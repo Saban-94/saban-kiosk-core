@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saban Admin - Seed Data</title>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #333; margin-top: 0; }
+        button { background: #007bff; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 5px; cursor: pointer; width: 100%; transition: background 0.2s; }
+        button:hover { background: #0056b3; }
+        #status { margin-top: 20px; background: #222; color: #0f0; padding: 15px; border-radius: 5px; font-family: monospace; min-height: 100px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🛠️ מנהל הקטלוג - אתחול</h1>
+        <p>לחיצה על הכפתור תמחק את בסיס הנתונים הקיים ותטען את מוצרי ברירת המחדל.</p>
+        
+        <button id="btnSeed">🚀 מלא את המדפים במוצרים</button>
+
+        <div id="status">ממתין לפקודה...</div>
+    </div>
+
+    <script type="module">
+        import { seedDatabase } from '../js/seed-data.js';
+
+        document.getElementById('btnSeed').addEventListener('click', () => {
+            if(confirm('האם אתה בטוח? כל הנתונים הקיימים יימחקו!')) {
+                seedDatabase();
+            }
+        });
+    </script>
+
+</body>
+</html>
