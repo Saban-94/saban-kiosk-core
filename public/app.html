@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sika OS</title>
     
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
     <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -16,15 +16,9 @@
     <style>
         :root { --sika-yellow: #FFC500; --sika-red: #E3000F; --bg: #f8fafc; }
         body { font-family: 'Heebo', sans-serif; background: var(--bg); color: #1e293b; overflow: hidden; user-select: none; }
-        
-        /* Product Modal Transition */
         #product-modal { transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; opacity: 0; transform: scale(0.95); }
         #product-modal.open { pointer-events: all; opacity: 1; transform: scale(1); }
-        
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 0px; }
-        
-        /* Print Styles */
         @media print {
             body * { visibility: hidden; }
             #print-area, #print-area * { visibility: visible; }
@@ -39,7 +33,7 @@
             <div class="bg-[#FFC500] text-black font-black px-3 py-1 text-xl -skew-x-12">Sika</div>
             <div class="text-sm text-gray-400 border-r border-gray-600 pr-3 mr-2">ח.סבן</div>
         </div>
-        <button onclick="window.location.href='index.html'" class="text-gray-400 hover:text-white"><i data-lucide="power"></i></button>
+        <button onclick="location.reload()" class="text-gray-400 hover:text-white"><i data-lucide="refresh-cw"></i></button>
     </header>
 
     <main class="flex-1 relative overflow-hidden flex">
@@ -87,7 +81,7 @@
                         <button onclick="updateCalc(1)" class="w-12 h-12 bg-gray-200 rounded font-bold text-xl">+</button>
                     </div>
                     <div id="calc-results" class="space-y-2 mb-6"></div>
-                    <button onclick="printCalc()" class="w-full bg-black text-white py-3 rounded-lg font-bold flex justify-center gap-2"><i data-lucide="printer"></i> הדפס רשימה (כולל מחירים)</button>
+                    <button onclick="printCalc()" class="w-full bg-black text-white py-3 rounded-lg font-bold flex justify-center gap-2"><i data-lucide="printer"></i> הדפס רשימה</button>
                 </div>
             </div>
             
@@ -113,7 +107,7 @@
                 <div id="modal-specs" class="grid grid-cols-2 gap-4 mb-8"></div>
 
                 <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 mb-6">
-                    <h4 class="font-bold text-blue-800 mb-2 flex items-center gap-2"><i data-lucide="info"></i> מידע מורחב למיישם:</h4>
+                    <h4 class="font-bold text-blue-800 mb-2 flex items-center gap-2"><i data-lucide="info"></i> מידע מורחב:</h4>
                     <p id="modal-full-desc" class="text-sm text-blue-900 leading-relaxed"></p>
                 </div>
 
@@ -121,8 +115,8 @@
                     <button onclick="askExpert()" class="bg-gray-800 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-700">
                         <i data-lucide="message-circle"></i> שאל את המומחה
                     </button>
-                    <button onclick="printProduct()" class="bg-[#FFC500] text-black py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-yellow-400 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
-                        <i data-lucide="printer"></i> הדפס מפרט (לחשיפת מחיר)
+                    <button onclick="printProduct()" class="bg-[#FFC500] text-black py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-yellow-400">
+                        <i data-lucide="printer"></i> הדפס מפרט
                     </button>
                 </div>
             </div>
@@ -130,20 +124,11 @@
     </div>
 
     <div id="video-player-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 backdrop-blur-md hidden transition-opacity duration-500 opacity-0">
-        
         <button onclick="closeVideo()" class="absolute top-6 right-6 z-20 text-white/50 hover:text-white hover:scale-110 transition p-4">
             <i data-lucide="x" size="48"></i>
         </button>
-
         <div class="relative w-full max-w-6xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-gray-800 mx-4">
-            <iframe id="youtube-frame" 
-                    class="w-full h-full" 
-                    src="" 
-                    title="Sika Player" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen>
-            </iframe>
+            <iframe id="youtube-frame" class="w-full h-full" src="" title="Sika Player" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         </div>
     </div>
 
@@ -153,17 +138,14 @@
             <button onclick="closeChat()"><i data-lucide="x"></i></button>
         </div>
         <div class="flex-1 p-8 flex flex-col items-center justify-center bg-gray-50">
-            <h3 class="text-2xl font-bold mb-4">במה המומחה יכול לעזור עם <span id="chat-context-product" class="text-red-600"></span>?</h3>
-            <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-2xl border border-gray-200">
-                <div class="text-gray-400 mb-4">ה-AI מקליד תשובה...</div>
-                <div class="h-2 w-full bg-gray-100 rounded overflow-hidden"><div class="h-full bg-red-500 w-1/2 animate-pulse"></div></div>
+            <h3 class="text-2xl font-bold mb-4">עוזר וירטואלי עבור <span id="chat-context-product" class="text-red-600"></span></h3>
+            <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-2xl border border-gray-200 text-center text-gray-400">
+                בקרוב...
             </div>
         </div>
     </div>
 
     <div id="print-area"></div>
-
-    <script src="data.js"></script>
     <script type="module" src="logic.js"></script>
 </body>
 </html>
