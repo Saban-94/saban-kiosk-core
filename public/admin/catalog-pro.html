@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Sika Admin Pro 3.0</title>
+    <title>Sika Admin Pro 4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
@@ -13,22 +13,24 @@
         .kiosk-card {
             background: white; border-radius: 16px; overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; flex-direction: column;
-            height: 550px; width: 340px; margin: 0 auto; position: sticky; top: 20px;
+            height: 600px; width: 360px; margin: 0 auto; position: sticky; top: 20px;
         }
-        .media-area { height: 40%; background: #f8fafc; display: flex; align-items: center; justify-content: center; position: relative; padding: 20px; }
+        .media-area { height: 35%; background: #f8fafc; display: flex; align-items: center; justify-content: center; position: relative; padding: 20px; }
         .media-area img { max-height: 100%; object-fit: contain; mix-blend-mode: multiply; }
-        .content-area { padding: 20px; flex: 1; display: flex; flex-direction: column; }
-        .spec-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; background: #f1f5f9; padding: 6px; border-radius: 6px; margin-bottom: 6px; }
+        .content-area { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
         
-        /* גלריה */
+        /* עיצוב המפרט הטכני החדש */
+        .tech-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 10px; }
+        .tech-item { background: #f1f5f9; padding: 8px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70px; }
+        .tech-icon { color: #E3000F; margin-bottom: 4px; }
+        .tech-label { font-size: 0.65rem; color: #64748b; font-weight: bold; }
+        .tech-val { font-size: 0.8rem; font-weight: bold; color: #1e293b; line-height: 1.1; }
+
         .selection-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
         .selectable-item { border: 2px solid transparent; border-radius: 8px; overflow: hidden; cursor: pointer; opacity: 0.7; transition: all 0.2s; position: relative; }
-        .selectable-item:hover { opacity: 1; }
         .selectable-item.selected { border-color: #E3000F; opacity: 1; transform: scale(1.05); z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .check-mark { position: absolute; top: 2px; right: 2px; background: #E3000F; color: white; border-radius: 50%; padding: 2px; display: none; }
         .selected .check-mark { display: block; }
-
-        /* טבלה */
         .table-row:hover { background-color: #fefce8; }
     </style>
 </head>
@@ -37,7 +39,6 @@
     <div class="max-w-7xl mx-auto grid grid-cols-12 gap-8">
         
         <div class="col-span-12 lg:col-span-8 space-y-8">
-            
             <div class="bg-white rounded-2xl shadow-lg p-8 relative">
                 <input type="hidden" id="editModeId" value="">
 
@@ -46,9 +47,7 @@
                         <span class="bg-black text-white px-3 py-1 rounded text-xl">Sika Admin</span>
                         עורך מוצרים
                     </h1>
-                    <button id="btnCancelEdit" onclick="resetForm()" class="hidden bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-300">
-                        ביטול עריכה
-                    </button>
+                    <button id="btnCancelEdit" onclick="resetForm()" class="hidden bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-300">ביטול עריכה</button>
                 </div>
 
                 <div class="flex gap-3 mb-8 bg-yellow-50 p-4 rounded-xl border border-yellow-200">
@@ -76,30 +75,49 @@
                         <input type="text" id="pShort" oninput="updatePreview()" class="w-full p-2 border rounded bg-gray-50">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">תמונה ראשית (URL)</label>
-                            <input type="text" id="pImageUrl" oninput="updatePreview()" placeholder="הדבק קישור או בחר מלמטה" 
-                                   class="w-full p-2 border border-gray-300 rounded text-sm mb-2">
-                            <div id="imageGallery" class="selection-grid min-h-[50px]"></div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">סרטון הדרכה (URL)</label>
-                            <input type="text" id="pVideoUrl" oninput="updatePreview()" placeholder="הדבק קישור או בחר מלמטה" 
-                                   class="w-full p-2 border border-gray-300 rounded text-sm mb-2">
-                            <div id="videoGallery" class="selection-grid min-h-[50px]"></div>
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <h3 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2"><i data-lucide="ruler"></i> נתונים טכניים (למפרט ולמחשבון)</h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">כושר כיסוי (למ"ר)</label>
+                                <div class="relative">
+                                    <input type="text" id="pCoverage" oninput="updatePreview()" placeholder="למשל: 1.5 קג" class="w-full p-2 pl-8 border rounded text-sm">
+                                    <i data-lucide="maximize" class="absolute left-2 top-2.5 w-4 h-4 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">זמן ייבוש</label>
+                                <div class="relative">
+                                    <input type="text" id="pDrying" oninput="updatePreview()" placeholder="למשל: 4 שעות" class="w-full p-2 pl-8 border rounded text-sm">
+                                    <i data-lucide="clock" class="absolute left-2 top-2.5 w-4 h-4 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">עובי יישום</label>
+                                <div class="relative">
+                                    <input type="text" id="pThickness" oninput="updatePreview()" placeholder="למשל: 2 מ״מ" class="w-full p-2 pl-8 border rounded text-sm">
+                                    <i data-lucide="layers" class="absolute left-2 top-2.5 w-4 h-4 text-gray-400"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">מפרט טכני (JSON)</label>
-                            <textarea id="pSpecs" oninput="updatePreview()" rows="4" class="w-full p-2 border rounded bg-gray-900 text-green-400 text-sm font-mono"></textarea>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">תמונה (URL)</label>
+                            <input type="text" id="pImageUrl" oninput="updatePreview()" class="w-full p-2 border rounded text-sm mb-2">
+                            <div id="imageGallery" class="selection-grid min-h-[50px]"></div>
                         </div>
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">קישור לקובץ מפרט (PDF)</label>
-                            <input type="text" id="pPdf" oninput="updatePreview()" placeholder="https://..." class="w-full p-2 border rounded bg-white text-sm mb-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-1">וידאו (URL)</label>
+                            <input type="text" id="pVideoUrl" oninput="updatePreview()" class="w-full p-2 border rounded text-sm mb-2">
+                            <div id="videoGallery" class="selection-grid min-h-[50px]"></div>
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">קישור PDF</label>
+                        <input type="text" id="pPdf" oninput="updatePreview()" class="w-full p-2 border rounded text-sm">
                     </div>
 
                     <div class="pt-4 border-t mt-4">
@@ -112,24 +130,15 @@
 
             <div class="bg-white rounded-2xl shadow-lg p-8">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold flex items-center gap-2"><i data-lucide="package"></i> מלאי מוצרים (Online)</h2>
+                    <h2 class="text-2xl font-bold flex items-center gap-2"><i data-lucide="package"></i> מלאי מוצרים</h2>
                     <button onclick="loadInventory()" class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded flex gap-1"><i data-lucide="refresh-cw" size="16"></i> רענן</button>
                 </div>
-                
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-right">
                         <thead class="bg-gray-100 text-gray-600 uppercase">
-                            <tr>
-                                <th class="p-3 rounded-r-lg">תמונה</th>
-                                <th class="p-3">שם המוצר</th>
-                                <th class="p-3">מותג</th>
-                                <th class="p-3">תיאור</th>
-                                <th class="p-3 rounded-l-lg text-center">פעולות</th>
-                            </tr>
+                            <tr><th class="p-3">תמונה</th><th class="p-3">שם</th><th class="p-3">מותג</th><th class="p-3">כיסוי/ייבוש</th><th class="p-3 text-center">פעולות</th></tr>
                         </thead>
-                        <tbody id="inventoryTable" class="divide-y divide-gray-100">
-                            <tr><td colspan="5" class="p-4 text-center text-gray-500">טוען נתונים...</td></tr>
-                        </tbody>
+                        <tbody id="inventoryTable" class="divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
             </div>
@@ -138,44 +147,40 @@
         <div class="col-span-12 lg:col-span-4 relative">
             <div class="sticky top-10">
                 <h3 class="text-center font-bold text-gray-500 mb-4">תצוגה מקדימה</h3>
-                
                 <div class="kiosk-card">
                     <div class="media-area">
                         <div class="absolute top-4 right-4 bg-white px-2 py-1 rounded text-xs font-bold shadow" id="prevBrand">Sika</div>
                         <img id="prevImage" src="https://via.placeholder.com/200?text=No+Image">
-                        <div id="prevVideoBadge" class="absolute bottom-4 left-4 bg-red-600 text-white p-2 rounded-full hidden shadow-lg animate-pulse">
-                            <i data-lucide="play" size="20"></i>
-                        </div>
+                        <div id="prevVideoBadge" class="absolute bottom-4 left-4 bg-red-600 text-white p-2 rounded-full hidden shadow-lg animate-pulse"><i data-lucide="play" size="20"></i></div>
                     </div>
                     <div class="content-area">
-                        <h2 id="prevName" class="text-2xl font-black mb-2 leading-tight">שם המוצר</h2>
+                        <h2 id="prevName" class="text-2xl font-black mb-1 leading-tight">שם המוצר</h2>
                         <p id="prevDesc" class="text-sm text-gray-500 mb-4 line-clamp-2">תיאור קצר יופיע כאן...</p>
-                        <div id="prevSpecs" class="space-y-1 mb-4"></div>
+                        
+                        <div id="prevTechGrid" class="tech-grid">
+                            <div class="tech-item"><i data-lucide="maximize" class="tech-icon" size="16"></i><span class="tech-label">כיסוי</span><span class="tech-val" id="prevCov">-</span></div>
+                            <div class="tech-item"><i data-lucide="clock" class="tech-icon" size="16"></i><span class="tech-label">ייבוש</span><span class="tech-val" id="prevDry">-</span></div>
+                            <div class="tech-item"><i data-lucide="layers" class="tech-icon" size="16"></i><span class="tech-label">עובי</span><span class="tech-val" id="prevThick">-</span></div>
+                        </div>
+
                         <div class="mt-auto flex flex-col gap-2">
-                            <a id="btnPdf" href="#" target="_blank" class="hidden w-full bg-gray-100 text-gray-700 py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 border border-gray-200">
-                                <i data-lucide="file-text" size="16" class="text-[#E3000F]"></i> דף מוצר (PDF)
-                            </a>
-                            <button class="w-full bg-black text-white py-3 rounded-lg font-bold text-sm flex justify-center gap-2 shadow-md">
-                                <i data-lucide="eye"></i> פרטים נוספים
-                            </button>
+                            <a id="btnPdf" href="#" target="_blank" class="hidden w-full bg-gray-100 text-gray-700 py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 border border-gray-200"><i data-lucide="file-text" size="16" class="text-[#E3000F]"></i> דף מוצר (PDF)</a>
+                            <button class="w-full bg-black text-white py-3 rounded-lg font-bold text-sm flex justify-center gap-2 shadow-md"><i data-lucide="eye"></i> פרטים נוספים</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <script type="module">
         import { db } from '../js/firebase-config.js';
-        // הוספנו פונקציות למחיקה ועדכון
         import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         import { askGeminiAdmin, searchImages, searchVideos } from '../js/gemini-service.js';
 
         lucide.createIcons();
-        let allProducts = []; // שמירת המלאי בזיכרון
+        let allProducts = [];
 
-        // --- פונקציות תצוגה ומילוי ---
         window.updatePreview = () => {
             document.getElementById('prevName').innerText = document.getElementById('pName').value || "שם המוצר";
             document.getElementById('prevBrand').innerText = document.getElementById('pBrand').value || "מותג";
@@ -198,24 +203,16 @@
                 btnPdf.classList.remove('flex');
             }
 
-            try {
-                const specs = JSON.parse(document.getElementById('pSpecs').value || "[]");
-                const html = specs.map(s => `
-                    <div class="spec-row">
-                        <i data-lucide="${s.icon}" size="14" class="text-red-500"></i>
-                        <span class="font-bold text-gray-700">${s.label}:</span>
-                        <span class="text-gray-500">${s.value}</span>
-                    </div>
-                `).join('');
-                document.getElementById('prevSpecs').innerHTML = html;
-                lucide.createIcons();
-            } catch(e) {}
+            // עדכון הנתונים הטכניים בתצוגה
+            document.getElementById('prevCov').innerText = document.getElementById('pCoverage').value || "-";
+            document.getElementById('prevDry').innerText = document.getElementById('pDrying').value || "-";
+            document.getElementById('prevThick').innerText = document.getElementById('pThickness').value || "-";
         }
 
         window.runAI = async () => {
             const query = document.getElementById('searchInput').value;
             if(!query) return alert("הקלד שם מוצר!");
-
+            
             const btn = document.querySelector('button[onclick="runAI()"]');
             btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> מחפש...`;
             
@@ -229,16 +226,21 @@
                 document.getElementById('pName').value = textData.name;
                 document.getElementById('pBrand').value = textData.brand;
                 document.getElementById('pShort').value = textData.shortDesc;
-                document.getElementById('pSpecs').value = JSON.stringify(textData.specs, null, 2);
+                // מילוי אוטומטי של השדות הטכניים החדשים
+                if(textData.tech) {
+                    document.getElementById('pCoverage').value = textData.tech.coverage || "";
+                    document.getElementById('pDrying').value = textData.tech.drying || "";
+                    document.getElementById('pThickness').value = textData.tech.thickness || "";
+                }
             }
 
+            // גלריות (תמונות ווידאו) - זהה לקוד הקודם
             const imgContainer = document.getElementById('imageGallery');
             imgContainer.innerHTML = images.map(url => `
                 <div class="selectable-item h-24 bg-gray-100 flex items-center justify-center relative" onclick="selectItem('pImageUrl', '${url}', this)">
                     <img src="${url}" class="max-h-full max-w-full object-contain">
                     <div class="check-mark"><i data-lucide="check" size="12"></i></div>
-                </div>
-            `).join('');
+                </div>`).join('');
 
             const vidContainer = document.getElementById('videoGallery');
             vidContainer.innerHTML = videos.map(vid => `
@@ -247,8 +249,7 @@
                     <div class="absolute inset-0 flex items-center justify-center"><i data-lucide="play-circle" class="text-white"></i></div>
                     <div class="check-mark"><i data-lucide="check" size="12"></i></div>
                     <div class="absolute bottom-0 text-[10px] text-white bg-black/80 w-full truncate px-1">${vid.title}</div>
-                </div>
-            `).join('');
+                </div>`).join('');
 
             if(images.length) selectItem('pImageUrl', images[0], imgContainer.firstChild);
             if(videos.length) selectItem('pVideoUrl', `https://youtu.be/${videos[0].id}`, vidContainer.firstChild);
@@ -266,53 +267,40 @@
             updatePreview();
         }
 
-        // --- ניהול מלאי (CRUD) ---
-
-        // 1. טעינת טבלה
         window.loadInventory = async () => {
             const tbody = document.getElementById('inventoryTable');
             tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center"><i data-lucide="loader-2" class="animate-spin inline"></i> טוען...</td></tr>`;
-            lucide.createIcons();
-
             try {
                 const querySnapshot = await getDocs(collection(db, "products"));
                 allProducts = [];
                 tbody.innerHTML = "";
-
                 querySnapshot.forEach((doc) => {
                     const p = { id: doc.id, ...doc.data() };
-                    allProducts.push(p);
+                    // נבנה מפרט טכני אם חסר
+                    const specs = p.specs || []; 
+                    const cov = specs.find(s => s.icon === 'maximize')?.value || p.coverage || "-";
+                    const dry = specs.find(s => s.icon === 'clock')?.value || p.drying || "-";
                     
-                    const row = `
+                    allProducts.push(p);
+                    tbody.innerHTML += `
                         <tr class="table-row border-b border-gray-50 transition">
                             <td class="p-3"><img src="${p.image}" class="w-10 h-10 object-contain bg-gray-50 rounded border"></td>
                             <td class="p-3 font-bold">${p.name}</td>
                             <td class="p-3 text-gray-500">${p.brand}</td>
-                            <td class="p-3 text-gray-400 text-xs max-w-[200px] truncate">${p.shortDesc}</td>
+                            <td class="p-3 text-xs text-gray-500">${cov} | ${dry}</td>
                             <td class="p-3 text-center flex justify-center gap-2">
-                                <button onclick="editProduct('${p.id}')" class="bg-blue-100 text-blue-600 p-2 rounded hover:bg-blue-200" title="ערוך"><i data-lucide="edit-2" size="16"></i></button>
-                                <button onclick="deleteProduct('${p.id}')" class="bg-red-100 text-red-600 p-2 rounded hover:bg-red-200" title="מחק"><i data-lucide="trash-2" size="16"></i></button>
+                                <button onclick="editProduct('${p.id}')" class="bg-blue-100 text-blue-600 p-2 rounded hover:bg-blue-200"><i data-lucide="edit-2" size="16"></i></button>
+                                <button onclick="deleteProduct('${p.id}')" class="bg-red-100 text-red-600 p-2 rounded hover:bg-red-200"><i data-lucide="trash-2" size="16"></i></button>
                             </td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
+                        </tr>`;
                 });
-                
-                if(allProducts.length === 0) tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">אין מוצרים במאגר</td></tr>`;
-                
                 lucide.createIcons();
-            } catch (e) {
-                console.error(e);
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500">שגיאה בטעינת נתונים</td></tr>`;
-            }
+            } catch (e) { console.error(e); }
         }
 
-        // 2. כניסה למצב עריכה
         window.editProduct = (id) => {
             const p = allProducts.find(prod => prod.id === id);
             if(!p) return;
-
-            // מילוי הטופס
             document.getElementById('editModeId').value = id;
             document.getElementById('pName').value = p.name;
             document.getElementById('pBrand').value = p.brand;
@@ -320,96 +308,70 @@
             document.getElementById('pImageUrl').value = p.image;
             document.getElementById('pVideoUrl').value = p.video || "";
             document.getElementById('pPdf').value = p.pdfUrl || "";
-            document.getElementById('pSpecs').value = JSON.stringify(p.specs || [], null, 2);
+            
+            // טעינת הנתונים הטכניים: אם יש שדות נפרדים נשתמש בהם, אחרת ננסה לשלוף מהמערך הישן
+            const specs = p.specs || [];
+            document.getElementById('pCoverage').value = p.coverage || specs.find(s=>s.icon==='maximize')?.value || "";
+            document.getElementById('pDrying').value = p.drying || specs.find(s=>s.icon==='clock')?.value || "";
+            document.getElementById('pThickness').value = p.thickness || specs.find(s=>s.icon==='layers')?.value || "";
 
-            // עדכון ממשק
             updatePreview();
             document.getElementById('btnCancelEdit').classList.remove('hidden');
-            const saveBtn = document.getElementById('btnSave');
-            saveBtn.innerHTML = `<i data-lucide="refresh-cw"></i> עדכן מוצר קיים`;
-            saveBtn.className = "w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-xl hover:bg-blue-700 shadow-lg flex justify-center gap-2";
-
-            // גלילה למעלה
+            document.getElementById('btnSave').innerHTML = "עדכן מוצר";
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            lucide.createIcons();
         }
 
-        // 3. מחיקה
         window.deleteProduct = async (id) => {
-            if(!confirm("האם למחוק את המוצר לצמיתות?")) return;
-            try {
-                await deleteDoc(doc(db, "products", id));
-                loadInventory(); // רענון טבלה
-            } catch(e) {
-                alert("שגיאה במחיקה: " + e.message);
-            }
+            if(!confirm("למחוק?")) return;
+            await deleteDoc(doc(db, "products", id));
+            loadInventory();
         }
 
-        // 4. איפוס טופס (ביטול עריכה)
         window.resetForm = () => {
             document.getElementById('editModeId').value = "";
-            document.getElementById('pName').value = "";
-            document.getElementById('pBrand').value = "";
-            document.getElementById('pShort').value = "";
-            document.getElementById('pImageUrl').value = "";
-            document.getElementById('pVideoUrl').value = "";
-            document.getElementById('pPdf').value = "";
-            document.getElementById('pSpecs').value = "";
-            
+            document.querySelectorAll('input').forEach(i => i.value = "");
             document.getElementById('btnCancelEdit').classList.add('hidden');
-            const saveBtn = document.getElementById('btnSave');
-            saveBtn.innerHTML = `<i data-lucide="save"></i> שמור מוצר לקטלוג`;
-            saveBtn.className = "w-full bg-[#E3000F] text-white py-4 rounded-xl font-bold text-xl hover:bg-red-700 shadow-lg flex justify-center gap-2";
-            
+            document.getElementById('btnSave').innerHTML = `<i data-lucide="save"></i> שמור מוצר לקטלוג`;
             updatePreview();
-            lucide.createIcons();
         }
 
-        // 5. שמירה (חכם: יודע אם זה חדש או עדכון)
         window.saveProduct = async () => {
-            const btn = document.getElementById('btnSave');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> מעבד...`;
-            lucide.createIcons();
+            const editId = document.getElementById('editModeId').value;
+            
+            // בניית אובייקט specs למערכת הישנה (כדי שהקיוסק יעבוד בלי שינוי)
+            const specsArray = [
+                { icon: 'maximize', label: 'כיסוי', value: document.getElementById('pCoverage').value },
+                { icon: 'clock', label: 'ייבוש', value: document.getElementById('pDrying').value },
+                { icon: 'layers', label: 'עובי', value: document.getElementById('pThickness').value }
+            ];
 
-            try {
-                const editId = document.getElementById('editModeId').value;
-                const data = {
-                    name: document.getElementById('pName').value,
-                    brand: document.getElementById('pBrand').value,
-                    shortDesc: document.getElementById('pShort').value,
-                    image: document.getElementById('pImageUrl').value,
-                    video: document.getElementById('pVideoUrl').value,
-                    pdfUrl: document.getElementById('pPdf').value,
-                    specs: JSON.parse(document.getElementById('pSpecs').value),
-                    price: 0,
-                    updatedAt: new Date()
-                };
+            const data = {
+                name: document.getElementById('pName').value,
+                brand: document.getElementById('pBrand').value,
+                shortDesc: document.getElementById('pShort').value,
+                image: document.getElementById('pImageUrl').value,
+                video: document.getElementById('pVideoUrl').value,
+                pdfUrl: document.getElementById('pPdf').value,
+                // שמירה כפולה: גם כשדות נפרדים לניהול קל, וגם כמערך לקיוסק
+                coverage: document.getElementById('pCoverage').value,
+                drying: document.getElementById('pDrying').value,
+                thickness: document.getElementById('pThickness').value,
+                specs: specsArray, 
+                updatedAt: new Date()
+            };
 
-                if (editId) {
-                    // עדכון קיים
-                    await updateDoc(doc(db, "products", editId), data);
-                    alert("המוצר עודכן בהצלחה!");
-                } else {
-                    // יצירת חדש
-                    data.createdAt = new Date();
-                    await addDoc(collection(db, "products"), data);
-                    alert("מוצר חדש נוסף למאגר!");
-                }
-
-                resetForm();
-                loadInventory(); // רענון הטבלה למטה
-
-            } catch(e) {
-                alert("שגיאה: " + e.message);
-                btn.innerHTML = originalText;
-                lucide.createIcons();
+            if (editId) {
+                await updateDoc(doc(db, "products", editId), data);
+            } else {
+                data.createdAt = new Date();
+                await addDoc(collection(db, "products"), data);
             }
+            alert("נשמר!");
+            resetForm();
+            loadInventory();
         }
 
-        // טעינה ראשונית של הטבלה
         loadInventory();
-
     </script>
 </body>
 </html>
