@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H. Saban Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Heebo', sans-serif; background: #f8fafc; height: 100vh; overflow: hidden; }
+        .sidebar { width: 300px; background: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100%; }
+        .editor-area { flex: 1; padding: 30px; overflow-y: auto; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .form-input { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        .product-item { padding: 10px; border-bottom: 1px solid #f1f5f9; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .product-item:hover { background: #f0f9ff; }
+        
+        /* Related Products Styles */
+        .related-tag { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 4px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; margin: 2px; }
+        .related-search-result { padding: 5px; cursor: pointer; border-bottom: 1px solid #eee; }
+        .related-search-result:hover { background: #f9fafb; }
+    </style>
+</head>
+<body class="flex">
+
+    <aside class="sidebar">
+        <div class="p-4 bg-gray-50 border-b">
+            <h1 class="font-black text-xl mb-2">ח. סבן ניהול</h1>
+            <input id="searchList" oninput="renderList()" placeholder="חיפוש..." class="form-input">
+            <button onclick="createNew()" class="w-full bg-black text-white mt-2 py-2 rounded font-bold">+ מוצר חדש</button>
+        </div>
+        <div id="inventoryList" class="flex-1 overflow-y-auto"></div>
+    </aside>
+
+    <main class="editor-area">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold" id="editStatus">עריכת מוצר</h2>
+            <div class="flex gap-2">
+                <button onclick="runFullAI()" class="bg-green-600 text-white px-4 py-2 rounded font-bold flex gap-2"><i data-lucide="sparkles"></i> AI מלא</button>
+                <button onclick="saveProduct()" class="bg-blue-600 text-white px-6 py-2 rounded font-bold flex gap-2"><i data-lucide="save"></i> שמור</button>
+            </div>
+        </div>
+
+        <input type="hidden" id="editModeId">
+
+        <div class="grid grid-cols-3 gap-6">
+            <div class="space-y-4">
+                <div class="card">
+                    <label class="block font-bold text-xs mb-1">שם המוצר</label>
+                    <input id="pName" class="form-input font-bold">
+                </div>
+                <div class="card">
+                    <label class="block font-bold text-xs mb-1">מותג</label>
+                    <div class="flex gap-1">
+                        <input id="pBrand" class="form-input">
+                        <button onclick="fillField('pBrand')" class="bg-green-100 text-green-600 p-2 rounded"><i data-lucide="sparkles" size="14"></i></button>
+                    </div>
+                    <input id="pBrandLogo" class="form-input mt-2 text-xs" placeholder="URL לוגו יצרן">
+                </div>
+                <div class="card">
+                    <label class="block font-bold text-xs mb-1">קטגוריה</label>
+                    <select id="pCategory" class="form-input">
+                        <option value="sealing">איטום</option>
+                        <option value="glues">דבקים</option>
+                        <option value="plaster">טיח וגמר</option>
+                        <option value="concrete">שיקום בטון</option>
+                        <option value="flooring">ריצוף</option>
+                        <option value="tools">כלי עבודה</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="card">
+                    <label class="block font-bold text-xs mb-1">תיאור שיווקי</label>
+                    <div class="relative">
+                        <textarea id="pMarketing" rows="4" class="form-input"></textarea>
+                        <button onclick="fillField('pMarketing')" class="absolute bottom-2 left-2 text-green-600"><i data-lucide="sparkles" size="14"></i></button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="font-bold text-xs mb-2">מפרט טכני</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="pCoverage" placeholder="כיסוי" class="form-input text-xs">
+                        <input id="pDrying" placeholder="ייבוש" class="form-input text-xs">
+                        <input id="pThickness" placeholder="עובי" class="form-input text-xs">
+                    </div>
+                </div>
+                
+                <div class="card bg-blue-50 border-blue-200">
+                    <label class="block font-bold text-xs mb-1 text-blue-800">מוצרים משלימים (Cross-Sell)</label>
+                    <div id="relatedTags" class="flex flex-wrap gap-2 mb-2"></div>
+                    <input type="text" id="searchRelatedInput" oninput="searchRelated()" placeholder="חפש מוצר לקשר..." class="form-input text-xs">
+                    <div id="relatedSearchResults" class="bg-white border mt-1 max-h-32 overflow-y-auto hidden"></div>
+                    <textarea id="pRelatedIds" class="hidden">[]</textarea>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="card">
+                    <label class="block font-bold text-xs mb-1">תמונות (URL)</label>
+                    <div id="urlInputsContainer" class="space-y-2"></div>
+                    <button onclick="addImageUrlInput()" class="text-xs text-blue-600 font-bold mt-2">+ הוסף תמונה</button>
+                </div>
+                <div class="card">
+                    <label class="block font-bold text-xs mb-1">מסמכים</label>
+                    <input id="pVideoUrl" placeholder="YouTube" class="form-input text-xs mb-2">
+                    <input id="pPdfUrl" placeholder="PDF מפרט" class="form-input text-xs">
+                </div>
+                <div class="card">
+                    <label class="block font-bold text-xs mb-1">סטטוס</label>
+                    <select id="pStatus" class="form-input">
+                        <option value="standard">רגיל</option>
+                        <option value="recommended">מומלץ</option>
+                        <option value="sale">מבצע</option>
+                        <option value="new">חדש</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { db } from '../js/firebase-config.js';
+        import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { askGeminiAdmin } from '../js/gemini-service.js';
+
+        lucide.createIcons();
+        let allProducts = [];
+        let relatedProducts = [];
+
+        // --- Core Functions ---
+        window.loadInventory = async () => {
+            const snap = await getDocs(collection(db, "products"));
+            allProducts = [];
+            snap.forEach(doc => allProducts.push({id: doc.id, ...doc.data()}));
+            renderList();
+        }
+
+        window.renderList = () => {
+            const term = document.getElementById('searchList').value.toLowerCase();
+            const list = document.getElementById('inventoryList');
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(term));
+            list.innerHTML = filtered.map(p => `
+                <div class="product-item" onclick="loadProduct('${p.id}')">
+                    <div class="font-bold text-sm truncate w-32">${p.name}</div>
+                    <div class="text-xs text-gray-500">${p.brand}</div>
+                </div>`).join('');
+        }
+
+        // --- Editor ---
+        window.loadProduct = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            if(!p) return;
+            document.getElementById('editModeId').value = id;
+            document.getElementById('pName').value = p.name;
+            document.getElementById('pBrand').value = p.brand;
+            document.getElementById('pBrandLogo').value = p.brandLogo || "";
+            document.getElementById('pCategory').value = p.category || "sealing";
+            document.getElementById('pStatus').value = p.status || "standard";
+            document.getElementById('pMarketing').value = p.marketingDesc || "";
+            document.getElementById('pCoverage').value = p.tech?.coverage || p.coverage || "";
+            document.getElementById('pDrying').value = p.tech?.drying || p.drying || "";
+            document.getElementById('pThickness').value = p.tech?.thickness || p.thickness || "";
+            document.getElementById('pVideoUrl').value = p.video || "";
+            document.getElementById('pPdfUrl').value = p.pdfUrl || "";
+            
+            // Images
+            document.getElementById('urlInputsContainer').innerHTML = "";
+            const imgs = p.images && p.images.length ? p.images : (p.image ? [p.image] : []);
+            if(imgs.length === 0) addImageUrlInput();
+            else imgs.forEach(url => addImageUrlInput(url));
+
+            // Related Products
+            relatedProducts = p.relatedIds || [];
+            renderRelatedTags();
+        }
+
+        window.createNew = () => {
+            document.getElementById('editModeId').value = "";
+            document.querySelectorAll('input, textarea').forEach(i => i.value = "");
+            document.getElementById('urlInputsContainer').innerHTML = "";
+            addImageUrlInput();
+            relatedProducts = [];
+            renderRelatedTags();
+        }
+
+        // --- Related Products Logic ---
+        window.searchRelated = () => {
+            const term = document.getElementById('searchRelatedInput').value.toLowerCase();
+            const results = document.getElementById('relatedSearchResults');
+            if(term.length < 2) { results.classList.add('hidden'); return; }
+            
+            const matches = allProducts.filter(p => p.name.toLowerCase().includes(term) && p.id !== document.getElementById('editModeId').value);
+            results.innerHTML = matches.map(p => `
+                <div class="related-search-result text-xs" onclick="addRelated('${p.id}', '${p.name}')">${p.name}</div>
+            `).join('');
+            results.classList.remove('hidden');
+        }
+
+        window.addRelated = (id, name) => {
+            if(!relatedProducts.includes(id)) {
+                relatedProducts.push(id);
+                renderRelatedTags();
+            }
+            document.getElementById('searchRelatedInput').value = "";
+            document.getElementById('relatedSearchResults').classList.add('hidden');
+        }
+
+        window.removeRelated = (id) => {
+            relatedProducts = relatedProducts.filter(pid => pid !== id);
+            renderRelatedTags();
+        }
+
+        window.renderRelatedTags = () => {
+            const container = document.getElementById('relatedTags');
+            container.innerHTML = relatedProducts.map(id => {
+                const p = allProducts.find(x => x.id === id);
+                return `<span class="related-tag">${p ? p.name : 'מוצר לא נמצא'} <i data-lucide="x" size="10" class="cursor-pointer" onclick="removeRelated('${id}')"></i></span>`;
+            }).join('');
+            document.getElementById('pRelatedIds').value = JSON.stringify(relatedProducts);
+            lucide.createIcons();
+        }
+
+        // --- Save ---
+        window.saveProduct = async () => {
+            const btn = event.target; btn.innerText = "שומר...";
+            try {
+                const imgInputs = document.querySelectorAll('.img-url-input');
+                let images = []; imgInputs.forEach(inp => { if(inp.value.length > 5) images.push(inp.value); });
+
+                const data = {
+                    name: document.getElementById('pName').value,
+                    brand: document.getElementById('pBrand').value,
+                    brandLogo: document.getElementById('pBrandLogo').value,
+                    category: document.getElementById('pCategory').value,
+                    marketingDesc: document.getElementById('pMarketing').value,
+                    status: document.getElementById('pStatus').value,
+                    image: images[0] || "",
+                    images: images,
+                    video: document.getElementById('pVideoUrl').value,
+                    pdfUrl: document.getElementById('pPdfUrl').value,
+                    coverage: document.getElementById('pCoverage').value,
+                    drying: document.getElementById('pDrying').value,
+                    thickness: document.getElementById('pThickness').value,
+                    tech: { coverage: document.getElementById('pCoverage').value, drying: document.getElementById('pDrying').value, thickness: document.getElementById('pThickness').value },
+                    relatedIds: relatedProducts, // שמירת הקשרים
+                    updatedAt: new Date()
+                };
+
+                const id = document.getElementById('editModeId').value;
+                if(id) await updateDoc(doc(db, "products", id), data);
+                else { data.createdAt = new Date(); await addDoc(collection(db, "products"), data); }
+                
+                alert("נשמר!"); loadInventory();
+            } catch(e) { alert("שגיאה"); console.error(e); }
+            btn.innerText = "שמור";
+        }
+
+        // --- AI & Helpers ---
+        window.addImageUrlInput = (val="") => {
+            const div = document.createElement('div');
+            div.innerHTML = `<input value="${val}" class="img-url-input form-input text-xs" placeholder="URL">`;
+            document.getElementById('urlInputsContainer').appendChild(div);
+        }
+
+        window.runFullAI = async () => {
+            const name = document.getElementById('pName').value;
+            if(!name) return alert("הזן שם מוצר");
+            const data = await askGeminiAdmin(name);
+            if(data) {
+                document.getElementById('pBrand').value = data.brand;
+                document.getElementById('pMarketing').value = data.marketingDesc;
+                document.getElementById('pCoverage').value = data.tech.coverage;
+                document.getElementById('pDrying').value = data.tech.drying;
+                document.getElementById('pThickness').value = data.tech.thickness;
+            }
+        }
+
+        window.fillField = async (fid) => {
+            const name = document.getElementById('pName').value;
+            const data = await askGeminiAdmin(name);
+            if(data) {
+                if(fid === 'pBrand') document.getElementById('pBrand').value = data.brand;
+                if(fid === 'pMarketing') document.getElementById('pMarketing').value = data.marketingDesc;
+                if(fid === 'pCoverage') document.getElementById('pCoverage').value = data.tech.coverage;
+                if(fid === 'pDrying') document.getElementById('pDrying').value = data.tech.drying;
+                if(fid === 'pThickness') document.getElementById('pThickness').value = data.tech.thickness;
+            }
+        }
+
+        loadInventory();
+    </script>
+</body>
+</html>
