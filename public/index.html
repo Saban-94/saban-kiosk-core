@@ -3,44 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saban Kiosk System</title>
+    <title>Sika Kiosk | Standby</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            margin: 0; padding: 0;
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: #1a1a1a; color: #ffffff;
-            height: 100vh;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            text-align: center;
-        }
-        h1 { font-size: 3rem; margin-bottom: 1rem; color: #ffcc00; }
-        p { font-size: 1.5rem; color: #cccccc; margin-bottom: 3rem; }
-        .btn-start {
-            background-color: #ffcc00; color: #000;
-            border: none; padding: 20px 60px;
-            font-size: 2rem; font-weight: bold;
-            border-radius: 50px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3);
-            transition: transform 0.2s;
-        }
-        .btn-start:active { transform: scale(0.95); }
-        .admin-link {
-            position: absolute; bottom: 20px; right: 20px;
-            color: #666; text-decoration: none; font-size: 0.8rem;
-        }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Heebo', sans-serif; cursor: none; }
+        .scene { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 10s ease-out, opacity 1s; }
+        .overlay { background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); position: absolute; inset: 0; }
+        .pulse-btn { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 197, 0, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(255, 197, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 197, 0, 0); } }
+        .qr-box { position: absolute; top: 30px; left: 30px; background: white; padding: 10px; border-radius: 10px; z-index: 50; text-align: center; }
     </style>
 </head>
-<body>
+<body onclick="window.location.href='app.html'">
 
-    <h1>ברוכים הבאים לח.סבן</h1>
-    <p>מערכת ייעוץ חכמה לחומרי בניין</p>
-    
-    <button class="btn-start" onclick="alert('המערכת בבנייה! בקרוב...')">
-        התחל ייעוץ 👈
-    </button>
+    <div class="qr-box shadow-2xl">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://gilar.co.il" alt="QR">
+        <div class="text-[10px] font-bold mt-1">סרוק וקח לדרך</div>
+    </div>
 
-    <a href="/admin/seed.html" class="admin-link">🛠️ ניהול ומילוי נתונים</a>
+    <div class="scene" style="background-image: url('https://images.unsplash.com/photo-1594912765363-2228d6c449bc?q=80&w=2000&auto=format&fit=crop'); transform: scale(1.1);"></div>
+    <div class="overlay"></div>
 
+    <div class="absolute inset-0 flex flex-col items-center justify-center text-center z-10 text-white">
+        <div class="bg-[#E3000F] px-6 py-2 rounded-full font-bold mb-6 text-xl tracking-widest uppercase">Sika Expert Center</div>
+        <h1 class="text-7xl font-black mb-4 leading-tight">בונים מקצועי.<br><span class="text-[#FFC500]">בונים בטוח.</span></h1>
+        <p class="text-2xl text-gray-300 font-light mb-12">ייעוץ טכני • מפרטים • פתרונות איטום</p>
+        
+        <div class="bg-white text-black w-24 h-24 rounded-full flex items-center justify-center pulse-btn cursor-pointer">
+            <i data-lucide="touchpad" size="40"></i>
+        </div>
+        <div class="mt-4 text-sm font-bold text-[#FFC500]">גע במסך להתחלה</div>
+    </div>
+
+    <script>lucide.createIcons();</script>
 </body>
 </html>
