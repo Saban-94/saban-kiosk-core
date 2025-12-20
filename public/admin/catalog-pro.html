@@ -2,19 +2,21 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Sika Admin Pro 2.0</title>
+    <title>Sika Admin Pro 2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Heebo', sans-serif; background: #f3f4f6; }
-        /* עיצוב כרטיס הקיוסק (העתק מדויק מהאפליקציה) */
+        
+        /* כרטיס הקיוסק */
         .kiosk-card {
             background: white; border-radius: 16px; overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; flex-direction: column;
-            height: 500px; width: 340px; margin: 0 auto; position: sticky; top: 20px;
+            height: 550px; /* הארכנו קצת כדי שיהיה מקום לכפתורים */
+            width: 340px; margin: 0 auto; position: sticky; top: 20px;
         }
-        .media-area { height: 45%; background: #f8fafc; display: flex; align-items: center; justify-content: center; position: relative; padding: 20px; }
+        .media-area { height: 40%; background: #f8fafc; display: flex; align-items: center; justify-content: center; position: relative; padding: 20px; }
         .media-area img { max-height: 100%; object-fit: contain; mix-blend-mode: multiply; }
         .content-area { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         .spec-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; background: #f1f5f9; padding: 6px; border-radius: 6px; margin-bottom: 6px; }
@@ -65,29 +67,49 @@
 
                 <div class="grid grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">בחר תמונה ראשית</label>
-                        <div id="imageGallery" class="selection-grid">
-                            <div class="text-xs text-gray-400 p-4 bg-gray-50 rounded">התמונות יופיעו כאן לאחר חיפוש...</div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">תמונה ראשית (URL)</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" id="pImageUrl" oninput="updatePreview()" placeholder="הדבק קישור או בחר מלמטה" 
+                                   class="w-full p-2 border border-gray-300 rounded text-sm focus:border-yellow-500 outline-none">
                         </div>
-                        <input type="hidden" id="selectedImage">
+                        <div class="text-xs font-bold text-gray-400 mb-1">הצעות מהרשת:</div>
+                        <div id="imageGallery" class="selection-grid">
+                            <div class="text-xs text-gray-400 p-4 bg-gray-50 rounded col-span-2 text-center">התמונות יופיעו כאן לאחר חיפוש...</div>
+                        </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">בחר סרטון הדרכה</label>
-                        <div id="videoGallery" class="selection-grid">
-                            <div class="text-xs text-gray-400 p-4 bg-gray-50 rounded">סרטונים יופיעו כאן לאחר חיפוש...</div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">סרטון הדרכה (YouTube ID / URL)</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" id="pVideoUrl" oninput="updatePreview()" placeholder="הדבק קישור או בחר מלמטה" 
+                                   class="w-full p-2 border border-gray-300 rounded text-sm focus:border-yellow-500 outline-none">
                         </div>
-                        <input type="hidden" id="selectedVideo">
+                        <div class="text-xs font-bold text-gray-400 mb-1">הצעות מהרשת:</div>
+                        <div id="videoGallery" class="selection-grid">
+                            <div class="text-xs text-gray-400 p-4 bg-gray-50 rounded col-span-2 text-center">סרטונים יופיעו כאן לאחר חיפוש...</div>
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">מפרט טכני (JSON)</label>
-                    <textarea id="pSpecs" oninput="updatePreview()" rows="4" class="w-full p-2 border rounded bg-gray-900 text-green-400 text-sm font-mono"></textarea>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">מפרט טכני (JSON)</label>
+                        <textarea id="pSpecs" oninput="updatePreview()" rows="4" class="w-full p-2 border rounded bg-gray-900 text-green-400 text-sm font-mono"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">קישור לקובץ מפרט (PDF)</label>
+                        <input type="text" id="pPdf" oninput="updatePreview()" placeholder="https://example.com/spec.pdf" 
+                               class="w-full p-2 border rounded bg-white text-sm mb-4">
+                        
+                        <div class="bg-blue-50 p-3 rounded text-xs text-blue-800 border border-blue-100">
+                            <i data-lucide="info" size="14" class="inline mb-1"></i>
+                            טיפ: הדבק כאן קישור ישיר לקובץ PDF מאתר היצרן. הכפתור יופיע אוטומטית בתצוגה.
+                        </div>
+                    </div>
                 </div>
 
-                <div class="pt-4 border-t">
-                    <button onclick="saveProduct()" class="w-full bg-[#E3000F] text-white py-4 rounded-xl font-bold text-xl hover:bg-red-700 shadow-lg flex justify-center gap-2">
+                <div class="pt-4 border-t mt-4">
+                    <button onclick="saveProduct()" class="w-full bg-[#E3000F] text-white py-4 rounded-xl font-bold text-xl hover:bg-red-700 shadow-lg flex justify-center gap-2 transform transition hover:-translate-y-1">
                         <i data-lucide="save"></i> שמור מוצר לקטלוג
                     </button>
                     <div id="statusMsg" class="text-center mt-2 font-bold h-6"></div>
@@ -103,20 +125,26 @@
                     <div class="media-area">
                         <div class="absolute top-4 right-4 bg-white px-2 py-1 rounded text-xs font-bold shadow" id="prevBrand">Sika</div>
                         <img id="prevImage" src="https://via.placeholder.com/200?text=No+Image">
-                        <div id="prevVideoBadge" class="absolute bottom-4 left-4 bg-red-600 text-white p-2 rounded-full hidden">
-                            <i data-lucide="play" size="16"></i>
+                        <div id="prevVideoBadge" class="absolute bottom-4 left-4 bg-red-600 text-white p-2 rounded-full hidden shadow-lg animate-pulse">
+                            <i data-lucide="play" size="20"></i>
                         </div>
                     </div>
                     <div class="content-area">
                         <h2 id="prevName" class="text-2xl font-black mb-2 leading-tight">שם המוצר</h2>
                         <p id="prevDesc" class="text-sm text-gray-500 mb-4 line-clamp-2">תיאור קצר יופיע כאן...</p>
                         
-                        <div id="prevSpecs" class="mt-auto space-y-1">
+                        <div id="prevSpecs" class="space-y-1 mb-4">
                             </div>
                         
-                        <button class="w-full mt-4 bg-black text-white py-2 rounded font-bold text-sm flex justify-center gap-2">
-                            <i data-lucide="eye"></i> פרטים נוספים
-                        </button>
+                        <div class="mt-auto flex flex-col gap-2">
+                            <a id="btnPdf" href="#" target="_blank" class="hidden w-full bg-gray-100 text-gray-700 py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-200 transition">
+                                <i data-lucide="file-text" size="16" class="text-[#E3000F]"></i> דף מוצר (PDF)
+                            </a>
+                            
+                            <button class="w-full bg-black text-white py-3 rounded-lg font-bold text-sm flex justify-center gap-2 shadow-md">
+                                <i data-lucide="eye"></i> פרטים נוספים
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -142,12 +170,24 @@
             document.getElementById('prevDesc').innerText = document.getElementById('pShort').value || "תיאור...";
             
             // עדכון תמונה
-            const imgUrl = document.getElementById('selectedImage').value;
+            const imgUrl = document.getElementById('pImageUrl').value;
             if(imgUrl) document.getElementById('prevImage').src = imgUrl;
 
             // עדכון אייקון וידאו
-            const vidId = document.getElementById('selectedVideo').value;
-            document.getElementById('prevVideoBadge').classList.toggle('hidden', !vidId);
+            const vidUrl = document.getElementById('pVideoUrl').value;
+            document.getElementById('prevVideoBadge').classList.toggle('hidden', !vidUrl);
+
+            // עדכון כפתור PDF
+            const pdfUrl = document.getElementById('pPdf').value;
+            const btnPdf = document.getElementById('btnPdf');
+            if (pdfUrl && pdfUrl.length > 5) {
+                btnPdf.classList.remove('hidden');
+                btnPdf.classList.add('flex');
+                btnPdf.href = pdfUrl;
+            } else {
+                btnPdf.classList.add('hidden');
+                btnPdf.classList.remove('flex');
+            }
 
             // עדכון מפרט
             try {
@@ -191,7 +231,7 @@
             // יצירת גלריית תמונות
             const imgContainer = document.getElementById('imageGallery');
             imgContainer.innerHTML = images.map(url => `
-                <div class="selectable-item h-24 bg-gray-100 flex items-center justify-center relative" onclick="selectItem('image', '${url}', this)">
+                <div class="selectable-item h-24 bg-gray-100 flex items-center justify-center relative" onclick="selectItem('pImageUrl', '${url}', this)">
                     <img src="${url}" class="max-h-full max-w-full object-contain">
                     <div class="check-mark"><i data-lucide="check" size="12"></i></div>
                 </div>
@@ -200,7 +240,7 @@
             // יצירת גלריית וידאו
             const vidContainer = document.getElementById('videoGallery');
             vidContainer.innerHTML = videos.map(vid => `
-                <div class="selectable-item h-24 bg-black relative" onclick="selectItem('video', '${vid.id}', this)">
+                <div class="selectable-item h-24 bg-black relative" onclick="selectItem('pVideoUrl', 'https://youtu.be/${vid.id}', this)">
                     <img src="${vid.thumbnail}" class="w-full h-full object-cover opacity-70">
                     <div class="absolute inset-0 flex items-center justify-center"><i data-lucide="play-circle" class="text-white"></i></div>
                     <div class="check-mark"><i data-lucide="check" size="12"></i></div>
@@ -209,25 +249,25 @@
             `).join('');
 
             // בחירה אוטומטית של הראשונים
-            if(images.length) selectItem('image', images[0], imgContainer.firstChild);
-            if(videos.length) selectItem('video', videos[0].id, vidContainer.firstChild);
+            if(images.length) selectItem('pImageUrl', images[0], imgContainer.firstChild);
+            if(videos.length) selectItem('pVideoUrl', `https://youtu.be/${videos[0].id}`, vidContainer.firstChild);
 
             btn.innerHTML = `<i data-lucide="sparkles" class="text-yellow-400"></i> חפש ומלא`;
             lucide.createIcons();
             updatePreview();
         };
 
-        // 3. בחירת פריט מהגלריה
-        window.selectItem = (type, value, element) => {
-            // הסרת בחירה קודמת
-            const container = type === 'image' ? document.getElementById('imageGallery') : document.getElementById('videoGallery');
-            container.querySelectorAll('.selectable-item').forEach(el => el.classList.remove('selected'));
+        // 3. בחירת פריט מהגלריה (מעדכן את שדה הקלט הגלוי)
+        window.selectItem = (inputId, value, element) => {
+            // הסרת בחירה קודמת בגלריה הספציפית
+            const gallery = element.parentElement;
+            gallery.querySelectorAll('.selectable-item').forEach(el => el.classList.remove('selected'));
             
-            // בחירה חדשה
+            // סימון ויזואלי
             element.classList.add('selected');
             
-            // עדכון שדה מוסתר
-            document.getElementById(type === 'image' ? 'selectedImage' : 'selectedVideo').value = value;
+            // עדכון השדה הגלוי
+            document.getElementById(inputId).value = value;
             
             updatePreview();
         }
@@ -239,16 +279,22 @@
                     name: document.getElementById('pName').value,
                     brand: document.getElementById('pBrand').value,
                     shortDesc: document.getElementById('pShort').value,
-                    image: document.getElementById('selectedImage').value,
-                    video: document.getElementById('selectedVideo').value,
+                    image: document.getElementById('pImageUrl').value,
+                    video: document.getElementById('pVideoUrl').value,
+                    pdfUrl: document.getElementById('pPdf').value, // שדה חדש
                     specs: JSON.parse(document.getElementById('pSpecs').value),
                     price: 0,
                     createdAt: new Date()
                 };
 
                 await addDoc(collection(db, "products"), data);
-                alert("מוצר נשמר בהצלחה!");
-                location.reload();
+                
+                const btn = document.querySelector('button[onclick="saveProduct()"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="check"></i> נשמר!`;
+                btn.classList.replace("bg-[#E3000F]", "bg-green-600");
+                
+                setTimeout(() => location.reload(), 1500);
             } catch(e) {
                 alert("שגיאה: " + e.message);
             }
