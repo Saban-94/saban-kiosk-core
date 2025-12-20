@@ -1,12 +1,13 @@
 // public/js/gemini-service.js
 
-const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug"; // וודא שזה המפתח הנכון שלך
+// מפתחות ה-API שלך
+const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug"; 
 const SEARCH_API_KEY = "AIzaSyDn2bU0mnmNpj26UeBZYAirLnXf-FtPgCg"; 
 const SEARCH_ENGINE_ID = "635bc3eeee0194b16";
 
 export async function askGeminiAdmin(productName) {
-    // שינוי מודל ל-1.5-flash היציב יותר
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    // ✅ עדכון: שימוש במודל gemini-2.0-flash-exp שעבד בבדיקה
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
     
     const prompt = `
     You are a construction expert. I will give you a product name.
@@ -45,6 +46,7 @@ export async function askGeminiAdmin(productName) {
         }
 
         const text = data.candidates[0].content.parts[0].text;
+        // ניקוי הקוד שה-AI לפעמים מוסיף
         const jsonString = text.replace(/```json|```/g, '').trim();
         return JSON.parse(jsonString);
 
