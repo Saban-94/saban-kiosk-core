@@ -1,4 +1,4 @@
-# Saban Kiosk Core System 🏗️
+# Sika Expert Kiosk - Interactive in-store terminal 🏗️
 
 מערכת קיוסק חכמה לייעוץ ומכירת חומרי בניין.
 המערכת מיועדת למסכי מגע, כוללת יועץ AI, קטלוג מוצרים והדפסת בונים.
