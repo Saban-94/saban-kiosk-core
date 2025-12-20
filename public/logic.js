@@ -29,7 +29,6 @@ async function initKiosk() {
         }
     } catch (error) {
         console.error("❌ שגיאה בטעינת מוצרים:", error);
-        // במקרה של שגיאה, אפשר לטעון נתוני גיבוי מ-data.js אם רוצים
     }
 }
 
@@ -48,7 +47,7 @@ function renderCatalog() {
     const grid = document.getElementById('products-grid');
     
     if (productsDB.length === 0) {
-        grid.innerHTML = `<div class="col-span-3 text-center text-gray-500">טוען מוצרים או שאין מוצרים במלאי...</div>`;
+        grid.innerHTML = `<div class="col-span-3 text-center text-gray-500">טוען מוצרים... (או שהמלאי ריק)</div>`;
         return;
     }
 
@@ -93,7 +92,7 @@ window.openProduct = function(id) {
     `).join('');
     document.getElementById('modal-specs').innerHTML = specsHTML;
 
-    // כפתור וידאו (אם קיים לינק)
+    // כפתור וידאו
     const vidBtn = document.getElementById('modal-video-btn');
     if (currentProduct.video) {
         vidBtn.onclick = () => window.open(currentProduct.video.includes('http') ? currentProduct.video : `https://www.youtube.com/watch?v=${currentProduct.video}`, '_blank');
@@ -166,21 +165,20 @@ window.updateCalc = function(delta) {
 }
 
 window.renderCalculator = function() {
-    // דוגמה ללוגיקה בסיסית - בעתיד ניתן למשוך גם מחירי מוצרים מה-DB
     const bagsGlue = Math.ceil(sqm / 5);
     const setsSeal = Math.ceil(sqm / 12);
     
     const items = [
-        { name: "SikaTop 107", qty: setsSeal, price: 180 },
-        { name: "SikaCeram 255", qty: bagsGlue, price: 55 },
-        { name: "Sika Tape", qty: 1, price: 120 }
+        { name: "SikaTop 107", qty: setsSeal },
+        { name: "SikaCeram 255", qty: bagsGlue },
+        { name: "Sika Tape", qty: 1 }
     ];
     
     let html = '';
     items.forEach(i => {
         html += `<div class="flex justify-between border-b py-2 text-sm">
             <span>${i.name} (x${i.qty})</span>
-            <span class="font-bold text-gray-400 hidden-price">הצג בהדפסה</span>
+            <span class="font-bold text-gray-400">הצג בהדפסה</span>
         </div>`;
     });
     
@@ -190,7 +188,6 @@ window.renderCalculator = function() {
 window.printCalc = function() {
     const bagsGlue = Math.ceil(sqm / 5);
     const setsSeal = Math.ceil(sqm / 12);
-    const total = (bagsGlue * 55) + (setsSeal * 180) + 120;
     
     const printContent = `
         <div style="text-align:center; font-family:sans-serif; width:80mm; margin:0 auto;">
@@ -198,12 +195,10 @@ window.printCalc = function() {
             <div>עבור: ${sqm} מ"ר</div>
             <hr>
             <div style="text-align:right;">
-            1. SikaTop 107 (x${setsSeal}) - ₪${setsSeal*180}<br>
-            2. SikaCeram 255 (x${bagsGlue}) - ₪${bagsGlue*55}<br>
-            3. Sika Tape (x1) - ₪120
+            1. SikaTop 107 (x${setsSeal})<br>
+            2. SikaCeram 255 (x${bagsGlue})<br>
+            3. Sika Tape (x1)
             </div>
-            <hr>
-            <div style="font-size:20px; font-weight:bold;">סה"כ: ₪${total}</div>
         </div>
     `;
     document.getElementById('print-area').innerHTML = printContent;
