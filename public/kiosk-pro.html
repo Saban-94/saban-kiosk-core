@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saban Pro Store</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --brand-primary: #111111;
+            --brand-secondary: #ffffff;
+            --brand-accent: #2563eb;
+            --brand-bg: #f8fafc;
+            --brand-text: #1e293b;
+        }
+
+        /* מיתוג סיקה */
+        body.theme-sika { --brand-primary: #FFC500; --brand-secondary: #000000; --brand-accent: #E3000F; --brand-bg: #fffceb; --brand-text: #000000; }
+        
+        /* מיתוג תרמוקיר */
+        body.theme-thermokir { --brand-primary: #0057B8; --brand-secondary: #ffffff; --brand-accent: #8CC63F; --brand-bg: #f0f9ff; --brand-text: #0f172a; }
+        
+        /* מיתוג מיסטר פיקס */
+        body.theme-misterfix { --brand-primary: #E3000F; --brand-secondary: #ffffff; --brand-accent: #333333; --brand-bg: #fff1f2; --brand-text: #0f172a; }
+
+        body { font-family: 'Heebo', sans-serif; background: var(--brand-bg); color: var(--brand-text); transition: background 0.5s, color 0.5s; overflow: hidden; user-select: none; }
+        
+        /* Sidebar */
+        .sidebar { background: var(--brand-secondary); border-left: 1px solid rgba(0,0,0,0.05); transition: all 0.5s; }
+        .sidebar-btn { padding: 20px; color: #94a3b8; border-radius: 16px; margin-bottom: 10px; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .sidebar-btn.active { background: var(--brand-primary); color: var(--brand-secondary); box-shadow: 0 10px 20px rgba(0,0,0,0.1); transform: scale(1.05); }
+        /* התאמת טקסט לסיקה (שחור על צהוב) */
+        body.theme-sika .sidebar-btn.active { color: black; } 
+
+        /* Product Card */
+        .product-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); transition: transform 0.2s; border: 1px solid transparent; height: 380px; display: flex; flex-direction: column; }
+        .product-card:hover { transform: translateY(-8px); border-color: var(--brand-accent); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); }
+        .card-img-area { background: #f8fafc; height: 50%; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        
+        /* Hero Section */
+        .brand-hero { background: var(--brand-primary); color: var(--brand-secondary); border-radius: 30px; padding: 40px; margin-bottom: 30px; position: relative; overflow: hidden; transition: all 0.5s; }
+        body.theme-sika .brand-hero { color: black; } /* תיקון לסיקה */
+        
+        /* Brand Filters */
+        .brand-pill { background: white; padding: 8px 16px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 2px solid transparent; transition: all 0.3s; opacity: 0.7; filter: grayscale(100%); }
+        .brand-pill:hover, .brand-pill.active { opacity: 1; border-color: var(--brand-accent); transform: scale(1.05); filter: grayscale(0%); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .brand-pill img { height: 24px; object-fit: contain; }
+
+        /* Category Buttons */
+        .cat-btn { padding: 10px 20px; border-radius: 12px; font-weight: bold; background: white; color: #64748b; border: 1px solid #e2e8f0; display: flex; items-center; gap: 8px; cursor: pointer; transition: all 0.2s; }
+        .cat-btn.active { background: var(--brand-accent); color: white; border-color: var(--brand-accent); }
+
+        /* Tech Icons */
+        .tech-badge { background: #f1f5f9; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; color: #64748b; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .tech-badge span { color: var(--brand-text); font-size: 13px; }
+
+        /* Search Radar */
+        .radar-container { position: relative; width: 200px; height: 200px; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+        .radar-ring { position: absolute; border: 2px solid var(--brand-accent); border-radius: 50%; opacity: 0; animation: ripple 2s infinite; }
+        .radar-ring:nth-child(2) { animation-delay: 0.5s; }
+        .radar-ring:nth-child(3) { animation-delay: 1s; }
+        @keyframes ripple { 0% { width: 0; height: 0; opacity: 0.8; } 100% { width: 100%; height: 100%; opacity: 0; } }
+
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 60; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .modal-overlay.open { display: flex; animation: fadeIn 0.3s; }
+        .modal-content { background: white; width: 95%; max-width: 1400px; height: 90%; border-radius: 40px; overflow: hidden; display: flex; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5); }
+        
+        .typewriter-text { border-left: 3px solid var(--brand-accent); padding-left: 10px; animation: blink 0.7s infinite; }
+        @keyframes blink { 50% { border-color: transparent; } }
+
+        /* Utilities */
+        ::-webkit-scrollbar { width: 0px; }
+        .hidden-tab { display: none; }
+    </style>
+</head>
+<body class="flex h-screen w-screen">
+
+    <nav class="w-32 sidebar h-full flex flex-col items-center py-8 shadow-2xl z-20">
+        <div class="mb-10 w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR1_PVzqyK74L9l5eC5grCsPGCsTinQnmHvw&s" class="w-full h-full object-contain">
+        </div>
+        
+        <button onclick="switchTab('catalog')" id="btn-catalog" class="sidebar-btn active">
+            <i data-lucide="layout-grid" size="32" class="mb-2"></i>
+            <span class="text-xs font-bold">חנות</span>
+        </button>
+        
+        <button onclick="switchTab('calculator')" id="btn-calculator" class="sidebar-btn">
+            <i data-lucide="calculator" size="32" class="mb-2"></i>
+            <span class="text-xs font-bold">מחשבון</span>
+        </button>
+
+        <div class="mt-auto">
+            <button onclick="openAdminQR()" class="opacity-30 hover:opacity-100 transition p-4">
+                <i data-lucide="settings" size="20"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-1 flex flex-col relative h-full overflow-hidden">
+        
+        <header class="p-8 pb-4 flex justify-between items-center z-10">
+            <div class="flex gap-4">
+                <div onclick="setTheme('default')" class="brand-pill active" id="pill-default">
+                    <span class="font-black text-lg">H. SABAN</span>
+                </div>
+                <div onclick="setTheme('sika')" class="brand-pill" id="pill-sika">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Sika_AG_logo.svg/1200px-Sika_AG_logo.svg.png">
+                </div>
+                <div onclick="setTheme('thermokir')" class="brand-pill" id="pill-thermokir">
+                    <img src="https://www.thermokir.co.il/wp-content/uploads/2019/06/logo.png">
+                </div>
+                <div onclick="setTheme('misterfix')" class="brand-pill" id="pill-misterfix">
+                    <img src="https://karmit-mrfix.com/wp-content/uploads/2020/07/logo.png">
+                </div>
+            </div>
+
+            <div class="relative w-[400px]">
+                <input id="searchInput" oninput="filterProducts()" type="text" placeholder="מה אנחנו בונים היום?" class="w-full bg-white p-4 pr-12 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-accent)] text-lg">
+                <i data-lucide="search" class="absolute right-4 top-4 text-gray-400" size="24"></i>
+            </div>
+        </header>
+
+        <div class="px-8 mb-4 flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+            <button onclick="filterCat('all')" class="cat-btn active" id="cat-all">הכל</button>
+            <button onclick="filterCat('sealing')" class="cat-btn" id="cat-sealing">💧 איטום</button>
+            <button onclick="filterCat('glues')" class="cat-btn" id="cat-glues">🧴 דבקים</button>
+            <button onclick="filterCat('concrete')" class="cat-btn" id="cat-concrete">🏗️ שיקום בטון</button>
+            <button onclick="filterByCategory('flooring')" class="cat-btn" id="cat-flooring">🔲 ריצוף</button>
+        </div>
+
+        <div id="view-catalog" class="flex-1 overflow-y-auto px-8 pb-20">
+            
+            <div class="brand-hero flex justify-between items-center shadow-2xl">
+                <div>
+                    <h2 class="text-5xl font-black mb-2" id="heroTitle">ברוכים הבאים לח. סבן</h2>
+                    <p class="text-xl opacity-80" id="heroSubtitle">המרכז המקצועי לחומרי בניין ושיפוץ</p>
+                </div>
+                <div class="bg-white/20 p-4 rounded-2xl backdrop-blur-md">
+                    <i data-lucide="award" size="48"></i>
+                </div>
+            </div>
+
+            <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+        </div>
+
+        <div id="view-calculator" class="hidden-tab flex-1 overflow-y-auto p-12 flex items-center justify-center">
+            <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-4xl">
+                <h2 class="text-4xl font-black mb-8">מחשבון כמויות</h2>
+                <div class="grid grid-cols-2 gap-8">
+                    <input id="calcArea" type="number" placeholder="שטח (מ''ר)" class="bg-gray-50 p-4 rounded-xl text-xl font-bold border border-gray-200">
+                    <input id="calcConsumption" type="number" placeholder="צריכה (ק''ג/מ''ר)" class="bg-gray-50 p-4 rounded-xl text-xl font-bold border border-gray-200">
+                    <div class="col-span-2 bg-black text-white p-6 rounded-2xl text-center">
+                        <div class="text-gray-400 text-sm">סה"כ חומר נדרש</div>
+                        <div class="text-6xl font-black" id="calcResult">0 ק"ג</div>
+                    </div>
+                    <button onclick="calculate()" class="col-span-2 bg-[var(--brand-accent)] text-white py-4 rounded-xl font-bold text-xl shadow-lg">חשב כמות</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="productModal" class="modal-overlay">
+        <div class="modal-content relative">
+            <button onclick="closeModal()" class="absolute top-6 left-6 z-20 bg-gray-100 p-3 rounded-full hover:bg-gray-200"><i data-lucide="x" size="24"></i></button>
+            
+            <div class="w-[40%] bg-gray-50 p-10 flex flex-col relative border-l border-gray-100">
+                <div class="flex-1 flex items-center justify-center">
+                    <img id="mImage" src="" class="max-h-[400px] max-w-full object-contain mix-blend-multiply drop-shadow-2xl hover:scale-110 transition duration-700">
+                </div>
+                
+                <div class="mt-6">
+                    <div class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-widest">מוצרים משלימים (חובה)</div>
+                    <div id="relatedGrid" class="grid grid-cols-3 gap-3"></div>
+                </div>
+            </div>
+
+            <div class="w-[60%] p-12 flex flex-col overflow-y-auto bg-white">
+                <div class="flex items-center gap-3 mb-4">
+                    <img id="mBrandLogo" src="" class="h-8 object-contain">
+                    <div id="mBrandText" class="text-sm font-bold text-gray-400 uppercase tracking-widest">BRAND</div>
+                </div>
+                
+                <h1 id="mName" class="text-5xl font-black mb-6 leading-tight">שם המוצר</h1>
+                
+                <div class="bg-[var(--brand-bg)] p-6 rounded-2xl border-r-4 border-[var(--brand-accent)] mb-8">
+                    <p id="mDesc" class="text-xl leading-relaxed font-medium typewriter-text"></p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="tech-badge">
+                        <i data-lucide="maximize" class="text-[var(--brand-accent)] mb-1" size="20"></i>
+                        כיסוי <span id="mCov">-</span>
+                    </div>
+                    <div class="tech-badge">
+                        <i data-lucide="clock" class="text-[var(--brand-accent)] mb-1" size="20"></i>
+                        ייבוש <span id="mDry">-</span>
+                    </div>
+                    <div class="tech-badge">
+                        <i data-lucide="layers" class="text-[var(--brand-accent)] mb-1" size="20"></i>
+                        עובי <span id="mThick">-</span>
+                    </div>
+                </div>
+
+                <div class="mt-auto flex gap-4 border-t border-gray-100 pt-6">
+                    <button onclick="openSmartCalc()" class="flex-1 bg-white border-2 border-gray-200 text-gray-700 text-lg font-bold py-4 rounded-xl hover:border-[var(--brand-accent)] hover:text-[var(--brand-accent)] transition flex items-center justify-center gap-2">
+                        <i data-lucide="calculator"></i> חשב כמויות
+                    </button>
+                    <button onclick="startExpertSearch()" class="flex-[2] bg-[var(--brand-primary)] text-[var(--brand-secondary)] text-lg font-bold py-4 rounded-xl shadow-xl hover:opacity-90 transition flex items-center justify-center gap-3">
+                        <i data-lucide="message-square"></i> התייעץ עם מומחה בכיר
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="radarModal" class="fixed inset-0 z-[100] bg-white hidden flex-col items-center justify-center">
+        <div class="radar-container mb-8">
+            <div class="radar-ring" style="width: 100%; height: 100%;"></div>
+            <div class="radar-ring" style="width: 70%; height: 70%;"></div>
+            <div class="radar-ring" style="width: 40%; height: 40%;"></div>
+            <img id="radarBrandLogo" src="" class="w-20 h-20 object-contain z-10 animate-bounce">
+        </div>
+        <h2 class="text-3xl font-black mb-2">מאתר מומחה...</h2>
+        <p class="text-gray-500 animate-pulse" id="radarStatus">יוצר קשר עם שרתי החברה</p>
+    </div>
+
+    <div id="expertFoundModal" class="fixed inset-0 z-[100] bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur">
+        <div class="bg-white w-[500px] rounded-3xl overflow-hidden shadow-2xl relative animate-fade-in text-center p-8">
+            <div class="w-32 h-32 rounded-full border-4 border-[var(--brand-accent)] mx-auto mb-4 p-1">
+                <img src="https://media-mrs2-1.cdn.whatsapp.net/v/t61.24694-24/109923599_330637871666131_5578032134568575008_n.jpg?ccb=11-4&oh=01_Q5Aa3QFeo2xxQ2aPXt6aNIHGockxutUkt3uT90hABAOshFRruQ&oe=69536285&_nc_sid=5e03e0&_nc_cat=111" class="w-full h-full rounded-full object-cover">
+            </div>
+            <h2 class="text-3xl font-black mb-1">אלי כהן</h2>
+            <p class="text-[var(--brand-accent)] font-bold mb-6">מומחה טכני בכיר</p>
+            
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-6">
+                <img id="connectQr" src="" class="w-40 h-40 mx-auto mix-blend-multiply">
+                <p class="text-xs text-gray-500 mt-2 font-bold">סרוק להתחלת צ'אט בוואטסאפ</p>
+            </div>
+            <button onclick="document.getElementById('expertFoundModal').classList.add('hidden')" class="text-gray-400 underline text-sm">סגור</button>
+        </div>
+    </div>
+
+    <div id="adminQrModal" class="fixed inset-0 z-[100] bg-black/90 hidden flex items-center justify-center">
+        <div class="bg-white p-10 rounded-3xl text-center">
+            <h2 class="text-2xl font-black mb-4">כניסת מנהל</h2>
+            <img id="adminQrImg" class="w-48 h-48 mx-auto">
+            <button onclick="document.getElementById('adminQrModal').classList.add('hidden')" class="mt-4 text-red-500 font-bold">סגור</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from './js/firebase-config.js';
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        
+        lucide.createIcons();
+        let allProducts = [];
+        let currentProduct = null;
+        let activeCategory = 'all';
+
+        // --- Themes ---
+        const themes = {
+            sika: { title: "SIKA SWITZERLAND", sub: "בונים אמון - בכל העולם", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Sika_AG_logo.svg/1200px-Sika_AG_logo.svg.png" },
+            thermokir: { title: "תרמוקיר", sub: "בונים נכון, בונים חכם", logo: "https://www.thermokir.co.il/wp-content/uploads/2019/06/logo.png" },
+            misterfix: { title: "MISTER FIX", sub: "מקצוענות בבנייה", logo: "https://karmit-mrfix.com/wp-content/uploads/2020/07/logo.png" },
+            default: { title: "ברוכים הבאים לח. סבן", sub: "המרכז המקצועי לחומרי בניין ושיפוץ", logo: "" }
+        };
+
+        async function init() {
+            try {
+                const snap = await getDocs(collection(db, "products"));
+                allProducts = [];
+                snap.forEach(doc => allProducts.push({id: doc.id, ...doc.data()}));
+                renderGrid(allProducts);
+            } catch (e) { console.error(e); }
+        }
+
+        // --- Dynamic Branding ---
+        window.setTheme = (brand) => {
+            document.body.className = `theme-${brand}`;
+            const info = themes[brand] || themes.default;
+            document.getElementById('heroTitle').innerText = info.title;
+            document.getElementById('heroSubtitle').innerText = info.sub;
+            document.getElementById('radarBrandLogo').src = info.logo || "https://cdn-icons-png.flaticon.com/512/38/38002.png";
+            
+            // Filter products
+            const filtered = brand === 'default' ? allProducts : allProducts.filter(p => (p.brand || "").toLowerCase().includes(brand));
+            renderGrid(filtered);
+            
+            // Update active pill
+            document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('active'));
+            document.getElementById(`pill-${brand}`).classList.add('active');
+        }
+
+        function renderGrid(list) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = list.map(p => `
+                <div onclick="openProduct('${p.id}')" class="product-card group">
+                    <div class="card-img-area">
+                        ${p.status && p.status !== 'standard' ? `<div class="absolute top-4 left-0 bg-[var(--brand-accent)] text-white text-xs font-bold px-3 py-1 shadow-md rounded-r-md z-10">${p.status}</div>` : ''}
+                        <img src="${p.image || 'https://placehold.co/300'}" class="max-h-[70%] max-w-[80%] object-contain mix-blend-multiply group-hover:scale-110 transition duration-500">
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col bg-white">
+                        <div class="text-xs font-bold text-gray-400 uppercase mb-1 tracking-wider">${p.brand || 'SIKA'}</div>
+                        <h3 class="text-lg font-bold text-gray-900 leading-tight mb-2 line-clamp-2">${p.name}</h3>
+                        <div class="mt-auto flex gap-2">
+                            ${p.tech?.coverage ? `<div class="bg-gray-50 px-2 py-1 rounded text-[10px] text-gray-500 border">כיסוי: ${p.tech.coverage}</div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // --- Categories ---
+        window.filterCat = (cat) => {
+            activeCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            const filtered = cat === 'all' ? allProducts : allProducts.filter(p => p.category === cat);
+            renderGrid(filtered);
+        }
+
+        window.filterProducts = () => {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(term));
+            renderGrid(filtered);
+        }
+
+        // --- Product Modal ---
+        window.openProduct = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            if(!p) return;
+            currentProduct = p;
+
+            document.getElementById('mName').innerText = p.name;
+            document.getElementById('mBrandText').innerText = p.brand || "MORG";
+            document.getElementById('mImage').src = p.image || 'https://placehold.co/600';
+            
+            // Safe Tech Data
+            const set = (eid, val) => document.getElementById(eid).innerText = val || "-";
+            set('mCov', p.tech?.coverage || p.coverage);
+            set('mDry', p.tech?.drying || p.drying);
+            set('mThick', p.tech?.thickness || p.thickness);
+
+            // Brand Logo
+            const logo = document.getElementById('mBrandLogo');
+            if(p.brandLogo) { logo.src = p.brandLogo; logo.classList.remove('hidden'); } else logo.classList.add('hidden');
+
+            // Typewriter Description
+            const descEl = document.getElementById('mDesc');
+            descEl.innerText = "";
+            let i = 0; const txt = p.marketingDesc || "טוען נתונים...";
+            const type = () => { if(i < txt.length) { descEl.innerHTML += txt.charAt(i); i++; setTimeout(type, 10); } else descEl.classList.remove('typewriter-text'); };
+            descEl.classList.add('typewriter-text'); type();
+
+            // Related Products
+            const relContainer = document.getElementById('relatedGrid');
+            if(p.relatedIds && p.relatedIds.length > 0) {
+                const related = allProducts.filter(prod => p.relatedIds.includes(prod.id));
+                relContainer.innerHTML = related.map(rp => `
+                    <div class="bg-white p-2 rounded-xl border border-gray-100 flex flex-col items-center text-center cursor-pointer hover:border-blue-500" onclick="openProduct('${rp.id}')">
+                        <img src="${rp.image}" class="h-12 object-contain mb-1">
+                        <div class="text-[9px] font-bold leading-tight">${rp.name}</div>
+                    </div>`).join('');
+            } else { relContainer.innerHTML = ''; }
+
+            document.getElementById('productModal').classList.add('open');
+            lucide.createIcons();
+        }
+
+        window.closeModal = () => document.getElementById('productModal').classList.remove('open');
+
+        // --- Expert Search Flow (Radar -> Found) ---
+        window.startExpertSearch = () => {
+            document.getElementById('productModal').classList.remove('open');
+            const radar = document.getElementById('radarModal');
+            radar.classList.remove('hidden'); radar.classList.add('flex');
+            
+            setTimeout(() => document.getElementById('radarStatus').innerText = "מאתר מומחה זמין...", 1500);
+            setTimeout(() => document.getElementById('radarStatus').innerText = "נמצאה התאמה!", 3000);
+            
+            setTimeout(() => {
+                radar.classList.add('hidden'); radar.classList.remove('flex');
+                showExpertFound();
+            }, 4000);
+        }
+
+        function showExpertFound() {
+            // Generate WhatsApp QR for Eli
+            const waLink = `https://wa.me/972544527513?text=${encodeURIComponent('היי אלי, אני בחנות וצריך עזרה עם ' + (currentProduct ? currentProduct.name : 'מוצר'))}`;
+            document.getElementById('connectQr').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(waLink)}`;
+            document.getElementById('expertFoundModal').classList.remove('hidden');
+        }
+
+        // --- Admin QR ---
+        window.openAdminQR = () => {
+            const url = window.location.origin + '/admin/mobile-admin.html';
+            document.getElementById('adminQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+            document.getElementById('adminQrModal').classList.remove('hidden');
+        }
+
+        // --- Calculator Link ---
+        window.openSmartCalc = () => {
+            closeModal();
+            switchTab('calculator');
+            if(currentProduct) {
+                const match = (currentProduct.tech?.coverage || "").match(/(\d+(\.\d+)?)/);
+                if(match) document.getElementById('calcConsumption').value = match[0];
+            }
+        }
+        
+        window.calculate = () => {
+            const area = document.getElementById('calcArea').value;
+            const cons = document.getElementById('calcConsumption').value;
+            if(area && cons) document.getElementById('calcResult').innerText = (area * cons).toFixed(1) + ' ק"ג';
+        }
+
+        window.switchTab = (tab) => {
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-'+tab).classList.add('active');
+            if (tab === 'catalog') { document.getElementById('view-catalog').classList.remove('hidden-tab'); document.getElementById('view-calculator').classList.add('hidden-tab'); }
+            else { document.getElementById('view-catalog').classList.add('hidden-tab'); document.getElementById('view-calculator').classList.remove('hidden-tab'); }
+        }
+
+        init();
+    </script>
+</body>
+</html>
