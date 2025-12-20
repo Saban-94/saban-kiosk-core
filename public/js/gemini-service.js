@@ -1,31 +1,23 @@
 // public/js/gemini-service.js
 
-// מפתחות ה-API שלך
 const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug"; 
 const SEARCH_API_KEY = "AIzaSyDn2bU0mnmNpj26UeBZYAirLnXf-FtPgCg"; 
 const SEARCH_ENGINE_ID = "635bc3eeee0194b16";
 
+// פונקציה ראשית: מביאה נתונים טקסטואליים
 export async function askGeminiAdmin(productName) {
-    // ✅ עדכון: שימוש במודל gemini-2.0-flash-exp שעבד בבדיקה
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
     
     const prompt = `
-    You are a construction expert. I will give you a product name.
-    Your task: return JSON data for this product in Hebrew.
-    Product: "${productName}"
+    You are a construction expert. Product: "${productName}"
+    Task: Return JSON in Hebrew with:
+    1. name: Full product name
+    2. brand: Brand name (English/Hebrew)
+    3. shortDesc: Marketing summary (1 sentence)
+    4. fullDesc: Technical description (3 sentences)
+    5. specs: Array of 3 key features (icon, label, value). Icons: clock, droplets, layers, shield, check.
     
-    Return ONLY JSON with this structure:
-    {
-        "name": "Full Product Name",
-        "shortDesc": "Short marketing description (Hebrew)",
-        "fullDesc": "Long professional description (Hebrew)",
-        "brand": "Sika/MisterFix/etc",
-        "specs": [
-            {"icon": "clock", "label": "זמן ייבוש", "value": "e.g. 4 hours"},
-            {"icon": "droplets", "label": "איטום", "value": "e.g. Positive"},
-            {"icon": "layers", "label": "עובי", "value": "e.g. 2mm"}
-        ]
-    }
+    Return ONLY valid JSON.
     `;
 
     try {
@@ -34,52 +26,49 @@ export async function askGeminiAdmin(productName) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
-
-        if (!response.ok) {
-            throw new Error(`Gemini API Error: ${response.status} ${response.statusText}`);
-        }
-
         const data = await response.json();
-        
-        if (!data.candidates || !data.candidates[0]) {
-            throw new Error("Gemini did not return a valid response");
-        }
-
         const text = data.candidates[0].content.parts[0].text;
-        // ניקוי הקוד שה-AI לפעמים מוסיף
-        const jsonString = text.replace(/```json|```/g, '').trim();
-        return JSON.parse(jsonString);
-
+        return JSON.parse(text.replace(/```json|```/g, '').trim());
     } catch (error) {
-        console.error("Gemini Critical Error:", error);
-        alert("שגיאה בתקשורת עם ה-AI. בדוק את הקונסול לפרטים.");
+        console.error("Gemini Error:", error);
         return null;
     }
 }
 
-export async function findProductImage(productName) {
+// פונקציה חדשה: מביאה גלריית תמונות
+export async function searchImages(query) {
     try {
-        // הוספנו פרמטרים לסינון בטוח
-        const url = `https://www.googleapis.com/customsearch/v1?key=${SEARCH_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(productName)}&searchType=image&num=1&safe=active`;
+        const url = `https://www.googleapis.com/customsearch/v1?key=${SEARCH_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&searchType=image&num=4&safe=active`;
+        const res = await fetch(url);
+        const data = await res.json();
+        return data.items ? data.items.map(item => item.link) : [];
+    } catch (e) {
+        console.error("Image Search Error:", e);
+        return [];
+    }
+}
+
+// פונקציה חדשה: מחפשת סרטונים ביוטיוב (דרך גוגל)
+export async function searchVideos(query) {
+    try {
+        // טריק: מחפשים בגוגל סרטונים מיוטיוב
+        const url = `https://www.googleapis.com/customsearch/v1?key=${SEARCH_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query + " youtube tutorial")}&num=4`;
+        const res = await fetch(url);
+        const data = await res.json();
         
-        const response = await fetch(url);
-        
-        if (response.status === 403) {
-            console.error("Google Search 403: בדוק הרשאות מפתח (Referrer) או שה-API לא מופעל.");
-            return null;
-        }
-
-        const data = await response.json();
-
-        if (data.items && data.items.length > 0) {
-            return data.items[0].link;
-        } else {
-            console.warn("No images found for:", productName);
-            return null;
-        }
-
-    } catch (error) {
-        console.error("Image Search Error:", error);
-        return null;
+        // סינון תוצאות שאינן וידאו
+        return data.items 
+            ? data.items
+                .filter(item => item.link.includes('youtube.com/watch'))
+                .map(item => ({
+                    title: item.title,
+                    link: item.link,
+                    id: item.link.split('v=')[1]?.split('&')[0],
+                    thumbnail: item.pagemap?.cse_image?.[0]?.src || ""
+                })) 
+            : [];
+    } catch (e) {
+        console.error("Video Search Error:", e);
+        return [];
     }
 }
