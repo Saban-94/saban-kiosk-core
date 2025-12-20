@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Sika Admin - Brand Control</title>
+    <title>Sika Admin - Ultimate Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -19,15 +19,12 @@
         }
         .media-area { height: 35%; background: #f8fafc; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .media-area img { max-height: 90%; max-width: 90%; object-fit: contain; mix-blend-mode: multiply; }
-        
         .ribbon { position: absolute; top: 20px; left: -30px; transform: rotate(-45deg); color: white; padding: 5px 40px; font-weight: 900; font-size: 0.8rem; box-shadow: 0 5px 10px rgba(0,0,0,0.2); z-index: 10; text-transform: uppercase; }
         .ribbon.sale { background: #E3000F; } 
         .ribbon.recommended { background: #FFC500; color: black; }
         .ribbon.new { background: #2563eb; }
-        
         .brand-logo { position: absolute; top: 15px; right: 15px; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 5; background: white; }
         .brand-logo img { width: 80%; height: 80%; object-fit: contain; }
-        
         .content-area { padding: 25px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
         
         /* גלריות */
@@ -44,14 +41,23 @@
         .tech-val { font-weight: 900; font-size: 0.85rem; color: #0f172a; }
         .tech-lbl { font-size: 0.65rem; color: #64748b; font-weight: bold; }
 
-        /* כפתורי AI */
+        /* כפתורי AI ממוקדים */
         .ai-btn-small { 
             position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
             background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;
             padding: 4px; border-radius: 6px; cursor: pointer; transition: all 0.2s; z-index: 10;
         }
-        .ai-btn-small:hover { background: #16a34a; color: white; }
+        .ai-btn-small:hover { background: #16a34a; color: white; transform: translateY(-50%) scale(1.1); }
+        
         .textarea-wrapper .ai-btn-small { top: 15px; transform: none; }
+        
+        /* כפתור הוספת תמונה */
+        .add-img-btn {
+            background: #eff6ff; color: #2563eb; border: 1px dashed #bfdbfe;
+            border-radius: 8px; width: 100%; padding: 8px; font-size: 0.8rem;
+            cursor: pointer; transition: all 0.2s; font-weight: bold;
+        }
+        .add-img-btn:hover { background: #dbeafe; }
     </style>
 </head>
 <body class="p-6">
@@ -87,7 +93,7 @@
                 <div class="bg-green-50 p-4 rounded-xl border border-green-200 mb-6 flex items-center justify-between">
                     <div>
                         <h4 class="font-bold text-green-900">השבחה אוטומטית (AI)</h4>
-                        <p class="text-xs text-green-700">מילוי שדות חסרים בלבד</p>
+                        <p class="text-xs text-green-700">ממלא את כל השדות הריקים בלבד</p>
                     </div>
                     <button onclick="runGlobalAI()" class="bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700 shadow-md flex items-center gap-2">
                         <i data-lucide="sparkles"></i> השלם הכל
@@ -98,19 +104,22 @@
                     
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">שם המוצר</label>
-                        <input id="pName" oninput="updatePreview()" class="w-full p-3 bg-gray-50 border rounded-lg font-bold text-lg">
+                        <div class="relative">
+                            <input id="pName" oninput="updatePreview()" class="w-full p-3 bg-gray-50 border rounded-lg font-bold text-lg pl-10" placeholder="הקלד שם מוצר...">
+                        </div>
                     </div>
 
                     <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
                         <label class="font-bold text-sm mb-2 block flex gap-2"><i data-lucide="award"></i> פרטי יצרן</label>
                         <div class="grid grid-cols-2 gap-4">
-                             <div>
+                             <div class="relative">
                                  <label class="text-xs font-bold text-gray-500 uppercase">שם יצרן</label>
-                                 <input id="pBrand" oninput="updatePreview()" class="w-full p-2 border rounded text-sm font-bold bg-white">
+                                 <input id="pBrand" oninput="updatePreview()" class="w-full p-2 border rounded text-sm font-bold bg-white pl-8">
+                                 <button onclick="fillField('pBrand')" class="ai-btn-small" title="זהה יצרן"><i data-lucide="sparkles" size="14"></i></button>
                              </div>
                              <div class="relative">
                                  <label class="text-xs font-bold text-gray-500 uppercase">לוגו יצרן (URL)</label>
-                                 <input type="text" id="pBrandLogo" oninput="updatePreview()" placeholder="הדבק לינק או השאר ריק לזיהוי אוטומטי" class="w-full p-2 border rounded text-sm text-gray-600 font-mono bg-white pl-10">
+                                 <input type="text" id="pBrandLogo" oninput="updatePreview()" placeholder="אוטומטי או הדבק לינק" class="w-full p-2 border rounded text-sm text-gray-600 font-mono bg-white pl-10">
                                  <img id="inputLogoPreview" src="" class="absolute bottom-1 left-2 w-8 h-8 object-contain hidden">
                              </div>
                         </div>
@@ -119,10 +128,18 @@
                     <div class="grid grid-cols-1 gap-4">
                         <div class="bg-white p-4 rounded-xl border relative shadow-sm">
                             <label class="font-bold flex justify-between mb-2 text-sm">
-                                <span><i data-lucide="image"></i> תמונה ראשית</span>
+                                <span><i data-lucide="image"></i> גלריית תמונות</span>
+                                <span class="text-xs text-gray-400 font-normal">הוסף לינקים לתמונות נוספות</span>
                             </label>
-                            <input type="text" id="pImageUrl" oninput="updatePreview()" placeholder="הדבק לינק לתמונה..." class="w-full p-2 mb-2 border rounded text-sm text-blue-600 font-mono">
-                            <div id="imageGallery" class="selection-grid min-h-[50px]"></div>
+                            
+                            <div id="urlInputsContainer" class="space-y-2 mb-2">
+                                </div>
+                            
+                            <button onclick="addImageUrlInput()" class="add-img-btn">
+                                <i data-lucide="plus" size="14" class="inline"></i> הוסף עוד תמונה
+                            </button>
+
+                            <div id="imageGallery" class="selection-grid min-h-[50px] mt-2"></div>
                         </div>
 
                         <div class="bg-white p-4 rounded-xl border relative shadow-sm">
@@ -158,17 +175,17 @@
                         <div class="relative">
                             <label class="text-xs font-bold text-blue-800">כפתור (CTA)</label>
                             <input id="pCta" oninput="updatePreview()" class="w-full p-2 rounded border border-blue-200 text-sm pl-8" placeholder="דורש השבחה">
-                            <button onclick="fillField('pCta')" class="ai-btn-small"><i data-lucide="sparkles" size="14"></i></button>
+                            <button onclick="fillField('pCta')" class="ai-btn-small" title="נסח כפתור"><i data-lucide="sparkles" size="14"></i></button>
                         </div>
                         <div class="col-span-2 relative textarea-wrapper">
                             <label class="text-xs font-bold text-blue-800">תיאור שיווקי</label>
                             <textarea id="pMarketing" oninput="updatePreview()" rows="2" class="w-full p-2 rounded border border-blue-200 text-sm pl-8" placeholder="דורש השבחה..."></textarea>
-                            <button onclick="fillField('pMarketing')" class="ai-btn-small"><i data-lucide="sparkles" size="14"></i></button>
+                            <button onclick="fillField('pMarketing')" class="ai-btn-small" title="כתוב תיאור שיווקי"><i data-lucide="sparkles" size="14"></i></button>
                         </div>
                         <div class="col-span-2 relative">
                             <label class="text-xs font-bold text-blue-800">תקן</label>
                             <input id="pStandard" oninput="updatePreview()" class="w-full p-2 rounded border border-blue-200 text-sm pl-8" placeholder="דורש השבחה">
-                            <button onclick="fillField('pStandard')" class="ai-btn-small"><i data-lucide="sparkles" size="14"></i></button>
+                            <button onclick="fillField('pStandard')" class="ai-btn-small" title="מצא תקן"><i data-lucide="sparkles" size="14"></i></button>
                         </div>
                     </div>
 
@@ -177,15 +194,15 @@
                         <div class="grid grid-cols-3 gap-2">
                             <div class="relative">
                                 <input id="pCoverage" oninput="updatePreview()" placeholder="כיסוי" class="p-2 border rounded text-sm w-full pl-8">
-                                <button onclick="fillField('pCoverage')" class="ai-btn-small"><i data-lucide="sparkles" size="14"></i></button>
+                                <button onclick="fillField('pCoverage')" class="ai-btn-small" title="חשב כיסוי"><i data-lucide="sparkles" size="14"></i></button>
                             </div>
                             <div class="relative">
                                 <input id="pDrying" oninput="updatePreview()" placeholder="ייבוש" class="p-2 border rounded text-sm w-full pl-8">
-                                <button onclick="fillField('pDrying')" class="ai-btn-small"><i data-lucide="sparkles" size="14"></i></button>
+                                <button onclick="fillField('pDrying')" class="ai-btn-small" title="מצא זמן ייבוש"><i data-lucide="sparkles" size="14"></i></button>
                             </div>
                             <div class="relative">
                                 <input id="pThickness" oninput="updatePreview()" placeholder="עובי" class="p-2 border rounded text-sm w-full pl-8">
-                                <button onclick="fillField('pThickness')" class="ai-btn-small"><i data-lucide="sparkles" size="14"></i></button>
+                                <button onclick="fillField('pThickness')" class="ai-btn-small" title="מצא עובי"><i data-lucide="sparkles" size="14"></i></button>
                             </div>
                         </div>
                     </div>
@@ -213,7 +230,6 @@
                 <div class="text-center mb-4 font-bold text-gray-400 text-sm tracking-widest">LIVE PREVIEW</div>
                 <div class="kiosk-card relative">
                     <div class="brand-logo"><img id="prevLogo" src=""></div>
-                    
                     <div id="prevRibbon" class="ribbon hidden"></div>
                     <div class="media-area">
                         <img id="prevImage" src="https://via.placeholder.com/300?text=Sika">
@@ -258,13 +274,29 @@
         let selectedImages = []; 
         let allProducts = [];
 
-        // מאגר לוגואים בסיסי (גיבוי)
         const brandLogos = {
             'sika': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Sika_AG_logo.svg/1200px-Sika_AG_logo.svg.png',
             'misterfix': 'https://karmit-mrfix.com/wp-content/uploads/2020/07/logo.png',
             'thermokir': 'https://www.thermokir.co.il/wp-content/uploads/2019/06/logo.png',
+            'bg': 'https://bgbond.co.il/wp-content/uploads/2020/05/logo.png',
             'default': 'https://cdn-icons-png.flaticon.com/512/1088/1088537.png'
         };
+
+        // --- ניהול שדות תמונה דינמיים ---
+        window.addImageUrlInput = (value = "") => {
+            const container = document.getElementById('urlInputsContainer');
+            const div = document.createElement('div');
+            div.className = "flex gap-2 items-center";
+            div.innerHTML = `
+                <input type="text" value="${value}" oninput="updatePreview()" placeholder="https://..." class="img-url-input w-full p-2 border rounded text-sm text-blue-600 font-mono">
+                <button onclick="this.parentElement.remove(); updatePreview()" class="text-red-500 hover:bg-red-50 p-2 rounded"><i data-lucide="trash-2" size="16"></i></button>
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
+        };
+
+        // הוספת שדה ראשון כברירת מחדל
+        if(document.querySelectorAll('.img-url-input').length === 0) addImageUrlInput();
 
         window.updatePreview = () => {
             const getVal = (id) => document.getElementById(id).value;
@@ -274,30 +306,19 @@
             document.getElementById('prevMarketing').innerText = getVal('pMarketing') || "תיאור שיווקי...";
             document.getElementById('prevBtn').innerHTML = `${getVal('pCta') || "הוסף להצעת מחיר"} <i data-lucide="arrow-left"></i>`;
             
-            // --- לוגיקה ללוגו יצרן ---
+            // לוגו
             const manualLogo = getVal('pBrandLogo');
             const brandName = (getVal('pBrand')||"").toLowerCase();
             let finalLogo = brandLogos['default'];
-
-            if (manualLogo && manualLogo.length > 5) {
-                // אם המשתמש הזין לינק ידני - משתמשים בו
-                finalLogo = manualLogo;
-            } else {
-                // אם לא, מחפשים במאגר
+            if (manualLogo && manualLogo.length > 5) finalLogo = manualLogo;
+            else {
                 const brandKey = Object.keys(brandLogos).find(k => brandName.includes(k));
                 if (brandKey) finalLogo = brandLogos[brandKey];
             }
-            
-            // עדכון התצוגה המקדימה והאייקון הקטן בשדה
             document.getElementById('prevLogo').src = finalLogo;
             const inputPreview = document.getElementById('inputLogoPreview');
-            if (manualLogo) {
-                inputPreview.src = manualLogo;
-                inputPreview.classList.remove('hidden');
-            } else {
-                inputPreview.classList.add('hidden');
-            }
-            // ---------------------------
+            if (manualLogo) { inputPreview.src = manualLogo; inputPreview.classList.remove('hidden'); }
+            else inputPreview.classList.add('hidden');
 
             const status = getVal('pStatus');
             const ribbon = document.getElementById('prevRibbon');
@@ -305,20 +326,20 @@
             ribbon.classList.toggle('hidden', status === 'standard');
             ribbon.innerText = { 'recommended': 'מומלץ', 'sale': 'מבצע', 'new': 'חדש' }[status] || '';
 
-            const manualImg = getVal('pImageUrl');
-            if(manualImg && manualImg.length > 5) {
-                document.getElementById('prevImage').src = manualImg;
-            } else if(selectedImages.length > 0) {
-                document.getElementById('prevImage').src = selectedImages[0];
-            }
+            // תמונה: לוקח מהשדה הראשון שיש בו תוכן
+            const inputs = document.querySelectorAll('.img-url-input');
+            let foundImg = "";
+            for(let inp of inputs) { if(inp.value.length > 5) { foundImg = inp.value; break; } }
+            
+            if(foundImg) document.getElementById('prevImage').src = foundImg;
+            else if(selectedImages.length > 0) document.getElementById('prevImage').src = selectedImages[0];
 
             document.getElementById('prevVideoBadge').classList.toggle('hidden', !getVal('pVideoUrl'));
             document.getElementById('prevPdfBox').classList.toggle('hidden', !getVal('pPdfUrl'));
-
             document.getElementById('prevCov').innerText = getVal('pCoverage') || "-";
             document.getElementById('prevDry').innerText = getVal('pDrying') || "-";
             document.getElementById('prevThick').innerText = getVal('pThickness') || "-";
-
+            
             const std = getVal('pStandard');
             document.getElementById('prevStandardBox').classList.toggle('hidden', !std);
             document.getElementById('prevStandard').innerText = std;
@@ -326,7 +347,7 @@
             lucide.createIcons();
         }
 
-        // פונקציית AI לכל הטופס
+        // --- AI גלובלי (ממלא רק ריקים) ---
         window.runGlobalAI = async () => {
             const name = document.getElementById('pName').value;
             if(!name) return alert("הכנס שם מוצר");
@@ -341,7 +362,6 @@
                 if(data) {
                     const smartFill = (id, val) => {
                         const el = document.getElementById(id);
-                        // ממלא רק אם ריק!
                         if (!el.value && val) {
                             el.value = val;
                             el.style.backgroundColor = "#f0fdf4";
@@ -349,6 +369,7 @@
                         }
                     };
 
+                    smartFill('pBrand', data.brand); // גם מותג
                     smartFill('pMarketing', data.marketingDesc);
                     smartFill('pCta', data.ctaText);
                     smartFill('pStandard', data.standard);
@@ -367,10 +388,10 @@
             lucide.createIcons();
         };
 
-        // פונקציית AI לשדה בודד
+        // --- AI ממוקד לשדה (Targeted) ---
         window.fillField = async (fieldId) => {
             const name = document.getElementById('pName').value;
-            if(!name) return alert("הכנס שם מוצר קודם");
+            if(!name) return alert("הכנס שם מוצר");
             
             const btn = event.currentTarget;
             const originalIcon = btn.innerHTML;
@@ -381,6 +402,7 @@
                 const data = await askGeminiAdmin(name);
                 if(data) {
                     const map = {
+                        'pBrand': data.brand,
                         'pMarketing': data.marketingDesc,
                         'pCta': data.ctaText,
                         'pStandard': data.standard,
@@ -401,20 +423,36 @@
             lucide.createIcons();
         }
 
+        // --- שמירה ---
         window.saveProduct = async () => {
             const btn = document.querySelector('button[onclick="saveProduct()"]');
             btn.innerHTML = `שומר...`;
             try {
+                // איסוף כל התמונות מהשדות הדינמיים
+                const imgInputs = document.querySelectorAll('.img-url-input');
+                let manualImages = [];
+                imgInputs.forEach(inp => { if(inp.value.length > 5) manualImages.push(inp.value); });
+                
+                // מיזוג עם תמונות שנבחרו מהגלריה (אם יש)
+                let finalImages = [...manualImages, ...selectedImages];
+                // הסרת כפילויות
+                finalImages = [...new Set(finalImages)];
+                
+                // אם אין כלום, וודא שיש לפחות מערך ריק
+                if(finalImages.length === 0 && document.getElementById('pImageUrl')) {
+                     // fallback
+                }
+
                 const data = {
                     name: document.getElementById('pName').value,
                     brand: document.getElementById('pBrand').value,
-                    brandLogo: document.getElementById('pBrandLogo').value, // שמירת לוגו מותאם אישית
+                    brandLogo: document.getElementById('pBrandLogo').value,
                     status: document.getElementById('pStatus').value,
                     marketingDesc: document.getElementById('pMarketing').value,
                     ctaText: document.getElementById('pCta').value,
                     standard: document.getElementById('pStandard').value,
-                    image: document.getElementById('pImageUrl').value,
-                    images: selectedImages.length ? selectedImages : [document.getElementById('pImageUrl').value],
+                    image: finalImages[0] || "", // תמונה ראשית
+                    images: finalImages,         // כל הגלריה
                     video: document.getElementById('pVideoUrl').value,
                     pdfUrl: document.getElementById('pPdfUrl').value,
                     coverage: document.getElementById('pCoverage').value,
@@ -439,6 +477,7 @@
             lucide.createIcons();
         }
 
+        // --- יבוא וניהול ---
         window.handleBulkUpload = async (input) => {
              const file = input.files[0];
              if (!file) return;
@@ -486,7 +525,7 @@
             document.getElementById('editModeId').value = id;
             document.getElementById('pName').value = p.name;
             document.getElementById('pBrand').value = p.brand;
-            document.getElementById('pBrandLogo').value = p.brandLogo || ""; // טעינת לוגו מותאם
+            document.getElementById('pBrandLogo').value = p.brandLogo || "";
             document.getElementById('pStatus').value = p.status || 'standard';
             document.getElementById('pMarketing').value = p.marketingDesc || "";
             document.getElementById('pStandard').value = p.standard || "";
@@ -494,12 +533,19 @@
             document.getElementById('pCoverage').value = p.tech?.coverage || p.coverage || "";
             document.getElementById('pDrying').value = p.tech?.drying || p.drying || "";
             document.getElementById('pThickness').value = p.tech?.thickness || p.thickness || "";
-            document.getElementById('pImageUrl').value = p.image || "";
             document.getElementById('pVideoUrl').value = p.video || "";
             document.getElementById('pPdfUrl').value = p.pdfUrl || "";
             
-            selectedImages = p.images || (p.image ? [p.image] : []);
-            renderImageGallery(selectedImages);
+            // טעינת תמונות לשדות הדינמיים
+            const container = document.getElementById('urlInputsContainer');
+            container.innerHTML = ""; // ניקוי
+            const imgs = p.images && p.images.length ? p.images : (p.image ? [p.image] : []);
+            
+            if (imgs.length === 0) addImageUrlInput();
+            else imgs.forEach(url => addImageUrlInput(url));
+
+            // טעינת גלריה לבחירה (אופציונלי, למטה)
+            renderImageGallery(imgs);
 
             document.getElementById('btnCancel').classList.remove('hidden');
             window.scrollTo({top:0, behavior:'smooth'});
@@ -514,11 +560,18 @@
                     <div class="check-mark"><i data-lucide="check" size="12"></i></div>
                 </div>`).join('');
         }
+        
         window.selectFromGallery = (url, el) => {
-            document.querySelectorAll('#imageGallery .selectable-item').forEach(d => d.classList.remove('selected'));
-            el.classList.add('selected');
-            document.getElementById('pImageUrl').value = url;
-            selectedImages = [url];
+            // הוספה לשדות הידניים בלחיצה
+            const inputs = document.querySelectorAll('.img-url-input');
+            let added = false;
+            // בודק אם יש שדה ריק למלא
+            for(let inp of inputs) {
+                if(inp.value === "") { inp.value = url; added = true; break; }
+            }
+            // אם אין ריק, מוסיף שדה חדש
+            if(!added) addImageUrlInput(url);
+            
             updatePreview();
         }
 
@@ -528,6 +581,8 @@
         window.resetForm = () => {
             document.getElementById('editModeId').value = "";
             document.querySelectorAll('input, textarea').forEach(i => i.value = "");
+            document.getElementById('urlInputsContainer').innerHTML = "";
+            addImageUrlInput(); // שדה ברירת מחדל
             document.getElementById('btnCancel').classList.add('hidden');
             document.getElementById('imageGallery').innerHTML = "";
             document.getElementById('videoGallery').innerHTML = "";
