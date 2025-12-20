@@ -2,158 +2,186 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Saban Expert HQ</title>
-    
-    <link rel="manifest" href="manifest.json"> <meta name="theme-color" content="#000000">
-    <meta name="mobile-web-app-capable" content="yes">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saban Expert Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Heebo', sans-serif; background: #111; color: white; padding-bottom: 20px; }
         
-        .lead-card { background: #1e1e1e; border: 1px solid #333; border-radius: 16px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; transition: all 0.3s; }
-        .lead-card.new { border-color: #E3000F; box-shadow: 0 0 20px rgba(227, 0, 15, 0.2); }
-        .lead-card.new::before { content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%; background: #E3000F; }
+        /* Chat UI */
+        .chat-container { height: calc(100vh - 140px); display: flex; flex-direction: column; }
+        .msg-bubble { max-width: 80%; padding: 12px; border-radius: 16px; font-size: 14px; margin-bottom: 8px; }
+        .msg-client { background: #333; color: white; align-self: flex-start; border-bottom-right-radius: 4px; }
+        .msg-me { background: #2563eb; color: white; align-self: flex-end; border-bottom-left-radius: 4px; }
         
-        .action-btn { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.1s; }
-        .action-btn:active { transform: scale(0.9); }
+        /* Product Picker Modal */
+        .picker-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 70vh; background: #1e1e1e; border-top-left-radius: 20px; border-top-right-radius: 20px; transform: translateY(100%); transition: transform 0.3s; z-index: 50; padding: 20px; display: flex; flex-direction: column; }
+        .picker-modal.open { transform: translateY(0); }
         
-        .whatsapp-btn { background: #25D366; color: white; }
-        .phone-btn { background: #3b82f6; color: white; }
-        .archive-btn { background: #333; color: #666; }
+        .prod-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #333; cursor: pointer; }
+        .prod-item:hover { background: #333; }
+        .prod-img { width: 40px; height: 40px; border-radius: 6px; background: white; object-fit: contain; }
     </style>
 </head>
 <body>
 
-    <div class="p-6 bg-[#111] sticky top-0 z-20 border-b border-gray-800 flex justify-between items-center shadow-lg">
-        <div>
-            <div class="text-[#FFC500] font-black text-2xl italic tracking-wider">Saban PRO</div>
-            <div class="text-xs text-gray-400">מערכת ניהול לידים</div>
+    <div class="p-4 bg-[#1e1e1e] flex justify-between items-center border-b border-gray-800">
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <img src="https://media-mrs2-1.cdn.whatsapp.net/v/t61.24694-24/109923599_330637871666131_5578032134568575008_n.jpg?ccb=11-4&oh=01_Q5Aa3QFeo2xxQ2aPXt6aNIHGockxutUkt3uT90hABAOshFRruQ&oe=69536285&_nc_sid=5e03e0&_nc_cat=111" class="w-10 h-10 rounded-full border-2 border-[#E3000F]">
+                <div class="w-3 h-3 bg-green-500 rounded-full absolute bottom-0 right-0 border border-black"></div>
+            </div>
+            <div>
+                <div class="font-bold">אלי כהן</div>
+                <div class="text-xs text-gray-400">מחובר • סניף הוד השרון</div>
+            </div>
         </div>
-        <div class="relative">
-            <div id="pingIndicator" class="w-3 h-3 bg-red-500 rounded-full absolute top-0 right-0 hidden"></div>
-            <i data-lucide="bell" class="text-white"></i>
-        </div>
+        <div class="bg-gray-800 px-3 py-1 rounded-full text-xs font-bold">שיחה פעילה</div>
     </div>
 
-    <div class="grid grid-cols-2 gap-4 p-4">
-        <div class="bg-gray-900 p-4 rounded-2xl border border-gray-800 text-center">
-            <div class="text-3xl font-bold text-white" id="countNew">0</div>
-            <div class="text-xs text-gray-500 font-bold uppercase">ממתינים לטיפול</div>
-        </div>
-        <div class="bg-gray-900 p-4 rounded-2xl border border-gray-800 text-center">
-            <div class="text-3xl font-bold text-green-500" id="countTotal">0</div>
-            <div class="text-xs text-gray-500 font-bold uppercase">טופלו היום</div>
-        </div>
+    <div class="chat-container p-4 overflow-y-auto" id="expertChatStream">
+        <div class="msg-bubble msg-client">שלום, אני צריך פריימר לפני ריצוף. יש לכם?</div>
     </div>
 
-    <div class="p-4">
-        <h3 class="text-gray-500 text-xs font-bold uppercase mb-4 tracking-widest">פניות אחרונות (Real-Time)</h3>
-        <div id="leadsFeed" class="space-y-4">
-            <div class="text-center text-gray-600 mt-10">טוען פניות...</div>
+    <div class="fixed bottom-0 left-0 w-full bg-[#1e1e1e] p-3 border-t border-gray-800 flex gap-2 items-center">
+        <button onclick="toggleProductPicker()" class="bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700">
+            <i data-lucide="plus"></i>
+        </button>
+        <input id="expertInput" type="text" placeholder="ענה ללקוח..." class="flex-1 bg-black text-white rounded-full px-4 py-3 text-sm border border-gray-700 focus:border-blue-500 outline-none">
+        <button onclick="sendExpertMessage()" class="bg-blue-600 text-white p-3 rounded-full shadow-lg">
+            <i data-lucide="send" size="18"></i>
+        </button>
+    </div>
+
+    <div id="productPicker" class="picker-modal shadow-2xl shadow-black">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg">בחר מוצר לשליחה</h3>
+            <button onclick="toggleProductPicker()" class="bg-gray-800 p-2 rounded-full"><i data-lucide="x"></i></button>
         </div>
+        <input type="text" id="prodSearch" oninput="renderPickerList()" placeholder="חפש בקטלוג..." class="w-full bg-black p-3 rounded-xl mb-4 border border-gray-700 text-white">
+        
+        <div id="pickerList" class="flex-1 overflow-y-auto">
+            </div>
     </div>
 
     <script type="module">
         import { db } from '../js/firebase-config.js';
-        import { collection, query, orderBy, onSnapshot, updateDoc, doc, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { collection, getDocs, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         lucide.createIcons();
+        let productsDB = [];
+        let currentChatId = null; // In real app, select from list
 
-        // האזנה ללידים בזמן אמת
-        const q = query(collection(db, "leads"), orderBy("timestamp", "desc"), limit(20));
-        
-        onSnapshot(q, (snapshot) => {
-            const container = document.getElementById('leadsFeed');
-            container.innerHTML = "";
-            
-            let newCount = 0;
-            let totalCount = 0;
+        // --- Init ---
+        async function init() {
+            const snap = await getDocs(collection(db, "products"));
+            productsDB = [];
+            snap.forEach(doc => productsDB.push({id: doc.id, ...doc.data()}));
+            renderPickerList();
+            listenToChat();
+        }
 
-            if (snapshot.empty) {
-                container.innerHTML = '<div class="text-center text-gray-700 mt-10">אין פניות חדשות</div>';
-                return;
-            }
-
-            snapshot.forEach((docSnap) => {
-                const lead = docSnap.data();
-                const id = docSnap.id;
-                const isNew = lead.status === 'new';
-                if(isNew) newCount++;
-                totalCount++;
-
-                const timeStr = lead.timestamp ? new Date(lead.timestamp.seconds * 1000).toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'}) : '--:--';
-                
-                // יצירת לינק לוואטסאפ
-                // הסרת ה-0 הראשון והוספת 972
-                const cleanPhone = lead.phone.replace(/^0+/, ''); 
-                const waLink = `https://wa.me/972${cleanPhone}?text=${encodeURIComponent(`היי ${lead.name}, קיבלתי את הפנייה שלך בקיוסק (${lead.query}). איך אני יכול לעזור?`)}`;
-
-                container.innerHTML += `
-                    <div class="lead-card ${isNew ? 'new' : 'opacity-70'}">
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center font-bold text-[#FFC500] border border-gray-700 text-xl">
-                                    ${lead.name.charAt(0)}
-                                </div>
-                                <div>
-                                    <div class="font-bold text-lg leading-none">${lead.name}</div>
-                                    <div class="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                                        <i data-lucide="clock" size="10"></i> ${timeStr} • ${lead.source === 'kiosk_app' ? 'קיוסק' : 'אחר'}
-                                    </div>
-                                </div>
-                            </div>
-                            ${isNew ? '<span class="bg-[#E3000F] text-white text-[10px] font-bold px-2 py-1 rounded animate-pulse">חדש!</span>' : '<i data-lucide="check-circle" class="text-green-500" size="16"></i>'}
-                        </div>
-                        
-                        <div class="bg-black/40 p-3 rounded-lg text-sm text-gray-300 mb-4 border border-gray-700">
-                            ${lead.query || "פנייה כללית"}
-                        </div>
-
-                        <div class="flex gap-4 justify-end items-center border-t border-gray-800 pt-3">
-                            <button onclick="archiveLead('${id}')" class="text-xs text-gray-500 underline mr-auto">סמן כטופל</button>
-                            
-                            <a href="tel:${lead.phone}" class="action-btn phone-btn shadow-lg" onclick="markRead('${id}')">
-                                <i data-lucide="phone" size="20"></i>
-                            </a>
-                            <a href="${waLink}" target="_blank" class="action-btn whatsapp-btn shadow-lg" onclick="markRead('${id}')">
-                                <i data-lucide="message-circle" size="20"></i>
-                            </a>
-                        </div>
-                    </div>
-                `;
+        // --- Chat Logic ---
+        function listenToChat() {
+            const q = query(collection(db, "chats"), orderBy("timestamp", "asc"), limit(50));
+            onSnapshot(q, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const data = change.doc.data();
+                        currentChatId = data.chatId; // Lock on to latest chat for demo
+                        renderMessage(data);
+                    }
+                });
             });
+        }
+
+        function renderMessage(data) {
+            const container = document.getElementById('expertChatStream');
+            const div = document.createElement('div');
             
-            document.getElementById('countNew').innerText = newCount;
-            document.getElementById('countTotal').innerText = totalCount;
-            
-            // חיווי ויזואלי אם יש חדש
-            const ping = document.getElementById('pingIndicator');
-            if(newCount > 0) {
-                ping.classList.remove('hidden');
-                ping.classList.add('animate-ping');
+            if (data.type === 'product' && data.productData) {
+                // Sent Product Card View
+                div.className = "msg-bubble msg-me bg-gray-800 border border-gray-700 p-0 overflow-hidden w-64";
+                div.innerHTML = `
+                    <div class="h-32 bg-white flex items-center justify-center p-2"><img src="${data.productData.image}" class="h-full object-contain"></div>
+                    <div class="p-3">
+                        <div class="text-xs text-gray-400 font-bold">${data.productData.brand}</div>
+                        <div class="font-bold text-white">${data.productData.name}</div>
+                        <div class="text-xs text-green-400 mt-1 flex items-center gap-1"><i data-lucide="check" size="10"></i> נשלח ללקוח</div>
+                    </div>`;
             } else {
-                ping.classList.add('hidden');
+                // Text Message
+                div.className = `msg-bubble ${data.sender === 'expert' ? 'msg-me' : 'msg-client'}`;
+                div.innerText = data.text;
             }
-
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
             lucide.createIcons();
-        });
-
-        // עדכון סטטוס ל"נקרא" (כשלוחצים על כפתור)
-        window.markRead = async (id) => {
-            // לא מעביר לארכיון, רק מסיר את הסימון "חדש"
-            // הלוגיקה שלך יכולה להשתנות כאן
         }
 
-        // העברה לארכיון (טופל)
-        window.archiveLead = async (id) => {
-            if(confirm("לסמן כטופל?")) {
-                await updateDoc(doc(db, "leads", id), { status: "handled" });
-            }
+        window.sendExpertMessage = async () => {
+            const input = document.getElementById('expertInput');
+            const text = input.value.trim();
+            if(!text) return;
+            
+            input.value = '';
+            await addDoc(collection(db, "chats"), {
+                chatId: currentChatId,
+                sender: 'expert',
+                text: text,
+                type: 'text',
+                timestamp: new Date()
+            });
         }
+
+        // --- Product Picker Logic ---
+        window.toggleProductPicker = () => {
+            document.getElementById('productPicker').classList.toggle('open');
+        }
+
+        window.renderPickerList = () => {
+            const term = document.getElementById('prodSearch').value.toLowerCase();
+            const list = document.getElementById('pickerList');
+            const filtered = productsDB.filter(p => p.name.toLowerCase().includes(term));
+            
+            list.innerHTML = filtered.map(p => `
+                <div class="prod-item" onclick="sendProduct('${p.id}')">
+                    <img src="${p.image || 'https://placehold.co/50'}" class="prod-img">
+                    <div class="flex-1">
+                        <div class="font-bold text-sm">${p.name}</div>
+                        <div class="text-xs text-gray-400">${p.brand}</div>
+                    </div>
+                    <div class="bg-blue-600 p-2 rounded-full"><i data-lucide="send" size="14"></i></div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.sendProduct = async (id) => {
+            const p = productsDB.find(x => x.id === id);
+            if(!p) return;
+            
+            toggleProductPicker();
+            
+            await addDoc(collection(db, "chats"), {
+                chatId: currentChatId,
+                sender: 'expert',
+                text: "Here is the product",
+                type: 'product',
+                productData: {
+                    id: p.id,
+                    name: p.name,
+                    brand: p.brand,
+                    image: p.image || 'https://placehold.co/200'
+                },
+                timestamp: new Date()
+            });
+        }
+
+        init();
     </script>
 </body>
 </html>
