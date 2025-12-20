@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H. Saban Command Center</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Heebo', sans-serif; background: #f8fafc; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar Styles */
+        .sidebar { width: 320px; background: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100%; box-shadow: 5px 0 25px rgba(0,0,0,0.02); z-index: 10; }
+        .product-item { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
+        .product-item:hover { background: #f8fafc; }
+        .product-item.active { background: #eff6ff; border-right: 4px solid #2563eb; }
+        .product-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: contain; background: white; border: 1px solid #e2e8f0; }
+
+        /* Main Editor Area */
+        .editor-area { flex: 1; padding: 40px; overflow-y: auto; background: #f8fafc; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 24px; margin-bottom: 24px; border: 1px solid #e2e8f0; }
+        
+        /* Inputs & AI Buttons */
+        .input-wrapper { position: relative; margin-bottom: 4px; }
+        .form-input { width: 100%; padding: 10px 14px; padding-left: 40px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; transition: border 0.2s; }
+        .form-input:focus { outline: none; border-color: #2563eb; ring: 2px solid #bfdbfe; }
+        .ai-trigger { position: absolute; left: 6px; top: 50%; transform: translateY(-50%); color: #94a3b8; padding: 4px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+        .ai-trigger:hover { color: #2563eb; background: #eff6ff; }
+        .field-label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; }
+
+        /* Category Grid */
+        .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+        .cat-option { border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; cursor: pointer; text-align: center; transition: all 0.2s; background: white; }
+        .cat-option:hover { border-color: #94a3b8; }
+        .cat-option.selected { border-color: #2563eb; background: #eff6ff; color: #1e3a8a; }
+        .cat-icon { margin-bottom: 5px; color: #64748b; }
+        .cat-option.selected .cat-icon { color: #2563eb; }
+
+        /* Image Grid */
+        .img-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+        .img-slot { width: 100px; height: 100px; border: 2px dashed #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; background: #f8fafc; }
+        .img-slot img { width: 100%; height: 100%; object-fit: contain; }
+        .img-slot:hover { border-color: #2563eb; }
+        .delete-img { position: absolute; top: 2px; right: 2px; background: rgba(255,0,0,0.8); color: white; border-radius: 50%; padding: 2px; display: none; }
+        .img-slot:hover .delete-img { display: block; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex">
+
+    <aside class="sidebar">
+        <div class="p-4 border-b border-gray-100 bg-white sticky top-0 z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-black text-white flex items-center justify-center rounded-lg font-black text-xl">H</div>
+                <div class="leading-tight">
+                    <div class="font-bold text-gray-900">ח. סבן</div>
+                    <div class="text-xs text-gray-500">מרכז ניהול מוצרים</div>
+                </div>
+            </div>
+            <div class="relative">
+                <input id="searchList" oninput="renderList()" type="text" placeholder="חיפוש במלאי..." class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 pr-8 text-sm focus:outline-none focus:border-blue-500">
+                <i data-lucide="search" class="absolute right-2 top-2.5 text-gray-400" size="16"></i>
+            </div>
+            <div class="flex gap-2 mt-3">
+                <button onclick="createNew()" class="flex-1 bg-black text-white py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition flex items-center justify-center gap-2"><i data-lucide="plus" size="14"></i> חדש</button>
+                <input type="file" id="jsonFile" accept=".json" class="hidden" onchange="handleBulkUpload(this)">
+                <button onclick="document.getElementById('jsonFile').click()" class="bg-blue-50 text-blue-600 px-3 py-2 rounded-lg text-sm font-bold hover:bg-blue-100" title="יבוא"><i data-lucide="upload"></i></button>
+            </div>
+        </div>
+        <div id="inventoryList" class="flex-1 overflow-y-auto">
+            </div>
+    </aside>
+
+    <main class="editor-area">
+        <div class="max-w-5xl mx-auto">
+            
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-black text-gray-900">עורך המוצר</h1>
+                    <p class="text-gray-500 text-sm" id="editStatus">מצב: מוצר חדש</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="runFullAI()" class="bg-green-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-green-700 transition flex items-center gap-2">
+                        <i data-lucide="sparkles"></i> השלם הכל ב-AI
+                    </button>
+                    <button onclick="saveProduct()" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition flex items-center gap-2">
+                        <i data-lucide="save"></i> שמור
+                    </button>
+                </div>
+            </div>
+
+            <input type="hidden" id="editModeId">
+
+            <div class="grid grid-cols-12 gap-6">
+                
+                <div class="col-span-12 lg:col-span-8 space-y-6">
+                    
+                    <div class="card">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2">
+                                <label class="field-label">שם המוצר</label>
+                                <div class="input-wrapper">
+                                    <input id="pName" class="form-input text-lg font-bold" placeholder="הקלד שם מוצר מלא...">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="field-label">מותג (יצרן)</label>
+                                <div class="input-wrapper">
+                                    <input id="pBrand" class="form-input" placeholder="למשל: Sika">
+                                    <i data-lucide="sparkles" class="ai-trigger" onclick="fillField('pBrand')" title="AI: זהה מותג"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="field-label">לוגו מותג (אופציונלי)</label>
+                                <input id="pBrandLogo" class="form-input !pl-2" placeholder="URL ללוגו">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <label class="field-label">קטגוריה ראשית</label>
+                        <input type="hidden" id="pCategory">
+                        <div class="cat-grid" id="categoryGrid">
+                            </div>
+                    </div>
+
+                    <div class="card">
+                        <label class="field-label">תיאור שיווקי</label>
+                        <div class="input-wrapper mb-4">
+                            <textarea id="pMarketing" rows="3" class="form-input" style="padding-left:14px; padding-bottom: 30px;" placeholder="תיאור קצר ומשכנע..."></textarea>
+                            <i data-lucide="sparkles" class="ai-trigger" style="top: auto; bottom: 8px;" onclick="fillField('pMarketing')" title="AI: כתוב תיאור"></i>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="field-label">כושר כיסוי</label>
+                                <div class="input-wrapper">
+                                    <input id="pCoverage" class="form-input" placeholder='2.5 ק"ג/מ"ר'>
+                                    <i data-lucide="sparkles" class="ai-trigger" onclick="fillField('pCoverage')"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="field-label">זמן ייבוש</label>
+                                <div class="input-wrapper">
+                                    <input id="pDrying" class="form-input" placeholder="24 שעות">
+                                    <i data-lucide="sparkles" class="ai-trigger" onclick="fillField('pDrying')"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="field-label">עובי יישום</label>
+                                <div class="input-wrapper">
+                                    <input id="pThickness" class="form-input" placeholder="2-5 מ''מ">
+                                    <i data-lucide="sparkles" class="ai-trigger" onclick="fillField('pThickness')"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-span-12 lg:col-span-4 space-y-6">
+                    
+                    <div class="card">
+                        <label class="field-label">סטטוס מוצר</label>
+                        <select id="pStatus" class="form-input !pl-2 cursor-pointer">
+                            <option value="standard">רגיל</option>
+                            <option value="recommended">⭐ מומלץ</option>
+                            <option value="sale">🔥 מבצע</option>
+                            <option value="new">✨ חדש</option>
+                        </select>
+                    </div>
+
+                    <div class="card">
+                        <label class="field-label flex justify-between">
+                            <span>גלריית תמונות</span>
+                            <span class="text-xs text-blue-600 cursor-pointer" onclick="addUrlInput()">+ הוסף URL</span>
+                        </label>
+                        <div id="imageContainer" class="img-grid">
+                            </div>
+                        <input type="hidden" id="pMainImage"> <textarea id="pAllImages" class="hidden">[]</textarea> </div>
+
+                    <div class="card">
+                        <label class="field-label">קישורים נוספים</label>
+                        <div class="space-y-3">
+                            <div class="input-wrapper">
+                                <input id="pVideoUrl" class="form-input" placeholder="YouTube URL">
+                                <i data-lucide="video" class="absolute left-3 top-2.5 text-gray-400" size="16"></i>
+                            </div>
+                            <div class="input-wrapper">
+                                <input id="pPdfUrl" class="form-input" placeholder="PDF URL (מפרט)">
+                                <i data-lucide="file-text" class="absolute left-3 top-2.5 text-gray-400" size="16"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { db } from '../js/firebase-config.js';
+        import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { askGeminiAdmin } from '../js/gemini-service.js';
+
+        lucide.createIcons();
+        let allProducts = [];
+        let imagesList = [];
+
+        // --- 1. Categories Configuration ---
+        const categories = [
+            { id: 'sealing', name: 'איטום', icon: 'droplets' },
+            { id: 'glues', name: 'דבקים', icon: 'link' },
+            { id: 'concrete', name: 'שיקום בטון', icon: 'component' },
+            { id: 'plaster', name: 'טיח וגמר', icon: 'paint-bucket' },
+            { id: 'flooring', name: 'ריצוף', icon: 'layout-grid' },
+            { id: 'tools', name: 'כלי עבודה', icon: 'hammer' },
+            { id: 'paint', name: 'צבע', icon: 'palette' },
+            { id: 'additives', name: 'תוספים', icon: 'flask-conical' }
+        ];
+
+        function renderCategories() {
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = categories.map(cat => `
+                <div class="cat-option" onclick="selectCategory('${cat.id}')" id="cat-${cat.id}">
+                    <div class="cat-icon"><i data-lucide="${cat.icon}"></i></div>
+                    <div class="text-xs font-bold">${cat.name}</div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+        renderCategories();
+
+        window.selectCategory = (id) => {
+            document.getElementById('pCategory').value = id;
+            document.querySelectorAll('.cat-option').forEach(el => el.classList.remove('selected'));
+            document.getElementById('cat-'+id).classList.add('selected');
+        }
+
+        // --- 2. Inventory & List Management ---
+        window.loadInventory = async () => {
+            const list = document.getElementById('inventoryList');
+            list.innerHTML = '<div class="p-4 text-center text-gray-400">טוען נתונים...</div>';
+            
+            const snap = await getDocs(collection(db, "products"));
+            allProducts = [];
+            snap.forEach(doc => allProducts.push({id: doc.id, ...doc.data()}));
+            
+            renderList();
+        }
+
+        window.renderList = () => {
+            const term = document.getElementById('searchList').value.toLowerCase();
+            const list = document.getElementById('inventoryList');
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(term));
+            
+            list.innerHTML = filtered.map(p => `
+                <div class="product-item" onclick="loadProduct('${p.id}')">
+                    <img src="${p.image || 'https://placehold.co/100'}" class="product-thumb">
+                    <div class="flex-1 min-w-0">
+                        <div class="font-bold text-sm truncate text-gray-800">${p.name}</div>
+                        <div class="text-xs text-gray-500">${p.brand || '-'} | ${getCatName(p.category)}</div>
+                    </div>
+                    <button onclick="deleteProduct('${p.id}', event)" class="text-gray-400 hover:text-red-500"><i data-lucide="trash-2" size="14"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function getCatName(id) {
+            const c = categories.find(x => x.id === id);
+            return c ? c.name : 'כללי';
+        }
+
+        // --- 3. Editor Logic ---
+        window.createNew = () => {
+            document.getElementById('editModeId').value = "";
+            document.querySelectorAll('input, textarea, select').forEach(i => i.value = "");
+            document.getElementById('editStatus').innerText = "מצב: מוצר חדש";
+            imagesList = [];
+            renderImages();
+            selectCategory(''); // clear cat
+        }
+
+        window.loadProduct = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            if(!p) return;
+
+            document.getElementById('editModeId').value = id;
+            document.getElementById('editStatus').innerText = "עורך: " + p.name;
+            
+            // Populate Fields
+            const set = (eid, val) => document.getElementById(eid).value = val || "";
+            set('pName', p.name);
+            set('pBrand', p.brand);
+            set('pBrandLogo', p.brandLogo);
+            set('pStatus', p.status || 'standard');
+            set('pMarketing', p.marketingDesc);
+            set('pCoverage', p.tech?.coverage || p.coverage);
+            set('pDrying', p.tech?.drying || p.drying);
+            set('pThickness', p.tech?.thickness || p.thickness);
+            set('pVideoUrl', p.video);
+            set('pPdfUrl', p.pdfUrl);
+            
+            // Category
+            selectCategory(p.category || '');
+
+            // Images
+            imagesList = (p.images && p.images.length > 0) ? p.images : (p.image ? [p.image] : []);
+            renderImages();
+        }
+
+        // --- 4. Image Management ---
+        window.renderImages = () => {
+            const container = document.getElementById('imageContainer');
+            
+            let html = imagesList.map((url, idx) => `
+                <div class="img-slot">
+                    <img src="${url}">
+                    <button class="delete-img" onclick="removeImage(${idx})"><i data-lucide="x" size="12"></i></button>
+                </div>
+            `).join('');
+
+            // Add "New" slot
+            html += `<div class="img-slot border-dashed" onclick="addUrlInput()">
+                        <i data-lucide="plus" class="text-gray-400"></i>
+                     </div>`;
+            
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        window.addUrlInput = () => {
+            const url = prompt("הדבק כתובת תמונה (URL):");
+            if(url) {
+                imagesList.push(url);
+                renderImages();
+            }
+        }
+
+        window.removeImage = (idx) => {
+            imagesList.splice(idx, 1);
+            renderImages();
+        }
+
+        // --- 5. AI Magic ---
+        window.runFullAI = async () => {
+            const name = document.getElementById('pName').value;
+            if(!name) return alert("הקלד שם מוצר תחילה");
+            
+            const btn = event.target; 
+            const prevText = btn.innerHTML;
+            btn.innerHTML = `⏳ עובד...`;
+
+            try {
+                const data = await askGeminiAdmin(name);
+                if(data) {
+                    const fill = (id, val) => { if(!document.getElementById(id).value && val) document.getElementById(id).value = val; };
+                    fill('pBrand', data.brand);
+                    fill('pMarketing', data.marketingDesc);
+                    fill('pCoverage', data.tech?.coverage);
+                    fill('pDrying', data.tech?.drying);
+                    fill('pThickness', data.tech?.thickness);
+                    // Smart Category Match
+                    if(data.shortDesc) {
+                        const txt = data.shortDesc + data.name;
+                        if(txt.includes('איטום')) selectCategory('sealing');
+                        else if(txt.includes('דבק')) selectCategory('glues');
+                        else if(txt.includes('טיח')) selectCategory('plaster');
+                    }
+                }
+            } catch(e) { console.error(e); }
+            btn.innerHTML = prevText;
+        }
+
+        window.fillField = async (fieldId) => {
+            const name = document.getElementById('pName').value;
+            if(!name) return alert("הכנס שם מוצר");
+            
+            // Visual feedback
+            const icon = event.target;
+            icon.classList.add('text-blue-500', 'animate-spin');
+            
+            const data = await askGeminiAdmin(name);
+            if(data) {
+                const map = {'pBrand': data.brand, 'pMarketing': data.marketingDesc, 'pCoverage': data.tech?.coverage, 'pDrying': data.tech?.drying, 'pThickness': data.tech?.thickness};
+                if(map[fieldId]) document.getElementById(fieldId).value = map[fieldId];
+            }
+            icon.classList.remove('text-blue-500', 'animate-spin');
+        }
+
+        // --- 6. Save & Delete ---
+        window.saveProduct = async () => {
+            const id = document.getElementById('editModeId').value;
+            const data = {
+                name: document.getElementById('pName').value,
+                brand: document.getElementById('pBrand').value,
+                category: document.getElementById('pCategory').value,
+                brandLogo: document.getElementById('pBrandLogo').value,
+                marketingDesc: document.getElementById('pMarketing').value,
+                status: document.getElementById('pStatus').value,
+                // Tech
+                coverage: document.getElementById('pCoverage').value,
+                drying: document.getElementById('pDrying').value,
+                thickness: document.getElementById('pThickness').value,
+                tech: { 
+                    coverage: document.getElementById('pCoverage').value,
+                    drying: document.getElementById('pDrying').value,
+                    thickness: document.getElementById('pThickness').value
+                },
+                // Media
+                image: imagesList[0] || "",
+                images: imagesList,
+                video: document.getElementById('pVideoUrl').value,
+                pdfUrl: document.getElementById('pPdfUrl').value,
+                updatedAt: new Date()
+            };
+
+            if(id) {
+                await updateDoc(doc(db, "products", id), data);
+            } else {
+                data.createdAt = new Date();
+                await addDoc(collection(db, "products"), data);
+            }
+            
+            alert("נשמר בהצלחה!");
+            loadInventory();
+            createNew(); // Reset form
+        }
+
+        window.deleteProduct = async (id, e) => {
+            e.stopPropagation();
+            if(confirm("למחוק לצמיתות?")) {
+                await deleteDoc(doc(db, "products", id));
+                loadInventory();
+                createNew();
+            }
+        }
+
+        // --- Bulk Import ---
+        window.handleBulkUpload = async (input) => {
+             const file = input.files[0]; if (!file) return;
+             const reader = new FileReader();
+             reader.onload = async (e) => {
+                 const products = JSON.parse(e.target.result);
+                 if (!confirm(`לייבא ${products.length} מוצרים?`)) return;
+                 for (const p of products) await addDoc(collection(db, "products"), {...p, createdAt: new Date()});
+                 loadInventory();
+             };
+             reader.readAsText(file);
+        }
+
+        // Init
+        loadInventory();
+
+    </script>
+</body>
+</html>
