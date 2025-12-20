@@ -1,11 +1,11 @@
-// js/gemini-service.js
+// public/js/gemini-service.js
 
 const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug"; // 🔴 הכנס כאן את המפתח שלך
 
 export async function askGeminiAdmin(productName) {
     const prompt = `
     You are a construction expert. I will give you a product name.
-    Your task: specific JSON data for this product (in Hebrew).
+    Your task: return JSON data for this product in Hebrew.
     Product: "${productName}"
     
     Return ONLY JSON with this structure:
@@ -32,13 +32,13 @@ export async function askGeminiAdmin(productName) {
         const data = await response.json();
         const text = data.candidates[0].content.parts[0].text;
         
-        // ניקוי הקוד שה-AI לפעמים מוסיף
+        // ניקוי הקוד שה-AI לפעמים מוסיף מסביב ל-JSON
         const jsonString = text.replace(/```json|```/g, '').trim();
         return JSON.parse(jsonString);
 
     } catch (error) {
         console.error("Gemini Error:", error);
-        alert("שגיאה בשליפת נתונים מה-AI");
+        alert("שגיאה בשליפת נתונים מה-AI. בדוק את מפתח ה-API.");
         return null;
     }
 }
