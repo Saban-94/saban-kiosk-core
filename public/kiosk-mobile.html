@@ -3,265 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sika Kiosk</title>
-    
+    <title>Sika Kiosk Experience</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#111111">
     <meta name="mobile-web-app-capable" content="yes">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
-    
     <style>
         body { font-family: 'Heebo', sans-serif; background: #f8fafc; padding-bottom: 90px; -webkit-tap-highlight-color: transparent; user-select: none; }
         .product-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: transform 0.1s; border: 1px solid #f1f5f9; }
         .product-card:active { transform: scale(0.98); }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(4px); }
-        .modal-overlay.open { opacity: 1; pointer-events: all; }
-        .modal-sheet { position: fixed; bottom: 0; left: 0; width: 100%; height: 90vh; background: white; border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 51; overflow-y: auto; display: flex; flex-direction: column; }
-        .modal-overlay.open .modal-sheet { transform: translateY(0); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* Lead Capture Style */
-        .lead-gradient { background: linear-gradient(135deg, #111 0%, #333 100%); }
+        /* Expert Search Animation */
+        .radar-scan { width: 200px; height: 200px; border-radius: 50%; border: 2px solid rgba(227, 0, 15, 0.3); position: relative; display: flex; align-items: center; justify-content: center; animation: pulse-ring 2s infinite; }
+        .radar-line { position: absolute; width: 100px; height: 2px; background: linear-gradient(90deg, transparent, #E3000F); top: 50%; left: 50%; transform-origin: 0 0; animation: radar-spin 2s linear infinite; }
+        .brand-icon { position: absolute; width: 40px; height: 40px; background: white; border-radius: 50%; padding: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); opacity: 0; transition: opacity 0.3s; }
+        
+        @keyframes radar-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(227, 0, 15, 0.4); } 70% { box-shadow: 0 0 0 30px rgba(227, 0, 15, 0); } 100% { box-shadow: 0 0 0 0 rgba(227, 0, 15, 0); } }
+        
+        /* Chat Bubbles */
+        .msg-bubble { max-width: 80%; padding: 12px; border-radius: 16px; font-size: 14px; margin-bottom: 8px; position: relative; }
+        .msg-user { background: #E3000F; color: white; align-self: flex-end; border-bottom-left-radius: 4px; }
+        .msg-expert { background: white; border: 1px solid #e2e8f0; color: #1e293b; align-self: flex-start; border-bottom-right-radius: 4px; }
+        
+        /* Product In-Chat Card */
+        .chat-product-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-top: 5px; width: 220px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     </style>
 </head>
 <body>
 
-    <header class="bg-[#111] text-white p-4 sticky top-0 z-30 shadow-lg">
-        <div class="flex justify-between items-center mb-3">
-            <div class="font-black text-xl italic tracking-wider text-[#FFC500]">Sika App</div>
-            <div class="bg-gray-800 rounded-full px-3 py-1 text-xs font-bold text-gray-300">סניף ראשי</div>
+    <header class="bg-[#111] text-white p-4 sticky top-0 z-30 shadow-lg flex justify-between items-center">
+        <div>
+            <div class="font-black text-xl italic tracking-wider text-[#FFC500]">Sika Kiosk</div>
+            <div class="text-[10px] text-gray-400">ח. סבן - סניף ראשי</div>
         </div>
-        <div class="relative">
-            <input id="searchInput" oninput="filterProducts()" type="text" placeholder="חיפוש מוצר..." class="w-full bg-gray-800 text-white p-3 rounded-xl pl-10 focus:outline-none focus:ring-2 focus:ring-[#E3000F] placeholder-gray-500">
-            <i data-lucide="search" class="absolute left-3 top-3.5 text-gray-400" size="18"></i>
-        </div>
+        <button onclick="startExpertSearch()" class="bg-gradient-to-r from-red-600 to-red-500 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg animate-pulse">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+            </span>
+            נציג אונליין
+        </button>
     </header>
 
     <div id="productGrid" class="grid grid-cols-2 gap-4 p-4 min-h-[50vh]">
         <div class="col-span-2 text-center text-gray-400 mt-10">טוען נתונים...</div>
     </div>
 
-    <div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-3 flex justify-around items-center z-40 pb-6">
-        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center text-[#E3000F]">
-            <i data-lucide="home" size="24"></i>
-            <span class="text-[10px] font-bold">בית</span>
-        </button>
-        <button onclick="openLeadCapture('general')" class="flex flex-col items-center text-gray-400 hover:text-black">
-            <div class="bg-black text-white p-3 rounded-full -mt-8 shadow-lg border-4 border-white">
-                <i data-lucide="phone-call" size="24"></i>
-            </div>
-            <span class="text-[10px] font-bold mt-1">מומחה</span>
-        </button>
-        <button class="flex flex-col items-center text-gray-400">
-            <i data-lucide="user" size="24"></i>
-            <span class="text-[10px] font-bold">אישי</span>
-        </button>
+    <div id="expertSearchModal" class="fixed inset-0 z-[60] bg-white hidden flex-col items-center justify-center text-center">
+        <h2 class="text-2xl font-black text-gray-900 mb-2">מחפש מומחה זמין...</h2>
+        <p class="text-gray-500 mb-10 text-sm">סורק מותגים רלוונטיים לשאלתך</p>
+        
+        <div class="radar-scan mb-10">
+            <div class="radar-line"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Sika_AG_logo.svg/1200px-Sika_AG_logo.svg.png" class="brand-icon" style="top: 10px; left: 80px;" id="brand1">
+            <img src="https://www.thermokir.co.il/wp-content/uploads/2019/06/logo.png" class="brand-icon" style="top: 100px; right: 10px;" id="brand2">
+            <img src="https://karmit-mrfix.com/wp-content/uploads/2020/07/logo.png" class="brand-icon" style="bottom: 20px; left: 40px;" id="brand3">
+        </div>
+        
+        <div id="searchStatus" class="text-[#E3000F] font-bold text-sm">מתחבר לשרתי Sika Global...</div>
     </div>
 
-    <div id="productModal" class="modal-overlay">
-        <div onclick="closeModal()" class="absolute inset-0"></div>
-        <div class="modal-sheet p-6">
-            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6 flex-shrink-0"></div>
+    <div id="expertFoundModal" class="fixed inset-0 z-[70] bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl relative">
+            <div class="h-24 bg-[#FACC15] relative">
+                <div class="absolute top-4 right-4 bg-black/20 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur">זמין כעת</div>
+            </div>
             
-            <div class="flex justify-between items-start mb-4 flex-shrink-0">
-                <div>
-                    <div class="text-xs font-bold text-gray-400 uppercase flex items-center gap-2 mb-1">
-                        <span id="mBrandText">SIKA</span>
-                        <img id="mBrandLogo" src="" class="h-5 object-contain hidden">
-                    </div>
-                    <h1 id="mName" class="text-2xl font-black leading-tight text-gray-800">שם המוצר</h1>
+            <div class="flex justify-center -mt-12 mb-3">
+                <div class="relative">
+                    <img src="https://media-mrs2-1.cdn.whatsapp.net/v/t61.24694-24/109923599_330637871666131_5578032134568575008_n.jpg?ccb=11-4&oh=01_Q5Aa3QFeo2xxQ2aPXt6aNIHGockxutUkt3uT90hABAOshFRruQ&oe=69536285&_nc_sid=5e03e0&_nc_cat=111" 
+                         class="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover bg-gray-200" 
+                         onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Sika_AG_logo.svg/1200px-Sika_AG_logo.svg.png" class="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full p-1 border shadow">
                 </div>
-                <button onclick="closeModal()" class="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition"><i data-lucide="x"></i></button>
             </div>
-
-            <div class="overflow-x-auto flex gap-3 mb-6 snap-x no-scrollbar flex-shrink-0" id="mGallery" style="min-height: 160px;"></div>
-
-            <div class="grid grid-cols-3 gap-3 mb-6 text-center flex-shrink-0">
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100"><i data-lucide="maximize" class="text-[#E3000F] mx-auto mb-1"></i><div id="mCov" class="font-bold text-xs text-gray-800">-</div><div class="text-[10px] text-gray-500">כיסוי</div></div>
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100"><i data-lucide="clock" class="text-[#E3000F] mx-auto mb-1"></i><div id="mDry" class="font-bold text-xs text-gray-800">-</div><div class="text-[10px] text-gray-500">ייבוש</div></div>
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100"><i data-lucide="layers" class="text-[#E3000F] mx-auto mb-1"></i><div id="mThick" class="font-bold text-xs text-gray-800">-</div><div class="text-[10px] text-gray-500">עובי</div></div>
-            </div>
-
-            <div class="bg-yellow-50/80 p-4 rounded-xl border border-yellow-100 text-sm mb-6 leading-relaxed text-gray-700 overflow-y-auto flex-1" id="mDesc"></div>
-
-            <div class="mt-auto space-y-3 pb-6 pt-2 flex-shrink-0 bg-white">
-                <button onclick="openLeadCapture('product')" class="flex items-center justify-center gap-2 w-full bg-black text-white font-bold py-4 rounded-xl shadow-lg hover:bg-gray-800 transition">
-                    <i data-lucide="phone-call" size="20"></i> התייעץ עם מומחה בכיר
-                </button>
-                <div class="flex gap-3">
-                    <a id="mVideoBtn" href="#" target="_blank" class="hidden flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-600 font-bold py-3 rounded-xl text-xs"><i data-lucide="play-circle" size="16"></i> סרטון</a>
-                    <a id="mPdfBtn" href="#" target="_blank" class="hidden flex-1 flex items-center justify-center gap-2 bg-blue-50 text-blue-600 font-bold py-3 rounded-xl text-xs"><i data-lucide="file-text" size="16"></i> מפרט</a>
+            
+            <div class="text-center px-6 pb-6">
+                <h3 class="text-2xl font-black text-gray-900">אלי כהן</h3>
+                <p class="text-[#E3000F] font-bold text-sm mb-4">מומחה בכיר - מחלקת איטום Sika</p>
+                
+                <div class="bg-gray-50 rounded-xl p-3 text-xs text-gray-600 mb-6 border border-gray-100">
+                    "היי, אני אלי. מצאתי עבורך את הפתרון המדויק. בוא נדבר."
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="openLiveChat()" class="bg-black text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-800">
+                        <i data-lucide="message-square"></i> צ'אט לייב
+                    </button>
+                    <a href="tel:+972544527513" class="bg-green-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-600">
+                        <i data-lucide="phone"></i> חייג לאלי
+                    </a>
+                </div>
+                <button onclick="toggleSchedule()" class="w-full mt-3 py-2 text-gray-400 text-xs font-bold underline">תיאום שיחה למועד אחר</button>
+                
+                <div id="scheduleForm" class="hidden mt-4 pt-4 border-t border-gray-100 text-right">
+                    <label class="text-xs font-bold text-gray-500 block mb-1">מתי להתקשר אליך?</label>
+                    <div class="flex gap-2 mb-2">
+                        <input type="date" id="callDate" class="w-full bg-gray-100 p-2 rounded-lg text-sm">
+                        <input type="time" id="callTime" class="w-full bg-gray-100 p-2 rounded-lg text-sm">
+                    </div>
+                    <button onclick="scheduleCall()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-bold">שריין שיחה עם אלי</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="leadModal" class="fixed inset-0 z-[70] bg-black/80 hidden flex items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl p-8 text-center relative overflow-hidden shadow-2xl">
-            <button onclick="document.getElementById('leadModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400"><i data-lucide="x"></i></button>
-            
-            <div class="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl border-4 border-gray-100">
-                <i data-lucide="crown" class="text-[#FFC500]" size="32"></i>
+    <div id="liveChatModal" class="fixed inset-0 z-[80] bg-gray-100 hidden flex flex-col">
+        <div class="bg-white p-4 shadow-sm flex justify-between items-center border-b border-gray-200">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <img src="https://media-mrs2-1.cdn.whatsapp.net/v/t61.24694-24/109923599_330637871666131_5578032134568575008_n.jpg?ccb=11-4&oh=01_Q5Aa3QFeo2xxQ2aPXt6aNIHGockxutUkt3uT90hABAOshFRruQ&oe=69536285&_nc_sid=5e03e0&_nc_cat=111" class="w-10 h-10 rounded-full object-cover">
+                    <div class="w-3 h-3 bg-green-500 border-2 border-white rounded-full absolute bottom-0 right-0"></div>
+                </div>
+                <div>
+                    <div class="font-bold text-gray-900 leading-none">אלי כהן</div>
+                    <div class="text-xs text-gray-500">מקליד...</div>
+                </div>
             </div>
-            
-            <h2 class="text-2xl font-black text-gray-900 mb-2">שיחת מומחה VIP</h2>
-            <p class="text-gray-500 text-sm mb-6">המומחה הבכיר שלנו זמין כרגע. השאר פרטים והוא ישלח לך הודעת וואטסאפ מיידית.</p>
-            
-            <div class="space-y-4">
-                <input id="leadName" type="text" placeholder="שמך המלא" class="w-full bg-gray-50 p-4 rounded-xl text-lg font-bold border border-gray-200 focus:border-black outline-none transition text-center">
-                <input id="leadPhone" type="tel" placeholder="מספר נייד (050...)" class="w-full bg-gray-50 p-4 rounded-xl text-lg font-bold border border-gray-200 focus:border-black outline-none transition text-center">
-                
-                <button onclick="submitLead()" id="submitLeadBtn" class="w-full bg-[#E3000F] text-white py-4 rounded-xl font-black text-xl shadow-lg hover:bg-red-600 transform active:scale-95 transition flex items-center justify-center gap-2">
-                    חבר אותי עכשיו <i data-lucide="arrow-left"></i>
-                </button>
+            <button onclick="document.getElementById('liveChatModal').classList.add('hidden')" class="bg-gray-100 p-2 rounded-full"><i data-lucide="x" class="text-gray-500"></i></button>
+        </div>
+
+        <div id="chatStream" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2 bg-[#efeae2]">
             </div>
-            
-            <div class="mt-4 text-[10px] text-gray-400">הפנייה תגיע ישירות לנייד של המומחה הבכיר</div>
+
+        <div class="p-3 bg-white flex gap-2 items-center">
+            <input id="chatInput" type="text" placeholder="כתוב הודעה לאלי..." class="flex-1 bg-gray-100 rounded-full px-4 py-3 text-sm focus:outline-none">
+            <button onclick="sendChatMessage()" class="bg-[#E3000F] text-white p-3 rounded-full shadow-lg"><i data-lucide="send" size="18"></i></button>
         </div>
     </div>
 
     <script type="module">
         import { db } from '../js/firebase-config.js';
-        import { collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        
+        import { collection, getDocs, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
         lucide.createIcons();
         let allProducts = [];
-        window.currentProductId = null;
-        let leadSource = '';
+        let chatId = null; // Will be created when chat starts
 
         // --- Init ---
         async function init() {
-            try {
-                const snap = await getDocs(collection(db, "products"));
-                allProducts = [];
-                snap.forEach(doc => allProducts.push({id: doc.id, ...doc.data()}));
-                renderProducts(allProducts);
-            } catch (e) {
-                console.error(e);
-                document.getElementById('productGrid').innerHTML = '<div class="col-span-2 text-center text-red-500 mt-10">שגיאה בטעינה</div>';
-            }
+            const snap = await getDocs(collection(db, "products"));
+            allProducts = [];
+            snap.forEach(doc => allProducts.push({id: doc.id, ...doc.data()}));
+            renderProducts(allProducts);
         }
 
         function renderProducts(list) {
             const container = document.getElementById('productGrid');
-            if(list.length === 0) { container.innerHTML = '<div class="col-span-2 text-center text-gray-400 mt-10">אין מוצרים</div>'; return; }
-
             container.innerHTML = list.map(p => `
-                <div onclick="openProduct('${p.id}')" class="product-card flex flex-col h-64 relative cursor-pointer group">
-                    ${p.status && p.status !== 'standard' ? `<div class="absolute top-2 left-2 bg-[#E3000F] text-white text-[10px] font-bold px-2 py-1 rounded shadow-md z-10">${p.status}</div>` : ''}
-                    <div class="h-36 p-4 flex items-center justify-center bg-gray-50">
-                        <img src="${p.image || 'https://placehold.co/150'}" class="max-h-full max-w-full object-contain mix-blend-multiply" onerror="this.src='https://placehold.co/150?text=Sika'">
+                <div class="product-card flex flex-col h-64 relative">
+                    <div class="h-36 p-4 flex items-center justify-center bg-gray-50"><img src="${p.image || 'https://placehold.co/150'}" class="max-h-full object-contain mix-blend-multiply"></div>
+                    <div class="p-3 bg-white">
+                        <div class="text-[10px] font-bold text-gray-400 uppercase">${p.brand || 'SIKA'}</div>
+                        <h3 class="font-bold text-sm leading-tight">${p.name}</h3>
                     </div>
-                    <div class="p-3 flex-1 flex flex-col justify-between bg-white">
-                        <div>
-                            <div class="text-[10px] font-bold text-gray-400 uppercase truncate mb-1">${p.brand || 'SIKA'}</div>
-                            <h3 class="font-bold text-sm leading-tight line-clamp-2 text-gray-800">${p.name}</h3>
+                </div>`).join('');
+        }
+
+        // --- 1. Search Animation ---
+        window.startExpertSearch = () => {
+            const modal = document.getElementById('expertSearchModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Animation Sequence
+            setTimeout(() => { document.getElementById('brand1').style.opacity = 1; }, 500);
+            setTimeout(() => { document.getElementById('brand2').style.opacity = 1; }, 1200);
+            setTimeout(() => { document.getElementById('brand3').style.opacity = 1; }, 1800);
+            setTimeout(() => {
+                document.getElementById('searchStatus').innerText = "נמצא מומחה מתאים!";
+                document.getElementById('searchStatus').classList.add('text-green-600');
+            }, 2500);
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.getElementById('expertFoundModal').classList.remove('hidden');
+            }, 3500);
+        }
+
+        // --- 2. Live Chat ---
+        window.openLiveChat = async () => {
+            document.getElementById('expertFoundModal').classList.add('hidden');
+            document.getElementById('liveChatModal').classList.remove('hidden');
+            
+            // יצירת מזהה שיחה ורישום ראשוני
+            chatId = 'chat_' + Date.now();
+            
+            // האזנה להודעות
+            listenToChat();
+            
+            // הודעת פתיחה מאלי
+            setTimeout(() => addMessage('expert', "היי, הגעת לאלי. במה אני יכול לעזור?"), 500);
+        }
+
+        window.sendChatMessage = async () => {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if(!text) return;
+            
+            addMessage('user', text);
+            input.value = '';
+            
+            // שמירה ב-Firebase כדי שהמומחה יראה באפליקציה שלו
+            await addDoc(collection(db, "chats"), {
+                chatId: chatId,
+                sender: 'client',
+                text: text,
+                type: 'text',
+                timestamp: new Date()
+            });
+        }
+
+        function addMessage(sender, content, type = 'text', productData = null) {
+            const container = document.getElementById('chatStream');
+            const div = document.createElement('div');
+            
+            if (type === 'product' && productData) {
+                // כרטיס מוצר ויזואלי בתוך הצ'אט
+                div.className = `msg-bubble msg-expert p-0 border-0 bg-transparent`;
+                div.innerHTML = `
+                    <div class="chat-product-card">
+                        <div class="h-32 bg-gray-50 flex items-center justify-center p-2"><img src="${productData.image}" class="h-full object-contain"></div>
+                        <div class="p-3">
+                            <div class="text-[10px] text-gray-400 font-bold uppercase">${productData.brand}</div>
+                            <div class="font-bold text-sm leading-tight mb-2">${productData.name}</div>
+                            <button class="w-full bg-[#E3000F] text-white text-xs font-bold py-2 rounded-lg">הוסף לעגלה</button>
                         </div>
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        window.filterProducts = () => {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allProducts.filter(p => (p.name && p.name.toLowerCase().includes(term)) || (p.brand && p.brand.toLowerCase().includes(term)));
-            renderProducts(filtered);
-        }
-
-        // --- Product Modal ---
-        window.openProduct = (id) => {
-            const p = allProducts.find(x => x.id === id);
-            if(!p) return;
-            window.currentProductId = id;
-
-            const safeText = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
-            safeText('mName', p.name);
-            safeText('mBrandText', p.brand || "SIKA");
-            safeText('mDesc', p.marketingDesc || "אין תיאור.");
-            safeText('mCov', p.tech?.coverage || p.coverage || "-");
-            safeText('mDry', p.tech?.drying || p.drying || "-");
-            safeText('mThick', p.tech?.thickness || p.thickness || "-");
-
-            const logoEl = document.getElementById('mBrandLogo');
-            if(logoEl && p.brandLogo) { logoEl.src = p.brandLogo; logoEl.classList.remove('hidden'); }
-            else if(logoEl) logoEl.classList.add('hidden');
-
-            const toggle = (bid, link) => {
-                const el = document.getElementById(bid);
-                if(el) { link && link.length > 5 ? (el.href=link, el.classList.remove('hidden')) : el.classList.add('hidden'); }
-            };
-            toggle('mVideoBtn', p.video);
-            toggle('mPdfBtn', p.pdfUrl);
-
-            const gallery = document.getElementById('mGallery');
-            if(gallery) {
-                let imgs = (p.images && p.images.length) ? p.images : [p.image || 'https://placehold.co/150'];
-                gallery.innerHTML = imgs.map(img => `<div class="min-w-[80%] snap-center h-48 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center p-2"><img src="${img}" class="max-h-full max-w-full object-contain mix-blend-multiply"></div>`).join('');
+                    </div>`;
+            } else {
+                // הודעת טקסט רגילה
+                div.className = `msg-bubble ${sender === 'user' ? 'msg-user' : 'msg-expert'}`;
+                div.innerText = content;
             }
-
-            document.getElementById('productModal').classList.add('open');
-            lucide.createIcons();
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
         }
 
-        window.closeModal = () => document.getElementById('productModal').classList.remove('open');
-
-        // --- Lead Capture System ---
-        window.openLeadCapture = (source) => {
-            leadSource = source; // 'product' or 'general'
-            document.getElementById('leadModal').classList.remove('hidden');
-        }
-
-        window.submitLead = async () => {
-            const name = document.getElementById('leadName').value;
-            const phone = document.getElementById('leadPhone').value;
-            const btn = document.getElementById('submitLeadBtn');
-            
-            if(!name || phone.length < 9) return alert("אנא מלא שם ומספר טלפון תקין");
-            
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> שולח...`;
-            lucide.createIcons();
-
-            try {
-                // מציאת שם המוצר אם אנחנו בתוך מוצר
-                let context = "פנייה כללית מהקיוסק";
-                if(leadSource === 'product' && window.currentProductId) {
-                    const p = allProducts.find(x => x.id === window.currentProductId);
-                    if(p) context = `מתעניין במוצר: ${p.name}`;
-                }
-
-                // שמירה ב-Firebase לטיפול המומחה
-                await addDoc(collection(db, "leads"), {
-                    name: name,
-                    phone: phone,
-                    query: context,
-                    source: "kiosk_app",
-                    status: "new",
-                    timestamp: new Date()
+        function listenToChat() {
+            const q = query(collection(db, "chats"), orderBy("timestamp", "asc")); // במציאות לסנן לפי chatId
+            onSnapshot(q, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const data = change.doc.data();
+                        // מציגים רק אם זה לא אני שלחתי (למנוע כפילות, או לסנן לפי sender)
+                        if (data.chatId === chatId && data.sender === 'expert') {
+                            addMessage('expert', data.text, data.type, data.productData);
+                        }
+                    }
                 });
+            });
+        }
 
-                // משוב ללקוח
-                document.getElementById('leadModal').innerHTML = `
-                    <div class="text-center p-8">
-                        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-                            <i data-lucide="check" size="32"></i>
-                        </div>
-                        <h2 class="text-2xl font-bold mb-2">הפנייה התקבלה!</h2>
-                        <p class="text-gray-500">המומחה קיבל את הפרטים שלך.<br>צפה להודעת וואטסאפ בדקות הקרובות.</p>
-                        <button onclick="document.getElementById('leadModal').classList.add('hidden'); location.reload();" class="mt-6 text-blue-600 font-bold">סגור</button>
-                    </div>
-                `;
-                lucide.createIcons();
-
-            } catch(e) {
-                console.error(e);
-                alert("תקלה בשליחה. אנא נסה שוב.");
-                btn.innerHTML = originalText;
-            }
+        // --- 3. Schedule ---
+        window.toggleSchedule = () => {
+            document.getElementById('scheduleForm').classList.remove('hidden');
+        }
+        
+        window.scheduleCall = async () => {
+            const date = document.getElementById('callDate').value;
+            const time = document.getElementById('callTime').value;
+            if(!date || !time) return alert("בחר תאריך ושעה");
+            
+            await addDoc(collection(db, "leads"), {
+                type: "call_request",
+                expert: "Eli",
+                scheduledFor: `${date} ${time}`,
+                timestamp: new Date()
+            });
+            alert("השיחה שוריינה! אלי יתקשר אליך.");
+            document.getElementById('expertFoundModal').classList.add('hidden');
         }
 
         init();
