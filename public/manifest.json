@@ -1,11 +1,11 @@
 {
-  "name": "Sika Expert Kiosk",
-  "short_name": "Sika Kiosk",
-  "start_url": "/index.html",
-  "display": "fullscreen",
-  "background_color": "#000000",
+  "name": "Sika Smart Kiosk",
+  "short_name": "Sika App",
+  "start_url": "/kiosk-mobile.html",
+  "display": "standalone",
+  "background_color": "#111111",
   "theme_color": "#E3000F",
-  "orientation": "landscape",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/1088/1088537.png",
