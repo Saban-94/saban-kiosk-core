@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sika OS</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --sika-yellow: #FFC500; --sika-red: #E3000F; --bg: #f8fafc; }
+        body { font-family: 'Heebo', sans-serif; background: var(--bg); color: #1e293b; overflow: hidden; user-select: none; }
+        
+        /* Product Modal Transition */
+        #product-modal { transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; opacity: 0; transform: scale(0.95); }
+        #product-modal.open { pointer-events: all; opacity: 1; transform: scale(1); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 0px; }
+        
+        /* Print Styles */
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <header class="bg-[#111] text-white p-4 flex justify-between items-center shadow-md z-20">
+        <div class="flex items-center gap-3">
+            <div class="bg-[#FFC500] text-black font-black px-3 py-1 text-xl -skew-x-12">Sika</div>
+            <div class="text-sm text-gray-400 border-r border-gray-600 pr-3 mr-2">ח.סבן</div>
+        </div>
+        <button onclick="window.location.href='index.html'" class="text-gray-400 hover:text-white"><i data-lucide="power"></i></button>
+    </header>
+
+    <main class="flex-1 relative overflow-hidden flex">
+        
+        <nav class="w-24 bg-white border-l border-gray-200 flex flex-col items-center py-6 gap-6 z-10 shadow-lg">
+            <button onclick="showSection('lobby')" class="p-3 rounded-xl bg-gray-100 text-blue-600 hover:bg-blue-50 transition"><i data-lucide="home" size="28"></i></button>
+            <button onclick="showSection('catalog')" class="p-3 rounded-xl hover:bg-gray-50 text-gray-600 transition"><i data-lucide="grid" size="28"></i></button>
+            <button onclick="showSection('calculator')" class="p-3 rounded-xl hover:bg-gray-50 text-gray-600 transition"><i data-lucide="calculator" size="28"></i></button>
+        </nav>
+
+        <div id="content-area" class="flex-1 bg-slate-50 p-8 overflow-y-auto relative">
+            
+            <div id="lobby" class="section">
+                <h1 class="text-4xl font-black mb-2">שלום, במה אפשר לעזור?</h1>
+                <p class="text-gray-500 mb-8">בחר אחת מהאפשרויות להתחלה</p>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div onclick="showSection('catalog')" class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl transition cursor-pointer border-2 border-transparent hover:border-[#FFC500] group">
+                        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition"><i data-lucide="search" size="32"></i></div>
+                        <h3 class="text-2xl font-bold">קטלוג מוצרים</h3>
+                        <p class="text-gray-500">חיפוש פתרונות איטום והדבקה</p>
+                    </div>
+                    
+                    <div onclick="showSection('calculator')" class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl transition cursor-pointer border-2 border-transparent hover:border-[#E3000F] group">
+                        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition"><i data-lucide="ruler" size="32"></i></div>
+                        <h3 class="text-2xl font-bold">מחשבון פרויקט</h3>
+                        <p class="text-gray-500">חישוב כמויות לשיפוץ מלא</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="catalog" class="section hidden">
+                <h2 class="text-3xl font-bold mb-6">המוצרים הנבחרים</h2>
+                <div class="grid grid-cols-3 gap-6" id="products-grid">
+                    </div>
+            </div>
+
+            <div id="calculator" class="section hidden">
+                <h2 class="text-3xl font-bold mb-6 text-green-600">מחשבון כמויות</h2>
+                <div class="bg-white p-6 rounded-2xl shadow-lg max-w-2xl">
+                    <label class="font-bold block mb-2">שטח הפרויקט (מ"ר)</label>
+                    <div class="flex gap-4 items-center mb-6">
+                        <button onclick="updateCalc(-1)" class="w-12 h-12 bg-gray-200 rounded font-bold text-xl">-</button>
+                        <span id="calc-val" class="text-3xl font-bold w-20 text-center">10</span>
+                        <button onclick="updateCalc(1)" class="w-12 h-12 bg-gray-200 rounded font-bold text-xl">+</button>
+                    </div>
+                    <div id="calc-results" class="space-y-2 mb-6"></div>
+                    <button onclick="printCalc()" class="w-full bg-black text-white py-3 rounded-lg font-bold flex justify-center gap-2"><i data-lucide="printer"></i> הדפס רשימה (כולל מחירים)</button>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <div id="product-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white w-[90%] h-[85%] rounded-3xl overflow-hidden flex shadow-2xl relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 z-20 bg-gray-100 p-2 rounded-full hover:bg-gray-200"><i data-lucide="x"></i></button>
+            
+            <div class="w-1/2 bg-gray-100 relative flex items-center justify-center p-10">
+                <img id="modal-img" src="" class="max-h-full max-w-full object-contain mix-blend-multiply">
+                <button id="modal-video-btn" class="absolute bottom-10 left-10 bg-white/90 px-6 py-3 rounded-full flex items-center gap-3 shadow-lg hover:scale-105 transition font-bold text-red-600 hidden">
+                    <i data-lucide="play-circle" size="24"></i> צפה בסרטון יישום
+                </button>
+            </div>
+
+            <div class="w-1/2 p-10 flex flex-col overflow-y-auto">
+                <div class="text-[#E3000F] font-bold tracking-widest text-sm mb-2">SIKA PRO SOLUTIONS</div>
+                <h2 id="modal-title" class="text-4xl font-black mb-2 leading-none"></h2>
+                <p id="modal-desc" class="text-xl text-gray-500 mb-6 font-light"></p>
+                
+                <div id="modal-specs" class="grid grid-cols-2 gap-4 mb-8"></div>
+
+                <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 mb-6">
+                    <h4 class="font-bold text-blue-800 mb-2 flex items-center gap-2"><i data-lucide="info"></i> מידע מורחב למיישם:</h4>
+                    <p id="modal-full-desc" class="text-sm text-blue-900 leading-relaxed"></p>
+                </div>
+
+                <div class="mt-auto grid grid-cols-2 gap-4">
+                    <button onclick="askExpert()" class="bg-gray-800 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-700">
+                        <i data-lucide="message-circle"></i> שאל את המומחה
+                    </button>
+                    <button onclick="printProduct()" class="bg-[#FFC500] text-black py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-yellow-400 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
+                        <i data-lucide="printer"></i> הדפס מפרט (לחשיפת מחיר)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="video-player-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 backdrop-blur-md hidden transition-opacity duration-500 opacity-0">
+        
+        <button onclick="closeVideo()" class="absolute top-6 right-6 z-20 text-white/50 hover:text-white hover:scale-110 transition p-4">
+            <i data-lucide="x" size="48"></i>
+        </button>
+
+        <div class="relative w-full max-w-6xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-gray-800 mx-4">
+            <iframe id="youtube-frame" 
+                    class="w-full h-full" 
+                    src="" 
+                    title="Sika Player" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+
+    <div id="ai-chat-overlay" class="absolute inset-0 bg-white z-40 hidden flex-col">
+        <div class="bg-black text-white p-4 flex justify-between items-center">
+            <span class="font-bold flex gap-2"><i data-lucide="bot"></i> Sika Expert AI</span>
+            <button onclick="closeChat()"><i data-lucide="x"></i></button>
+        </div>
+        <div class="flex-1 p-8 flex flex-col items-center justify-center bg-gray-50">
+            <h3 class="text-2xl font-bold mb-4">במה המומחה יכול לעזור עם <span id="chat-context-product" class="text-red-600"></span>?</h3>
+            <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-2xl border border-gray-200">
+                <div class="text-gray-400 mb-4">ה-AI מקליד תשובה...</div>
+                <div class="h-2 w-full bg-gray-100 rounded overflow-hidden"><div class="h-full bg-red-500 w-1/2 animate-pulse"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="print-area"></div>
+
+    <script src="data.js"></script>
+    <script type="module" src="logic.js"></script>
+</body>
+</html>
