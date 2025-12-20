@@ -1,16 +1,13 @@
 // public/js/gemini-service.js
 
-// 1. מפתח למוח (Gemini - טקסטים ומפרטים)
-const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug";
-
-// 2. מפתח לעיניים (Google Search - תמונות)
+const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug"; // וודא שזה המפתח הנכון שלך
 const SEARCH_API_KEY = "AIzaSyDn2bU0mnmNpj26UeBZYAirLnXf-FtPgCg"; 
 const SEARCH_ENGINE_ID = "635bc3eeee0194b16";
 
-/**
- * פונקציה 1: מביאה נתונים טקסטואליים מ-Gemini
- */
 export async function askGeminiAdmin(productName) {
+    // שינוי מודל ל-1.5-flash היציב יותר
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    
     const prompt = `
     You are a construction expert. I will give you a product name.
     Your task: return JSON data for this product in Hebrew.
@@ -31,11 +28,15 @@ export async function askGeminiAdmin(productName) {
     `;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
+        const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
+
+        if (!response.ok) {
+            throw new Error(`Gemini API Error: ${response.status} ${response.statusText}`);
+        }
 
         const data = await response.json();
         
@@ -48,26 +49,31 @@ export async function askGeminiAdmin(productName) {
         return JSON.parse(jsonString);
 
     } catch (error) {
-        console.error("Gemini Error:", error);
+        console.error("Gemini Critical Error:", error);
+        alert("שגיאה בתקשורת עם ה-AI. בדוק את הקונסול לפרטים.");
         return null;
     }
 }
 
-/**
- * פונקציה 2: מוצאת תמונה של המוצר מגוגל
- */
 export async function findProductImage(productName) {
     try {
-        // חיפוש תמונות (searchType=image)
-        const url = `https://www.googleapis.com/customsearch/v1?key=${SEARCH_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${productName}&searchType=image&num=1`;
+        // הוספנו פרמטרים לסינון בטוח
+        const url = `https://www.googleapis.com/customsearch/v1?key=${SEARCH_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(productName)}&searchType=image&num=1&safe=active`;
         
         const response = await fetch(url);
+        
+        if (response.status === 403) {
+            console.error("Google Search 403: בדוק הרשאות מפתח (Referrer) או שה-API לא מופעל.");
+            return null;
+        }
+
         const data = await response.json();
 
         if (data.items && data.items.length > 0) {
-            return data.items[0].link; // מחזיר את הלינק לתמונה הראשונה שנמצאה
+            return data.items[0].link;
         } else {
-            return null; // לא נמצאה תמונה
+            console.warn("No images found for:", productName);
+            return null;
         }
 
     } catch (error) {
