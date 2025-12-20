@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sika AI - Concept Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Heebo', sans-serif; background: #222; color: white; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        /* The Kiosk Frame */
+        .kiosk-frame { width: 1000px; height: 600px; background: white; border: 20px solid #111; border-radius: 30px; position: relative; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5); display: flex; }
+        
+        /* --- ROBOT DESIGNS (CSS ONLY) --- */
+        
+        /* 1. The Pro Builder (Yellow) */
+        .robot-builder { position: absolute; bottom: 20px; right: 20px; width: 120px; height: 140px; z-index: 50; transition: all 0.5s; cursor: pointer; }
+        .robot-builder .head { width: 60px; height: 50px; background: #e2e8f0; border-radius: 10px; border: 3px solid #333; margin: 0 auto; position: relative; z-index: 2; }
+        .robot-builder .eyes { display: flex; gap: 5px; position: absolute; top: 15px; left: 12px; }
+        .robot-builder .eye { width: 10px; height: 10px; background: #333; border-radius: 50%; animation: blink 3s infinite; }
+        .robot-builder .helmet { width: 70px; height: 25px; background: #E3000F; border-radius: 20px 20px 0 0; position: absolute; top: -15px; left: -5px; border: 3px solid #333; }
+        .robot-builder .body { width: 80px; height: 70px; background: #FFC500; border-radius: 15px; border: 3px solid #333; margin: -5px auto 0; position: relative; display: flex; align-items: center; justify-content: center; }
+        .robot-builder .logo { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid #E3000F; }
+        .robot-builder .arm { width: 20px; height: 50px; background: #333; border-radius: 10px; position: absolute; top: 10px; }
+        .robot-builder .arm.left { left: -15px; transform: rotate(20deg); animation: wave 2s infinite; }
+        .robot-builder .arm.right { right: -15px; transform: rotate(-20deg); }
+        
+        /* 2. The Flying Triangle (Red) */
+        .robot-triangle { position: absolute; bottom: 40px; right: 40px; width: 100px; height: 100px; z-index: 50; transition: all 0.5s; cursor: pointer; animation: float 3s infinite ease-in-out; }
+        .robot-triangle .body-shape { width: 0; height: 0; border-left: 50px solid transparent; border-right: 50px solid transparent; border-top: 90px solid #E3000F; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); position: relative; }
+        .robot-triangle .eye-glow { width: 30px; height: 10px; background: #FFC500; position: absolute; top: -60px; left: -15px; border-radius: 5px; box-shadow: 0 0 15px #FFC500; animation: scan 2s infinite alternate; }
+        
+        /* Animations */
+        @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+        @keyframes wave { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(40deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes scan { 0% { width: 10px; left: -5px; } 100% { width: 30px; left: -15px; } }
+        @keyframes popIn { 0% { transform: scale(0) translateY(50px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+
+        /* Speech Bubble */
+        .bubble { position: absolute; bottom: 140px; right: 80px; background: white; color: black; padding: 15px 25px; border-radius: 20px 20px 0 20px; font-weight: bold; font-size: 18px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); opacity: 0; transform: translateY(10px); transition: all 0.3s; z-index: 60; border: 2px solid #E3000F; width: 250px; }
+        .bubble.show { opacity: 1; transform: translateY(0); }
+        .bubble::after { content: ''; position: absolute; bottom: -10px; right: 0; border-width: 10px 10px 0; border-style: solid; border-color: #E3000F transparent; display: block; width: 0; }
+
+        /* Screensaver UI */
+        .screensaver { width: 100%; height: 100%; background: url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2831&auto=format&fit=crop') no-repeat center/cover; position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .screensaver::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+        .ss-content { position: relative; z-index: 20; color: white; }
+        .cta-btn { background: #E3000F; color: white; padding: 15px 40px; font-size: 24px; font-weight: 900; border-radius: 50px; margin-top: 20px; cursor: pointer; animation: pulseBtn 2s infinite; border: 4px solid white; }
+        @keyframes pulseBtn { 0% { transform: scale(1); } 50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(227, 0, 15, 0.6); } 100% { transform: scale(1); } }
+
+        /* Active UI (Mockup) */
+        .active-ui { width: 100%; height: 100%; background: #f8fafc; padding: 20px; display: none; }
+        .active-ui.show { display: block; }
+        
+        /* Control Panel */
+        .controls { margin-top: 20px; display: flex; gap: 20px; background: #333; padding: 15px; border-radius: 15px; }
+        .ctrl-btn { padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; border: 1px solid #555; background: #111; color: #ccc; }
+        .ctrl-btn:hover { background: #444; color: white; }
+        .ctrl-btn.active { background: #E3000F; color: white; border-color: #E3000F; }
+
+        /* Helper */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="text-center mb-4">
+        <h1 class="text-2xl font-black text-[#FFC500] mb-1">Sika AI - Robot Concepts</h1>
+        <p class="text-gray-400 text-sm">הדמיית דמויות וחוויית משתמש לקיוסק</p>
+    </div>
+
+    <div class="kiosk-frame" id="kioskScreen">
+        
+        <div class="screensaver" id="screensaverLayer" onclick="wakeUp()">
+            <div class="ss-content">
+                <h2 class="text-5xl font-black mb-4">בונים חכם עם ח. סבן</h2>
+                <p class="text-xl opacity-90 mb-8">כל הפתרונות של SIKA במקום אחד</p>
+                <button class="cta-btn">הקש להתחלה 👆</button>
+            </div>
+            
+            <div class="absolute top-4 left-4 bg-black/50 text-xs px-2 py-1 rounded text-gray-300">
+                Live Feed: MonitorsAnywhere TV
+            </div>
+        </div>
+
+        <div class="active-ui" id="appLayer">
+            <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm">
+                <div class="font-black text-2xl text-gray-800">קטלוג מוצרים</div>
+                <div class="bg-gray-100 p-2 rounded-full"><i data-lucide="search" class="text-gray-400"></i></div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-white h-40 rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div class="h-20 bg-gray-100 rounded mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
+                    <div class="h-4 bg-[#E3000F] rounded w-1/2"></div>
+                </div>
+                <div class="bg-white h-40 rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div class="h-20 bg-gray-100 rounded mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
+                    <div class="h-4 bg-[#E3000F] rounded w-1/2"></div>
+                </div>
+                <div class="bg-white h-40 rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div class="h-20 bg-gray-100 rounded mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
+                    <div class="h-4 bg-[#E3000F] rounded w-1/2"></div>
+                </div>
+            </div>
+            
+            <button onclick="resetDemo()" class="absolute top-4 right-4 bg-gray-200 p-2 rounded text-xs font-bold text-gray-600 hover:bg-gray-300">חזור למסך המתנה ↺</button>
+        </div>
+
+        <div id="robotBuilder" class="robot-builder hidden" onclick="robotInteract()">
+            <div class="helmet"></div>
+            <div class="head">
+                <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+            </div>
+            <div class="body">
+                <div class="logo"></div>
+                <div class="arm left"></div>
+                <div class="arm right"></div>
+            </div>
+        </div>
+
+        <div id="robotTriangle" class="robot-triangle hidden" onclick="robotInteract()">
+            <div class="eye-glow"></div>
+            <div class="body-shape"></div>
+        </div>
+
+        <div class="bubble" id="robotBubble">
+            אני Sika-Bot! 👋<br>
+            <span class="text-xs font-normal text-gray-500">לחץ עליי לייעוץ מומחה</span>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <div class="text-xs text-gray-500 font-bold uppercase mb-1 w-full block">בחר דמות:</div>
+        <button onclick="setRobot('builder')" class="ctrl-btn active" id="btnBuilder">👷 הבנאי החכם</button>
+        <button onclick="setRobot('triangle')" class="ctrl-btn" id="btnTriangle">🔻 המשולש המעופף</button>
+        <div class="w-px bg-gray-600 mx-2"></div>
+        <button onclick="triggerPopUp()" class="ctrl-btn bg-blue-900 border-blue-800 text-blue-100">💬 בדוק הודעה</button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let currentRobot = 'builder';
+        let bubbleTimer;
+
+        // Init
+        setRobot('builder');
+
+        function setRobot(type) {
+            currentRobot = type;
+            
+            // UI Toggle
+            document.getElementById('btnBuilder').className = `ctrl-btn ${type === 'builder' ? 'active' : ''}`;
+            document.getElementById('btnTriangle').className = `ctrl-btn ${type === 'triangle' ? 'active' : ''}`;
+            
+            // Show/Hide Elements
+            document.getElementById('robotBuilder').classList.add('hidden');
+            document.getElementById('robotTriangle').classList.add('hidden');
+            
+            if(type === 'builder') document.getElementById('robotBuilder').classList.remove('hidden');
+            else document.getElementById('robotTriangle').classList.remove('hidden');
+        }
+
+        function wakeUp() {
+            // Hide Screensaver
+            document.getElementById('screensaverLayer').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('screensaverLayer').classList.add('hidden');
+                document.getElementById('appLayer').classList.add('show');
+            }, 500);
+
+            // Robot Reaction
+            showBubble("היי! בוא נמצא את החומר המושלם לפרויקט שלך 🏗️");
+            
+            // Move Robot Animation (Mockup)
+            const robot = currentRobot === 'builder' ? document.getElementById('robotBuilder') : document.getElementById('robotTriangle');
+            robot.style.transform = "scale(1.2)";
+            setTimeout(() => robot.style.transform = "scale(1)", 300);
+        }
+
+        function resetDemo() {
+            document.getElementById('screensaverLayer').classList.remove('hidden');
+            setTimeout(() => document.getElementById('screensaverLayer').style.opacity = '1', 10);
+            document.getElementById('appLayer').classList.remove('show');
+            document.getElementById('robotBubble').classList.remove('show');
+            
+            // Screensaver message
+            setTimeout(() => showBubble("נתקעת? אני כאן, רק תלחץ על המסך! 👇"), 1000);
+        }
+
+        function triggerPopUp() {
+            const messages = [
+                "פספסת פריימר? חבל, בוא נתקן! 💡",
+                "רוצה שאחשב לך כמויות? 🧮",
+                "נתקעת? אלי המומחה זמין עכשיו! 📞",
+                "סיקה 107 זה מעולה, אבל ניקית את השטח? 🧹"
+            ];
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+            showBubble(randomMsg);
+        }
+
+        function showBubble(text) {
+            const b = document.getElementById('robotBubble');
+            b.innerHTML = text;
+            b.classList.add('show');
+            
+            clearTimeout(bubbleTimer);
+            bubbleTimer = setTimeout(() => {
+                b.classList.remove('show');
+            }, 5000);
+        }
+
+        function robotInteract() {
+            showBubble("אני לוקח אותך למומחה האנושי... 🚀");
+            // Here we would trigger the Radar Search
+        }
+
+        // Start with a message
+        setTimeout(() => showBubble("היי! אני סיקה-בוט. הקש על המסך להתחיל! 👇"), 1000);
+
+    </script>
+</body>
+</html>
