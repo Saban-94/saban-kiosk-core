@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Saban API Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-10 font-mono">
+
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-yellow-500">🛠️ כלי בדיקת מפתחות API</h1>
+        
+        <div class="bg-gray-800 p-6 rounded-xl mb-6 border border-gray-700">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">🧠 בדיקת Gemini AI</h2>
+            
+            <div class="grid gap-4">
+                <div>
+                    <label class="block text-sm text-gray-400">API Key:</label>
+                    <input type="text" id="geminiKey" class="w-full bg-black border border-gray-600 p-2 rounded text-green-400" 
+                           placeholder="AIzaSy..." value=""> 
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400">Model Version:</label>
+                    <select id="geminiModel" class="w-full bg-black border border-gray-600 p-2 rounded">
+                        <option value="gemini-1.5-flash">gemini-1.5-flash (הכי חדש ומהיר)</option>
+                        <option value="gemini-pro">gemini-pro (הישן)</option>
+                        <option value="gemini-1.0-pro">gemini-1.0-pro (יציב)</option>
+                        <option value="gemini-2.0-flash-exp">gemini-2.0-flash-exp (ניסיוני)</option>
+                    </select>
+                </div>
+                <button onclick="testGemini()" class="bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold">בדוק חיבור ל-Gemini</button>
+            </div>
+            <div id="geminiResult" class="mt-4 p-4 bg-black rounded text-xs overflow-auto h-32 whitespace-pre-wrap text-gray-500">ממתין לבדיקה...</div>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">🔍 בדיקת Google Search</h2>
+            
+            <div class="grid gap-4">
+                <div>
+                    <label class="block text-sm text-gray-400">API Key:</label>
+                    <input type="text" id="searchKey" class="w-full bg-black border border-gray-600 p-2 rounded text-green-400" 
+                           placeholder="AIzaSy..." value="">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400">Search Engine ID (CX):</label>
+                    <input type="text" id="searchCx" class="w-full bg-black border border-gray-600 p-2 rounded text-yellow-400" 
+                           placeholder="01234..." value="">
+                </div>
+                <button onclick="testSearch()" class="bg-green-600 hover:bg-green-500 py-2 rounded font-bold">בדוק חיבור לחיפוש תמונות</button>
+            </div>
+            <div id="searchResult" class="mt-4 p-4 bg-black rounded text-xs overflow-auto h-32 whitespace-pre-wrap text-gray-500">ממתין לבדיקה...</div>
+        </div>
+    </div>
+
+    <script>
+        // מילוי אוטומטי של המפתחות שלך מהלוג (לנוחות)
+        document.getElementById('geminiKey').value = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug";
+        document.getElementById('searchKey').value = "AIzaSyDn2bU0mnmNpj26UeBZYAirLnXf-FtPgCg";
+        document.getElementById('searchCx').value = "635bc3eeee0194b16";
+
+        async function testGemini() {
+            const key = document.getElementById('geminiKey').value;
+            const model = document.getElementById('geminiModel').value;
+            const resultBox = document.getElementById('geminiResult');
+            
+            resultBox.innerText = "בודק תקשורת...";
+            resultBox.className = "mt-4 p-4 bg-black rounded text-xs overflow-auto h-32 whitespace-pre-wrap text-yellow-500";
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "Hello, say OK." }] }] })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultBox.innerText = "✅ הצלחה!\n" + JSON.stringify(data, null, 2);
+                    resultBox.classList.replace("text-yellow-500", "text-green-400");
+                } else {
+                    resultBox.innerText = `❌ שגיאה ${response.status}:\n` + JSON.stringify(data, null, 2);
+                    resultBox.classList.replace("text-yellow-500", "text-red-400");
+                }
+            } catch (error) {
+                resultBox.innerText = "❌ שגיאת רשת:\n" + error.message;
+                resultBox.classList.replace("text-yellow-500", "text-red-400");
+            }
+        }
+
+        async function testSearch() {
+            const key = document.getElementById('searchKey').value;
+            const cx = document.getElementById('searchCx').value;
+            const resultBox = document.getElementById('searchResult');
+            
+            resultBox.innerText = "בודק הרשאות...";
+            resultBox.className = "mt-4 p-4 bg-black rounded text-xs overflow-auto h-32 whitespace-pre-wrap text-yellow-500";
+
+            // חיפוש פשוט
+            const url = `https://www.googleapis.com/customsearch/v1?key=${key}&cx=${cx}&q=test&searchType=image&num=1`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultBox.innerText = "✅ הצלחה! נמצאה תמונה.\n" + JSON.stringify(data.items?.[0]?.link || "No items", null, 2);
+                    resultBox.classList.replace("text-yellow-500", "text-green-400");
+                } else {
+                    resultBox.innerText = `❌ שגיאה ${response.status} (${response.statusText}):\n` + JSON.stringify(data.error, null, 2);
+                    resultBox.classList.replace("text-yellow-500", "text-red-400");
+                }
+            } catch (error) {
+                resultBox.innerText = "❌ שגיאת רשת:\n" + error.message;
+                resultBox.classList.replace("text-yellow-500", "text-red-400");
+            }
+        }
+    </script>
+</body>
+</html>
