@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Saban Admin | מנהל קטלוג חכם</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-100 p-10 font-sans">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-black text-white p-6 flex justify-between items-center">
+            <h1 class="text-2xl font-bold flex gap-2"><i data-lucide="bot"></i> מנהל הקטלוג (AI)</h1>
+            <div class="text-sm text-gray-400">מחובר ל-Firebase</div>
+        </div>
+
+        <div class="p-8">
+            <div class="flex gap-4 mb-8">
+                <input type="text" id="searchInput" placeholder="הקלד שם מוצר (למשל: סיקה טופ 107)" 
+                       class="flex-1 p-4 border-2 border-gray-200 rounded-xl text-xl focus:border-yellow-500 outline-none">
+                <button onclick="magicFill()" class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-8 rounded-xl flex items-center gap-2 transition">
+                    <i data-lucide="sparkles"></i> מלא אוטומטית
+                </button>
+            </div>
+
+            <hr class="mb-8">
+
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="block font-bold mb-1">שם מלא</label>
+                    <input type="text" id="pName" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">מותג</label>
+                    <input type="text" id="pBrand" class="w-full p-2 border rounded">
+                </div>
+                <div class="col-span-2">
+                    <label class="block font-bold mb-1">תיאור קצר</label>
+                    <input type="text" id="pShort" class="w-full p-2 border rounded">
+                </div>
+                <div class="col-span-2">
+                    <label class="block font-bold mb-1">תיאור מלא (טכני)</label>
+                    <textarea id="pFull" rows="4" class="w-full p-2 border rounded"></textarea>
+                </div>
+                
+                <div class="col-span-2 bg-gray-50 p-4 rounded-xl border">
+                    <h3 class="font-bold mb-2">מפרט טכני (JSON)</h3>
+                    <textarea id="pSpecs" rows="5" class="w-full p-2 border rounded font-mono text-sm"></textarea>
+                </div>
+
+                <div class="col-span-2">
+                    <label class="block font-bold mb-1">כתובת תמונה (URL)</label>
+                    <input type="text" id="pImage" class="w-full p-2 border rounded mb-2">
+                    <img id="previewImg" src="" class="h-20 object-contain border p-1 rounded hidden">
+                </div>
+            </div>
+
+            <button onclick="saveToFirebase()" class="w-full mt-8 bg-black text-white py-4 rounded-xl font-bold text-lg hover:bg-gray-800 flex justify-center gap-2">
+                <i data-lucide="save"></i> שמור למסד הנתונים
+            </button>
+            <div id="statusMsg" class="text-center mt-4 font-bold"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from '../../js/firebase-config.js'; // וודא שהנתיב נכון
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { askGeminiAdmin } from '../../js/gemini-service.js';
+
+        lucide.createIcons();
+        
+        window.magicFill = async () => {
+            const query = document.getElementById('searchInput').value;
+            if(!query) return alert("אנא כתוב שם מוצר");
+            
+            document.getElementById('statusMsg').innerText = "🤖 ה-AI חושב...";
+            
+            // 1. קריאה ל-Gemini
+            const data = await askGeminiAdmin(query);
+            
+            if(data) {
+                document.getElementById('pName').value = data.name;
+                document.getElementById('pShort').value = data.shortDesc;
+                document.getElementById('pFull').value = data.fullDesc;
+                document.getElementById('pBrand').value = data.brand;
+                document.getElementById('pSpecs').value = JSON.stringify(data.specs, null, 2);
+                
+                // הערה: תמונות מג'מיני הן לא תמיד מדויקות, עדיף להדביק ידנית או להשתמש ב-Google Custom Search API
+                document.getElementById('pImage').placeholder = "הדבק כאן לינק לתמונה..."; 
+                
+                document.getElementById('statusMsg').innerText = "✅ הנתונים מולאו! בדוק ושמור.";
+            }
+        };
+
+        window.saveToFirebase = async () => {
+            try {
+                const docData = {
+                    name: document.getElementById('pName').value,
+                    brand: document.getElementById('pBrand').value,
+                    shortDesc: document.getElementById('pShort').value,
+                    fullDesc: document.getElementById('pFull').value,
+                    image: document.getElementById('pImage').value || "https://via.placeholder.com/300",
+                    specs: JSON.parse(document.getElementById('pSpecs').value),
+                    price: 0 // מחיר מוסתר
+                };
+
+                await addDoc(collection(db, "products"), docData);
+                document.getElementById('statusMsg').innerHTML = `<span class="text-green-600">המוצר נשמר בהצלחה!</span>`;
+                
+                // איפוס
+                setTimeout(() => location.reload(), 2000);
+            } catch (e) {
+                console.error(e);
+                alert("שגיאה בשמירה: " + e.message);
+            }
+        };
+    </script>
+</body>
+</html>
