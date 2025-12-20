@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saban Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Heebo', sans-serif; background: #1e1e1e; color: white; height: 100vh; overflow: hidden; }
+        .control-panel { width: 350px; background: #2d2d2d; border-left: 1px solid #444; padding: 20px; overflow-y: auto; height: 100%; }
+        .preview-area { flex: 1; background: #111; display: flex; align-items: center; justify-content: center; position: relative; }
+        .device-frame { width: 100%; height: 100%; border: 0; background: white; }
+        .input-group { margin-bottom: 20px; background: #333; padding: 15px; border-radius: 10px; }
+        .color-picker { width: 100%; height: 40px; border: none; cursor: pointer; border-radius: 5px; }
+        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #ccc; }
+        input[type="text"] { width: 100%; background: #222; border: 1px solid #555; color: white; padding: 8px; border-radius: 5px; }
+    </style>
+</head>
+<body class="flex">
+
+    <aside class="control-panel">
+        <div class="flex items-center gap-2 mb-6 text-[#E3000F]">
+            <i data-lucide="palette" size="24"></i>
+            <h1 class="text-2xl font-black">Saban Studio</h1>
+        </div>
+
+        <div class="input-group border-l-4 border-blue-500">
+            <h3 class="font-bold mb-3 flex items-center gap-2"><i data-lucide="monitor"></i> מסכי המתנה (MonitorsAnywhere)</h3>
+            <label>כתובת הנגן (Player URL)</label>
+            <input type="text" id="screensaverUrl" placeholder="https://online.monitorsanywhere.com/..." oninput="updateConfig()">
+            <label class="mt-2">זמן המתנה (שניות)</label>
+            <input type="number" id="idleTime" value="60" class="w-full bg-[#222] border border-[#555] p-2 rounded text-white" oninput="updateConfig()">
+        </div>
+
+        <div class="input-group">
+            <h3 class="font-bold mb-3">צבעי מותג ראשי</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label>צבע ראשי</label>
+                    <input type="color" id="colPrimary" class="color-picker" value="#111111" oninput="updatePreview()">
+                </div>
+                <div>
+                    <label>צבע דגש (Accent)</label>
+                    <input type="color" id="colAccent" class="color-picker" value="#2563eb" oninput="updatePreview()">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <h3 class="font-bold mb-3">כרטיס מוצר</h3>
+            <label class="flex items-center gap-2 cursor-pointer mb-2">
+                <input type="checkbox" id="showBadge" checked onchange="updateConfig()"> הצג ריבונים (מבצע/חדש)
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="showTech" checked onchange="updateConfig()"> הצג אייקונים טכניים בחוץ
+            </label>
+        </div>
+
+        <div class="input-group">
+            <h3 class="font-bold mb-3">מיתוג לוגואים</h3>
+            <label>לוגו ראשי (URL)</label>
+            <input type="text" id="mainLogo" value="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR1_PVzqyK74L9l5eC5grCsPGCsTinQnmHvw&s" oninput="updateConfig()">
+        </div>
+
+        <button onclick="saveConfig()" class="w-full bg-[#E3000F] text-white py-3 rounded-xl font-bold text-lg hover:bg-red-600 transition shadow-lg mt-4">
+            שמור והחל על הקיוסק
+        </button>
+    </aside>
+
+    <main class="preview-area">
+        <iframe id="kioskFrame" src="../kiosk-pro.html" class="device-frame"></iframe>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Load existing config simulation
+        let config = {
+            screensaverUrl: "",
+            idleTime: 60,
+            colors: { primary: "#111111", accent: "#2563eb" },
+            ui: { showBadge: true, showTech: true },
+            logo: ""
+        };
+
+        function updatePreview() {
+            const frame = document.getElementById('kioskFrame');
+            const primary = document.getElementById('colPrimary').value;
+            const accent = document.getElementById('colAccent').value;
+            
+            // Inject CSS into iframe
+            frame.contentWindow.document.documentElement.style.setProperty('--brand-primary', primary);
+            frame.contentWindow.document.documentElement.style.setProperty('--brand-accent', accent);
+        }
+
+        function updateConfig() {
+            config.screensaverUrl = document.getElementById('screensaverUrl').value;
+            config.idleTime = document.getElementById('idleTime').value;
+            config.colors.primary = document.getElementById('colPrimary').value;
+            config.colors.accent = document.getElementById('colAccent').value;
+            config.ui.showBadge = document.getElementById('showBadge').checked;
+            config.ui.showTech = document.getElementById('showTech').checked;
+            config.logo = document.getElementById('mainLogo').value;
+            
+            updatePreview();
+        }
+
+        async function saveConfig() {
+            // In a real app, this would save to Firebase "settings" collection
+            // For now, we simulate by saving to localStorage which the Kiosk reads
+            localStorage.setItem('saban_kiosk_config', JSON.stringify(config));
+            
+            const btn = document.querySelector('button');
+            btn.innerText = "נשמר בהצלחה! 🚀";
+            setTimeout(() => { 
+                btn.innerText = "שמור והחל על הקיוסק"; 
+                document.getElementById('kioskFrame').contentWindow.location.reload();
+            }, 1000);
+        }
+        
+        // Initial load simulation
+        const saved = JSON.parse(localStorage.getItem('saban_kiosk_config'));
+        if(saved) {
+            document.getElementById('screensaverUrl').value = saved.screensaverUrl || "";
+            document.getElementById('colPrimary').value = saved.colors?.primary || "#111111";
+            document.getElementById('colAccent').value = saved.colors?.accent || "#2563eb";
+        }
+    </script>
+</body>
+</html>
