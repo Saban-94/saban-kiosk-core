@@ -3,228 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sika AI - Concept Demo</title>
+    <title>Saban Pro Store - Sika AI</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Heebo', sans-serif; background: #222; color: white; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
-        /* The Kiosk Frame */
-        .kiosk-frame { width: 1000px; height: 600px; background: white; border: 20px solid #111; border-radius: 30px; position: relative; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5); display: flex; }
-        
-        /* --- ROBOT DESIGNS (CSS ONLY) --- */
-        
-        /* 1. The Pro Builder (Yellow) */
-        .robot-builder { position: absolute; bottom: 20px; right: 20px; width: 120px; height: 140px; z-index: 50; transition: all 0.5s; cursor: pointer; }
-        .robot-builder .head { width: 60px; height: 50px; background: #e2e8f0; border-radius: 10px; border: 3px solid #333; margin: 0 auto; position: relative; z-index: 2; }
-        .robot-builder .eyes { display: flex; gap: 5px; position: absolute; top: 15px; left: 12px; }
-        .robot-builder .eye { width: 10px; height: 10px; background: #333; border-radius: 50%; animation: blink 3s infinite; }
-        .robot-builder .helmet { width: 70px; height: 25px; background: #E3000F; border-radius: 20px 20px 0 0; position: absolute; top: -15px; left: -5px; border: 3px solid #333; }
-        .robot-builder .body { width: 80px; height: 70px; background: #FFC500; border-radius: 15px; border: 3px solid #333; margin: -5px auto 0; position: relative; display: flex; align-items: center; justify-content: center; }
-        .robot-builder .logo { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid #E3000F; }
-        .robot-builder .arm { width: 20px; height: 50px; background: #333; border-radius: 10px; position: absolute; top: 10px; }
-        .robot-builder .arm.left { left: -15px; transform: rotate(20deg); animation: wave 2s infinite; }
-        .robot-builder .arm.right { right: -15px; transform: rotate(-20deg); }
-        
-        /* 2. The Flying Triangle (Red) */
-        .robot-triangle { position: absolute; bottom: 40px; right: 40px; width: 100px; height: 100px; z-index: 50; transition: all 0.5s; cursor: pointer; animation: float 3s infinite ease-in-out; }
-        .robot-triangle .body-shape { width: 0; height: 0; border-left: 50px solid transparent; border-right: 50px solid transparent; border-top: 90px solid #E3000F; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); position: relative; }
-        .robot-triangle .eye-glow { width: 30px; height: 10px; background: #FFC500; position: absolute; top: -60px; left: -15px; border-radius: 5px; box-shadow: 0 0 15px #FFC500; animation: scan 2s infinite alternate; }
-        
-        /* Animations */
-        @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
-        @keyframes wave { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(40deg); } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-        @keyframes scan { 0% { width: 10px; left: -5px; } 100% { width: 30px; left: -15px; } }
-        @keyframes popIn { 0% { transform: scale(0) translateY(50px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+        :root {
+            --brand-primary: #111111;
+            --brand-secondary: #ffffff;
+            --brand-accent: #2563eb;
+            --brand-bg: #f8fafc;
+            --brand-text: #1e293b;
+        }
 
-        /* Speech Bubble */
-        .bubble { position: absolute; bottom: 140px; right: 80px; background: white; color: black; padding: 15px 25px; border-radius: 20px 20px 0 20px; font-weight: bold; font-size: 18px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); opacity: 0; transform: translateY(10px); transition: all 0.3s; z-index: 60; border: 2px solid #E3000F; width: 250px; }
-        .bubble.show { opacity: 1; transform: translateY(0); }
-        .bubble::after { content: ''; position: absolute; bottom: -10px; right: 0; border-width: 10px 10px 0; border-style: solid; border-color: #E3000F transparent; display: block; width: 0; }
-
-        /* Screensaver UI */
-        .screensaver { width: 100%; height: 100%; background: url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2831&auto=format&fit=crop') no-repeat center/cover; position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .screensaver::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
-        .ss-content { position: relative; z-index: 20; color: white; }
-        .cta-btn { background: #E3000F; color: white; padding: 15px 40px; font-size: 24px; font-weight: 900; border-radius: 50px; margin-top: 20px; cursor: pointer; animation: pulseBtn 2s infinite; border: 4px solid white; }
-        @keyframes pulseBtn { 0% { transform: scale(1); } 50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(227, 0, 15, 0.6); } 100% { transform: scale(1); } }
-
-        /* Active UI (Mockup) */
-        .active-ui { width: 100%; height: 100%; background: #f8fafc; padding: 20px; display: none; }
-        .active-ui.show { display: block; }
+        /* Themes */
+        body.theme-sika { --brand-primary: #FFC500; --brand-secondary: #000000; --brand-accent: #E3000F; --brand-bg: #fffceb; --brand-text: #000000; }
         
-        /* Control Panel */
-        .controls { margin-top: 20px; display: flex; gap: 20px; background: #333; padding: 15px; border-radius: 15px; }
-        .ctrl-btn { padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; border: 1px solid #555; background: #111; color: #ccc; }
-        .ctrl-btn:hover { background: #444; color: white; }
-        .ctrl-btn.active { background: #E3000F; color: white; border-color: #E3000F; }
+        body { font-family: 'Heebo', sans-serif; background: var(--brand-bg); color: var(--brand-text); transition: background 0.5s; overflow: hidden; user-select: none; }
+        
+        /* Sidebar */
+        .sidebar { background: var(--brand-secondary); border-left: 1px solid rgba(0,0,0,0.05); z-index: 40; }
+        .sidebar-btn { padding: 20px; color: #94a3b8; border-radius: 16px; margin-bottom: 10px; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; width: 100%; cursor: pointer; }
+        .sidebar-btn.active { background: var(--brand-primary); color: var(--brand-secondary); box-shadow: 0 10px 20px rgba(0,0,0,0.1); transform: scale(1.05); }
+        body.theme-sika .sidebar-btn.active { color: black; }
 
-        /* Helper */
-        .hidden { display: none !important; }
+        /* SIKA BOT ANIMATIONS */
+        #sikaBotOverlay {
+            position: fixed; bottom: 0; right: 50px; width: 350px; height: auto;
+            z-index: 9999; pointer-events: none; transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+        }
+        
+        /* מצב שומר מסך - גדול ובמרכז */
+        #sikaBotOverlay.screensaver-mode {
+            bottom: 10%; right: 50%; transform: translateX(50%) scale(1.5);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* מצב עבודה - קטן בצד */
+        #sikaBotOverlay.active-mode {
+            bottom: 20px; right: 20px; transform: scale(0.6);
+            cursor: pointer; pointer-events: auto;
+        }
+        
+        /* בועת דיבור */
+        .bot-bubble {
+            position: absolute; top: -60px; right: 20px; background: white; padding: 15px 25px;
+            border-radius: 20px 20px 0 20px; font-weight: 900; font-size: 20px; color: #1e293b;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 3px solid #E3000F;
+            opacity: 0; transform: translateY(20px); transition: 0.4s; pointer-events: none; width: max-content;
+        }
+        .bot-bubble.show { opacity: 1; transform: translateY(0); }
+
+        @keyframes float { 0% { transform: translateX(50%) scale(1.5) translateY(0px); } 50% { transform: translateX(50%) scale(1.5) translateY(-20px); } 100% { transform: translateX(50%) scale(1.5) translateY(0px); } }
+
+        /* Product Cards */
+        .product-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); transition: transform 0.2s; border: 1px solid transparent; height: 380px; display: flex; flex-direction: column; }
+        .product-card:hover { transform: translateY(-8px); border-color: var(--brand-accent); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); }
+        
+        /* Screensaver (MonitorsAnywhere) */
+        #screensaverLayer { position: fixed; inset: 0; z-index: 5000; background: black; transition: opacity 0.5s; opacity: 0; pointer-events: none; }
+        #screensaverLayer.active { opacity: 1; pointer-events: auto; }
+        #maFrame { width: 100%; height: 100%; border: 0; opacity: 0.6; } /* קצת כהה כדי שהרובוט יבלוט */
+
+        /* General UI */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 6000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .modal-overlay.open { display: flex; animation: fadeIn 0.3s; }
+        .modal-content { background: white; width: 95%; max-width: 1400px; height: 90%; border-radius: 40px; overflow: hidden; display: flex; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5); }
+        
+        .hidden-tab { display: none; }
+        ::-webkit-scrollbar { width: 0px; }
     </style>
 </head>
-<body>
+<body class="flex h-screen w-screen" onload="initSystem()">
 
-    <div class="text-center mb-4">
-        <h1 class="text-2xl font-black text-[#FFC500] mb-1">Sika AI - Robot Concepts</h1>
-        <p class="text-gray-400 text-sm">הדמיית דמויות וחוויית משתמש לקיוסק</p>
+    <div id="screensaverLayer" onclick="wakeUp()">
+        <iframe id="maFrame" src=""></iframe> <div class="absolute bottom-1/4 left-1/2 -translate-x-1/2 text-center animate-pulse">
+            <h2 class="text-6xl font-black text-white drop-shadow-lg mb-4">בונים חכם?</h2>
+            <button class="bg-[#E3000F] text-white px-10 py-4 rounded-full text-2xl font-bold shadow-[0_0_50px_rgba(227,0,15,0.6)] border-4 border-white hover:scale-105 transition">
+                לחץ כאן להתייעצות 👆
+            </button>
+        </div>
     </div>
 
-    <div class="kiosk-frame" id="kioskScreen">
+    <div id="sikaBotOverlay" class="screensaver-mode" onclick="onBotClick()">
+        <img src="images/sika-bot.png" class="w-full h-full object-contain drop-shadow-2xl" alt="Sika Bot">
         
-        <div class="screensaver" id="screensaverLayer" onclick="wakeUp()">
-            <div class="ss-content">
-                <h2 class="text-5xl font-black mb-4">בונים חכם עם ח. סבן</h2>
-                <p class="text-xl opacity-90 mb-8">כל הפתרונות של SIKA במקום אחד</p>
-                <button class="cta-btn">הקש להתחלה 👆</button>
-            </div>
-            
-            <div class="absolute top-4 left-4 bg-black/50 text-xs px-2 py-1 rounded text-gray-300">
-                Live Feed: MonitorsAnywhere TV
-            </div>
+        <div class="bot-bubble" id="botBubble">
+            היי! אני סיקה-בוט 🤖<br>
+            <span class="text-sm font-normal text-gray-500">לחץ עליי לעזרה בכל רגע</span>
         </div>
-
-        <div class="active-ui" id="appLayer">
-            <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm">
-                <div class="font-black text-2xl text-gray-800">קטלוג מוצרים</div>
-                <div class="bg-gray-100 p-2 rounded-full"><i data-lucide="search" class="text-gray-400"></i></div>
-            </div>
-            
-            <div class="grid grid-cols-3 gap-4">
-                <div class="bg-white h-40 rounded-xl shadow-sm border border-gray-100 p-4">
-                    <div class="h-20 bg-gray-100 rounded mb-2"></div>
-                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
-                    <div class="h-4 bg-[#E3000F] rounded w-1/2"></div>
-                </div>
-                <div class="bg-white h-40 rounded-xl shadow-sm border border-gray-100 p-4">
-                    <div class="h-20 bg-gray-100 rounded mb-2"></div>
-                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
-                    <div class="h-4 bg-[#E3000F] rounded w-1/2"></div>
-                </div>
-                <div class="bg-white h-40 rounded-xl shadow-sm border border-gray-100 p-4">
-                    <div class="h-20 bg-gray-100 rounded mb-2"></div>
-                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
-                    <div class="h-4 bg-[#E3000F] rounded w-1/2"></div>
-                </div>
-            </div>
-            
-            <button onclick="resetDemo()" class="absolute top-4 right-4 bg-gray-200 p-2 rounded text-xs font-bold text-gray-600 hover:bg-gray-300">חזור למסך המתנה ↺</button>
-        </div>
-
-        <div id="robotBuilder" class="robot-builder hidden" onclick="robotInteract()">
-            <div class="helmet"></div>
-            <div class="head">
-                <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-            </div>
-            <div class="body">
-                <div class="logo"></div>
-                <div class="arm left"></div>
-                <div class="arm right"></div>
-            </div>
-        </div>
-
-        <div id="robotTriangle" class="robot-triangle hidden" onclick="robotInteract()">
-            <div class="eye-glow"></div>
-            <div class="body-shape"></div>
-        </div>
-
-        <div class="bubble" id="robotBubble">
-            אני Sika-Bot! 👋<br>
-            <span class="text-xs font-normal text-gray-500">לחץ עליי לייעוץ מומחה</span>
-        </div>
-
     </div>
 
-    <div class="controls">
-        <div class="text-xs text-gray-500 font-bold uppercase mb-1 w-full block">בחר דמות:</div>
-        <button onclick="setRobot('builder')" class="ctrl-btn active" id="btnBuilder">👷 הבנאי החכם</button>
-        <button onclick="setRobot('triangle')" class="ctrl-btn" id="btnTriangle">🔻 המשולש המעופף</button>
-        <div class="w-px bg-gray-600 mx-2"></div>
-        <button onclick="triggerPopUp()" class="ctrl-btn bg-blue-900 border-blue-800 text-blue-100">💬 בדוק הודעה</button>
+    <nav class="w-32 sidebar h-full flex flex-col items-center py-8 shadow-2xl">
+        <div class="mb-10 w-24 h-24 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Sika_AG_logo.svg/1200px-Sika_AG_logo.svg.png" class="w-full h-full object-contain">
+        </div>
+        <button onclick="switchTab('catalog')" id="btn-catalog" class="sidebar-btn active"><i data-lucide="layout-grid" size="32" class="mb-2"></i><span class="text-xs font-bold">חנות</span></button>
+        <button onclick="switchTab('calculator')" id="btn-calculator" class="sidebar-btn"><i data-lucide="calculator" size="32" class="mb-2"></i><span class="text-xs font-bold">מחשבון</span></button>
+    </nav>
+
+    <main class="flex-1 flex flex-col relative h-full overflow-hidden">
+        <header class="p-8 pb-4 flex justify-between items-center z-10 bg-[var(--brand-bg)]/90 backdrop-blur-md sticky top-0">
+            <div class="flex gap-4">
+                <div class="bg-white px-6 py-2 rounded-full font-black text-xl shadow-sm border border-gray-100 text-[#E3000F]">
+                    Sika Expert Center
+                </div>
+            </div>
+            <div class="relative w-[400px]">
+                <input id="searchInput" oninput="filterProducts()" type="text" placeholder="מה מחפשים היום?" class="w-full bg-white p-4 pr-12 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#E3000F] text-lg">
+                <i data-lucide="search" class="absolute right-4 top-4 text-gray-400" size="24"></i>
+            </div>
+        </header>
+
+        <div class="px-8 mb-4 flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+            <button onclick="filterCat('all')" class="bg-white border px-6 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-50 active">הכל</button>
+            <button onclick="filterCat('sealing')" class="bg-white border px-6 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-50">💧 איטום</button>
+            <button onclick="filterCat('glues')" class="bg-white border px-6 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-50">🧴 דבקים</button>
+            <button onclick="filterCat('flooring')" class="bg-white border px-6 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-50">🔲 ריצוף</button>
+        </div>
+
+        <div id="view-catalog" class="flex-1 overflow-y-auto px-8 pb-20">
+            <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+        </div>
+    </main>
+
+    <div id="productModal" class="modal-overlay">
+        <div class="modal-content relative">
+            <button onclick="closeModal()" class="absolute top-6 left-6 z-20 bg-gray-100 p-3 rounded-full hover:bg-gray-200"><i data-lucide="x" size="24"></i></button>
+            <div class="w-[40%] bg-gray-50 p-10 flex flex-col border-l border-gray-100">
+                <div class="flex-1 flex items-center justify-center"><img id="mImage" src="" class="max-h-[400px] max-w-full object-contain mix-blend-multiply hover:scale-105 transition"></div>
+            </div>
+            <div class="w-[60%] p-12 flex flex-col overflow-y-auto bg-white">
+                <h1 id="mName" class="text-5xl font-black mb-6 leading-tight text-gray-900">שם המוצר</h1>
+                <div class="bg-yellow-50 p-6 rounded-2xl border-r-4 border-[#E3000F] mb-8"><p id="mDesc" class="text-xl leading-relaxed font-medium"></p></div>
+                
+                <div class="mt-auto flex gap-4 pt-6 border-t border-gray-100">
+                    <button onclick="openSmartCalc()" class="flex-1 bg-white border-2 border-gray-200 text-gray-700 text-lg font-bold py-4 rounded-xl hover:border-[#E3000F]">חשב כמויות</button>
+                    <button onclick="triggerBotHelp()" class="flex-[2] bg-[#111] text-white text-lg font-bold py-4 rounded-xl shadow-xl flex items-center justify-center gap-2">
+                        <i data-lucide="bot"></i> שאל את Sika Bot
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script>
+    <div id="expertChatModal" class="fixed inset-0 z-[70] bg-black/60 hidden flex items-center justify-center backdrop-blur-md">
+        <div class="bg-white w-[600px] h-[500px] rounded-3xl shadow-2xl flex flex-col relative overflow-hidden border-4 border-[#FFC500]">
+            <div class="bg-[#111] p-4 text-white flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-[#FFC500] rounded-full flex items-center justify-center border-2 border-white">🤖</div>
+                    <span class="font-bold text-lg">Sika Bot AI</span>
+                </div>
+                <button onclick="document.getElementById('expertChatModal').classList.add('hidden')" class="hover:text-red-500"><i data-lucide="x"></i></button>
+            </div>
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50"></div>
+            <div class="p-4 bg-white border-t flex gap-2">
+                <input id="userChatInput" class="flex-1 border-2 border-gray-200 p-4 rounded-xl text-lg focus:border-[#E3000F] outline-none" placeholder="שאל אותי משהו...">
+                <button onclick="sendUserMessage()" class="bg-[#E3000F] text-white p-4 rounded-xl hover:bg-red-600 transition"><i data-lucide="send"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from './js/firebase-config.js';
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { askProductExpert } from './js/gemini-service.js';
+
         lucide.createIcons();
-        let currentRobot = 'builder';
-        let bubbleTimer;
+        let allProducts = [];
+        let idleTimer;
+        let screensaverUrl = "https://www.youtube.com/embed/zHj-zDvlhQA?autoplay=1&mute=1&controls=0&loop=1&playlist=zHj-zDvlhQA"; // ברירת מחדל
 
-        // Init
-        setRobot('builder');
+        // --- System Init ---
+        window.initSystem = async () => {
+            // הגדרת מיתוג סיקה כברירת מחדל
+            document.body.classList.add('theme-sika');
+            
+            // טעינת מוצרים
+            try {
+                const snap = await getDocs(collection(db, "products"));
+                allProducts = [];
+                snap.forEach(doc => allProducts.push({id: doc.id, ...doc.data()}));
+                renderGrid(allProducts);
+            } catch(e) { console.log("Demo Mode: No DB connection"); }
 
-        function setRobot(type) {
-            currentRobot = type;
-            
-            // UI Toggle
-            document.getElementById('btnBuilder').className = `ctrl-btn ${type === 'builder' ? 'active' : ''}`;
-            document.getElementById('btnTriangle').className = `ctrl-btn ${type === 'triangle' ? 'active' : ''}`;
-            
-            // Show/Hide Elements
-            document.getElementById('robotBuilder').classList.add('hidden');
-            document.getElementById('robotTriangle').classList.add('hidden');
-            
-            if(type === 'builder') document.getElementById('robotBuilder').classList.remove('hidden');
-            else document.getElementById('robotTriangle').classList.remove('hidden');
+            // הפעלת מנגנון שומר מסך
+            resetIdleTimer();
+            ['mousemove', 'touchstart', 'click'].forEach(evt => document.body.addEventListener(evt, resetIdleTimer));
         }
 
-        function wakeUp() {
-            // Hide Screensaver
-            document.getElementById('screensaverLayer').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('screensaverLayer').classList.add('hidden');
-                document.getElementById('appLayer').classList.add('show');
-            }, 500);
-
-            // Robot Reaction
-            showBubble("היי! בוא נמצא את החומר המושלם לפרויקט שלך 🏗️");
+        // --- Sika Bot & Screensaver Logic ---
+        function resetIdleTimer() {
+            clearTimeout(idleTimer);
             
-            // Move Robot Animation (Mockup)
-            const robot = currentRobot === 'builder' ? document.getElementById('robotBuilder') : document.getElementById('robotTriangle');
-            robot.style.transform = "scale(1.2)";
-            setTimeout(() => robot.style.transform = "scale(1)", 300);
+            // המשתמש פעיל: הסתר שומר מסך, הקטן רובוט
+            document.getElementById('screensaverLayer').classList.remove('active');
+            
+            const bot = document.getElementById('sikaBotOverlay');
+            if (bot.classList.contains('screensaver-mode')) {
+                bot.classList.remove('screensaver-mode');
+                bot.classList.add('active-mode');
+                showBubble("אני כאן למטה אם צריך! 👇");
+            }
+
+            // טיימר ל-60 שניות חוסר מעש
+            idleTimer = setTimeout(() => {
+                // המשתמש נרדם: הצג שומר מסך, הגדל רובוט
+                document.getElementById('maFrame').src = screensaverUrl; 
+                document.getElementById('screensaverLayer').classList.add('active');
+                
+                bot.classList.remove('active-mode');
+                bot.classList.add('screensaver-mode');
+                showBubble("היי! משפצים? בוא תלחץ עליי! 👋");
+                
+                // סגור מודלים פתוחים
+                document.getElementById('productModal').classList.remove('open');
+                document.getElementById('expertChatModal').classList.add('hidden');
+            }, 60000); 
         }
 
-        function resetDemo() {
-            document.getElementById('screensaverLayer').classList.remove('hidden');
-            setTimeout(() => document.getElementById('screensaverLayer').style.opacity = '1', 10);
-            document.getElementById('appLayer').classList.remove('show');
-            document.getElementById('robotBubble').classList.remove('show');
-            
-            // Screensaver message
-            setTimeout(() => showBubble("נתקעת? אני כאן, רק תלחץ על המסך! 👇"), 1000);
+        window.wakeUp = () => {
+            resetIdleTimer();
         }
 
-        function triggerPopUp() {
-            const messages = [
-                "פספסת פריימר? חבל, בוא נתקן! 💡",
-                "רוצה שאחשב לך כמויות? 🧮",
-                "נתקעת? אלי המומחה זמין עכשיו! 📞",
-                "סיקה 107 זה מעולה, אבל ניקית את השטח? 🧹"
-            ];
-            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-            showBubble(randomMsg);
+        window.onBotClick = () => {
+            const bot = document.getElementById('sikaBotOverlay');
+            if (bot.classList.contains('screensaver-mode')) {
+                wakeUp(); // אם בשומר מסך -> רק תעיר את המערכת
+            } else {
+                triggerBotHelp(); // אם במצב עבודה -> פתח צ'אט עזרה
+            }
+        }
+
+        window.triggerBotHelp = () => {
+            const msgs = document.getElementById('chatMessages');
+            msgs.innerHTML = `
+                <div class="flex gap-3 items-end">
+                    <div class="w-8 h-8 bg-[#FFC500] rounded-full flex items-center justify-center text-xs border border-black">🤖</div>
+                    <div class="bg-white border border-gray-200 p-4 rounded-2xl rounded-bl-none text-gray-800 shadow-sm">
+                        שלום! אני Sika Bot.<br>אני יודע הכל על איטום, דבקים ובטון.<br><b>איך אני יכול לעזור לך בפרויקט היום?</b>
+                    </div>
+                </div>
+            `;
+            document.getElementById('expertChatModal').classList.remove('hidden');
         }
 
         function showBubble(text) {
-            const b = document.getElementById('robotBubble');
-            b.innerHTML = text;
-            b.classList.add('show');
+            const bubble = document.getElementById('botBubble');
+            bubble.innerHTML = text;
+            bubble.classList.add('show');
+            setTimeout(() => bubble.classList.remove('show'), 4000);
+        }
+
+        // --- Catalog Logic ---
+        function renderGrid(list) {
+            const grid = document.getElementById('productGrid');
+            if(!grid) return;
+            grid.innerHTML = list.map(p => `
+                <div onclick="openProduct('${p.id}')" class="product-card group cursor-pointer">
+                    <div class="h-1/2 bg-gray-50 flex items-center justify-center p-4 relative">
+                        <img src="${p.image || 'https://placehold.co/300'}" class="max-h-full max-w-full object-contain mix-blend-multiply group-hover:scale-110 transition">
+                    </div>
+                    <div class="p-5 flex-1 bg-white">
+                        <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">${p.brand || 'SIKA'}</div>
+                        <h3 class="text-lg font-bold text-gray-900 leading-tight">${p.name}</h3>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.openProduct = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            if(!p) return;
+            document.getElementById('mName').innerText = p.name;
+            document.getElementById('mDesc').innerText = p.marketingDesc || "תיאור בטעינה...";
+            document.getElementById('mImage').src = p.image || 'https://placehold.co/600';
+            document.getElementById('productModal').classList.add('open');
+        }
+
+        window.closeModal = () => document.getElementById('productModal').classList.remove('open');
+
+        // --- Chat Logic ---
+        window.sendUserMessage = async () => {
+            const input = document.getElementById('userChatInput');
+            const text = input.value;
+            if(!text) return;
             
-            clearTimeout(bubbleTimer);
-            bubbleTimer = setTimeout(() => {
-                b.classList.remove('show');
-            }, 5000);
+            const msgs = document.getElementById('chatMessages');
+            msgs.innerHTML += `
+                <div class="flex gap-3 items-end justify-end">
+                    <div class="bg-[#111] text-white p-4 rounded-2xl rounded-br-none shadow-md">${text}</div>
+                </div>`;
+            
+            input.value = "";
+            
+            // Simulate AI delay
+            msgs.innerHTML += `<div class="text-xs text-gray-400 text-center mt-2">סיקה-בוט מקליד...</div>`;
+            
+            // Connect to real Gemini here
+            const response = await askProductExpert({name: "כללי"}, text, []); 
+            
+            msgs.lastElementChild.remove(); // Remove "typing"
+            msgs.innerHTML += `
+                <div class="flex gap-3 items-end">
+                    <div class="w-8 h-8 bg-[#FFC500] rounded-full flex items-center justify-center text-xs border border-black">🤖</div>
+                    <div class="bg-white border border-gray-200 p-4 rounded-2xl rounded-bl-none text-gray-800 shadow-sm">${response}</div>
+                </div>`;
+            msgs.scrollTop = msgs.scrollHeight;
         }
 
-        function robotInteract() {
-            showBubble("אני לוקח אותך למומחה האנושי... 🚀");
-            // Here we would trigger the Radar Search
+        window.filterProducts = () => {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            renderGrid(allProducts.filter(p => p.name.toLowerCase().includes(term)));
         }
-
-        // Start with a message
-        setTimeout(() => showBubble("היי! אני סיקה-בוט. הקש על המסך להתחיל! 👇"), 1000);
-
     </script>
 </body>
 </html>
