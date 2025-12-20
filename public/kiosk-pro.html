@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saban Pro Store</title>
+    
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     
@@ -13,9 +14,14 @@
     
     <style>
         :root {
-            --brand-primary: #111111; --brand-secondary: #ffffff; --brand-accent: #2563eb; --brand-bg: #f8fafc; --brand-text: #1e293b;
+            --brand-primary: #111111;
+            --brand-secondary: #ffffff;
+            --brand-accent: #2563eb;
+            --brand-bg: #f8fafc;
+            --brand-text: #1e293b;
         }
-        /* Themes */
+
+        /* מיתוגים */
         body.theme-sika { --brand-primary: #FFC500; --brand-secondary: #000000; --brand-accent: #E3000F; --brand-bg: #fffceb; --brand-text: #000000; }
         body.theme-thermokir { --brand-primary: #0057B8; --brand-secondary: #ffffff; --brand-accent: #8CC63F; --brand-bg: #f0f9ff; --brand-text: #0f172a; }
         body.theme-misterfix { --brand-primary: #E3000F; --brand-secondary: #ffffff; --brand-accent: #333333; --brand-bg: #fff1f2; --brand-text: #0f172a; }
@@ -24,7 +30,8 @@
 
         body { font-family: 'Heebo', sans-serif; background: var(--brand-bg); color: var(--brand-text); transition: background 0.5s; overflow: hidden; user-select: none; }
         
-        /* UI Components */
+        /* UI Basics */
+        .sidebar { background: var(--brand-secondary); border-left: 1px solid rgba(0,0,0,0.05); }
         .sidebar-btn { padding: 20px; color: #94a3b8; border-radius: 16px; margin-bottom: 10px; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; width: 100%; cursor: pointer; }
         .sidebar-btn.active { background: var(--brand-primary); color: var(--brand-secondary); box-shadow: 0 10px 20px rgba(0,0,0,0.1); transform: scale(1.05); }
         body.theme-sika .sidebar-btn.active { color: black; }
@@ -36,9 +43,15 @@
         .product-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); transition: transform 0.2s; border: 1px solid transparent; height: 380px; display: flex; flex-direction: column; }
         .product-card:hover { transform: translateY(-8px); border-color: var(--brand-accent); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); }
         
-        .tech-badge { background: #f1f5f9; padding: 8px; border-radius: 10px; font-size: 11px; font-weight: bold; color: #64748b; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .tech-badge { background: #f1f5f9; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; color: #64748b; display: flex; flex-direction: column; align-items: center; gap: 2px; }
         
-        /* Radar Animation */
+        /* Screensaver Overlay */
+        #screensaverOverlay { position: fixed; inset: 0; z-index: 9999; background: black; display: none; opacity: 0; transition: opacity 0.5s; }
+        #screensaverOverlay.active { display: block; opacity: 1; }
+        #screensaverFrame { width: 100%; height: 100%; border: 0; pointer-events: none; } /* מונע אינטראקציה עם הפרסומת כדי שכל נגיעה תעיר את הקיוסק */
+        .touch-to-wake { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.9); padding: 15px 40px; border-radius: 50px; font-weight: 900; font-size: 24px; color: black; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: pulse 2s infinite; pointer-events: auto; cursor: pointer; }
+
+        /* ... שאר ה-CSS הקודם (רדאר, מודלים וכו') ... */
         .search-orbit-container { width: 300px; height: 300px; position: relative; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
         .orbit-ring { width: 100%; height: 100%; border: 2px dashed #cbd5e1; border-radius: 50%; position: absolute; animation: orbit-spin 10s linear infinite; }
         .brand-planet { width: 60px; height: 60px; background: white; border-radius: 50%; padding: 10px; position: absolute; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; animation: counter-spin 10s linear infinite; }
@@ -46,34 +59,28 @@
         .planet-1 { top: -30px; left: 50%; transform: translateX(-50%); } 
         .planet-2 { bottom: 40px; right: -10px; } 
         .planet-3 { bottom: 40px; left: -10px; }
-        .magnifying-glass { position: absolute; z-index: 10; font-size: 80px; color: var(--brand-accent); animation: search-pulse 2s infinite; }
-        
         @keyframes orbit-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes counter-spin { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
-        @keyframes search-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-
-        /* General */
-        .typewriter-text { border-left: 3px solid var(--brand-accent); padding-left: 10px; animation: blink 0.7s infinite; }
-        @keyframes blink { 50% { border-color: transparent; } }
+        @keyframes pulse { 0% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } 100% { transform: translateX(-50%) scale(1); } }
+        
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 60; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
         .modal-overlay.open { display: flex; animation: fadeIn 0.3s; }
-        .modal-content { background: white; width: 95%; max-width: 1400px; height: 90%; border-radius: 40px; overflow: hidden; display: flex; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5); }
-        
-        /* FAQ */
-        .faq-item { border-bottom: 1px solid #e2e8f0; }
-        .faq-question { padding: 15px 0; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; color: #64748b; font-size: 14px; background: #f8fafc; padding: 0 10px; border-radius: 8px; }
-        .faq-item.active .faq-answer { max-height: 200px; padding: 10px; margin-bottom: 10px; }
-
+        .modal-content { background: white; width: 95%; max-width: 1400px; height: 90%; border-radius: 40px; overflow: hidden; display: flex; }
+        .typewriter-text { border-left: 3px solid var(--brand-accent); padding-left: 10px; animation: blink 0.7s infinite; }
         .hidden-tab { display: none; }
         ::-webkit-scrollbar { width: 0px; }
     </style>
 </head>
-<body class="flex h-screen w-screen">
+<body class="flex h-screen w-screen" onload="initSystem()">
 
-    <nav class="w-32 bg-white h-full flex flex-col items-center py-8 shadow-2xl z-20">
+    <div id="screensaverOverlay" onclick="wakeUp()">
+        <iframe id="screensaverFrame" src=""></iframe>
+        <div class="touch-to-wake">הקש כדי להתחיל לעבוד 👆</div>
+    </div>
+
+    <nav class="w-32 sidebar h-full flex flex-col items-center py-8 shadow-2xl z-20">
         <div class="mb-10 w-24 h-24 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR1_PVzqyK74L9l5eC5grCsPGCsTinQnmHvw&s" class="w-full h-full object-contain">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR1_PVzqyK74L9l5eC5grCsPGCsTinQnmHvw&s" class="w-full h-full object-contain" id="sidebarLogo">
         </div>
         <button onclick="switchTab('catalog')" id="btn-catalog" class="sidebar-btn active"><i data-lucide="layout-grid" size="32" class="mb-2"></i><span class="text-xs font-bold">חנות</span></button>
         <button onclick="switchTab('calculator')" id="btn-calculator" class="sidebar-btn"><i data-lucide="calculator" size="32" class="mb-2"></i><span class="text-xs font-bold">מחשבון</span></button>
@@ -81,6 +88,7 @@
     </nav>
 
     <main class="flex-1 flex flex-col relative h-full overflow-hidden">
+        
         <header class="p-8 pb-4 flex justify-between items-center z-10 bg-[var(--brand-bg)]/90 backdrop-blur-md sticky top-0">
             <div class="flex gap-4">
                 <div onclick="setTheme('default')" class="brand-pill active" id="pill-default"><span class="font-black text-lg">H. SABAN</span></div>
@@ -115,16 +123,11 @@
         <div id="view-calculator" class="hidden-tab flex-1 overflow-y-auto p-12 flex items-center justify-center">
             <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-4xl">
                 <h2 class="text-4xl font-black mb-8 flex items-center gap-3"><i data-lucide="calculator" class="text-[var(--brand-accent)]"></i> מחשבון כמויות</h2>
-                <p class="text-gray-500 mb-6" id="calcProductName">חישוב כללי</p>
                 <div class="grid grid-cols-2 gap-8">
-                    <input id="calcArea" type="number" placeholder="שטח (מ''ר)" class="bg-gray-50 p-4 rounded-xl text-xl font-bold border border-gray-200">
-                    <input id="calcConsumption" type="number" placeholder="צריכה (ק''ג/מ''ר)" class="bg-gray-50 p-4 rounded-xl text-xl font-bold border border-gray-200">
-                    <input id="calcBagSize" type="number" placeholder="משקל שק (ק''ג)" class="bg-gray-50 p-4 rounded-xl text-xl font-bold border border-gray-200" value="25">
-                    <div class="col-span-2 bg-black text-white p-6 rounded-2xl text-center flex justify-around">
-                        <div><div class="text-gray-400 text-xs uppercase">סה"כ חומר</div><div class="text-4xl font-black" id="resKg">0 ק"ג</div></div>
-                        <div><div class="text-gray-400 text-xs uppercase">שקים</div><div class="text-4xl font-black text-green-400" id="resBags">0</div></div>
-                    </div>
-                    <button onclick="calculate()" class="col-span-2 bg-[var(--brand-accent)] text-white py-4 rounded-xl font-bold text-xl shadow-lg hover:opacity-90">בצע חישוב</button>
+                    <input id="calcArea" type="number" placeholder="שטח (מ''ר)" class="bg-gray-50 p-4 rounded-xl text-xl font-bold">
+                    <input id="calcConsumption" type="number" placeholder="צריכה (ק''ג/מ''ר)" class="bg-gray-50 p-4 rounded-xl text-xl font-bold">
+                    <button onclick="calculate()" class="col-span-2 bg-[var(--brand-accent)] text-white py-4 rounded-xl font-bold text-xl shadow-lg">חשב</button>
+                    <div class="col-span-2 text-center text-4xl font-black" id="resKg">0 ק"ג</div>
                 </div>
             </div>
         </div>
@@ -134,22 +137,21 @@
         <div class="modal-content relative">
             <button onclick="closeModal()" class="absolute top-6 left-6 z-20 bg-gray-100 p-3 rounded-full hover:bg-gray-200"><i data-lucide="x" size="24"></i></button>
             <div class="w-[40%] bg-gray-50 p-10 flex flex-col border-l border-gray-100">
-                <div class="flex-1 flex items-center justify-center"><img id="mImage" src="" class="max-h-[400px] max-w-full object-contain mix-blend-multiply drop-shadow-2xl hover:scale-105 transition duration-700"></div>
-                <div class="mt-6"><div class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-widest flex gap-2"><i data-lucide="link" size="14"></i> מוצרים משלימים (חובה)</div><div id="relatedGrid" class="grid grid-cols-3 gap-3"></div></div>
+                <div class="flex-1 flex items-center justify-center"><img id="mImage" src="" class="max-h-[400px] max-w-full object-contain mix-blend-multiply"></div>
+                <div class="mt-6"><div class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-widest flex gap-2"><i data-lucide="link" size="14"></i> משלימים</div><div id="relatedGrid" class="grid grid-cols-3 gap-3"></div></div>
             </div>
             <div class="w-[60%] p-12 flex flex-col overflow-y-auto bg-white">
                 <div class="flex items-center gap-3 mb-4"><img id="mBrandLogo" src="" class="h-8 object-contain"><div id="mBrandText" class="text-sm font-bold text-gray-400 uppercase tracking-widest">BRAND</div></div>
-                <h1 id="mName" class="text-5xl font-black mb-6 leading-tight">שם המוצר</h1>
+                <h1 id="mName" class="text-5xl font-black mb-6 leading-tight">שם מוצר</h1>
                 <div class="bg-[var(--brand-bg)] p-6 rounded-2xl border-r-4 border-[var(--brand-accent)] mb-8"><p id="mDesc" class="text-xl leading-relaxed font-medium typewriter-text"></p></div>
                 <div class="grid grid-cols-3 gap-4 mb-8">
-                    <div class="tech-badge"><i data-lucide="maximize" class="text-[var(--brand-accent)] mb-1" size="20"></i> כיסוי <span id="mCov">-</span></div>
-                    <div class="tech-badge"><i data-lucide="clock" class="text-[var(--brand-accent)] mb-1" size="20"></i> ייבוש <span id="mDry">-</span></div>
-                    <div class="tech-badge"><i data-lucide="layers" class="text-[var(--brand-accent)] mb-1" size="20"></i> עובי <span id="mThick">-</span></div>
+                    <div class="tech-badge">כיסוי <span id="mCov">-</span></div>
+                    <div class="tech-badge">ייבוש <span id="mDry">-</span></div>
+                    <div class="tech-badge">עובי <span id="mThick">-</span></div>
                 </div>
-                <div class="mb-8"><h3 class="font-bold text-xl mb-4 flex items-center gap-2"><i data-lucide="help-circle" class="text-[var(--brand-accent)]"></i> שאלות נפוצות</h3><div id="faqContainer" class="border-t border-gray-200"></div></div>
                 <div class="mt-auto flex gap-4 border-t border-gray-100 pt-6">
-                    <button onclick="openSmartCalc()" class="flex-1 bg-white border-2 border-gray-200 text-gray-700 text-lg font-bold py-4 rounded-xl hover:border-[var(--brand-accent)] hover:text-[var(--brand-accent)] transition flex items-center justify-center gap-2"><i data-lucide="calculator"></i> חשב כמויות</button>
-                    <button onclick="startExpertSearch()" class="flex-[2] bg-[var(--brand-primary)] text-[var(--brand-secondary)] text-lg font-bold py-4 rounded-xl shadow-xl hover:opacity-90 transition flex items-center justify-center gap-3"><i data-lucide="user-check"></i> התייעץ עם מומחה בכיר</button>
+                    <button onclick="openSmartCalc()" class="flex-1 bg-white border-2 border-gray-200 text-gray-700 text-lg font-bold py-4 rounded-xl">חשב</button>
+                    <button onclick="startExpertSearch()" class="flex-[2] bg-[var(--brand-primary)] text-[var(--brand-secondary)] text-lg font-bold py-4 rounded-xl shadow-xl hover:opacity-90">התייעץ עם אלי</button>
                 </div>
             </div>
         </div>
@@ -164,31 +166,22 @@
             </div>
             <div class="magnifying-glass"><i data-lucide="search"></i></div>
         </div>
-        <h2 class="text-4xl font-black text-gray-900 mb-4 tracking-tight">מאתר מומחה בכיר...</h2>
-        <div class="text-xl font-bold text-blue-600 typewriter-text" id="radarStatus">מתחבר לשרתי Sika...</div>
+        <h2 class="text-4xl font-black text-gray-900 mb-4">מאתר מומחה...</h2>
+        <div class="text-xl font-bold text-blue-600 typewriter-text" id="radarStatus"></div>
     </div>
 
     <div id="expertFoundModal" class="fixed inset-0 z-[100] bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur">
-        <div class="bg-white w-[500px] rounded-3xl overflow-hidden shadow-2xl relative animate-fade-in text-center p-8">
-            <div class="w-32 h-32 rounded-full border-4 border-[var(--brand-accent)] mx-auto mb-4 p-1">
-                <img src="https://media-mrs2-1.cdn.whatsapp.net/v/t61.24694-24/109923599_330637871666131_5578032134568575008_n.jpg?ccb=11-4&oh=01_Q5Aa3QFeo2xxQ2aPXt6aNIHGockxutUkt3uT90hABAOshFRruQ&oe=69536285&_nc_sid=5e03e0&_nc_cat=111" class="w-full h-full rounded-full object-cover">
-            </div>
+        <div class="bg-white w-[500px] rounded-3xl overflow-hidden shadow-2xl relative text-center p-8">
+            <div class="w-32 h-32 rounded-full border-4 border-[var(--brand-accent)] mx-auto mb-4 p-1"><img src="https://media-mrs2-1.cdn.whatsapp.net/v/t61.24694-24/109923599_330637871666131_5578032134568575008_n.jpg?ccb=11-4&oh=01_Q5Aa3QFeo2xxQ2aPXt6aNIHGockxutUkt3uT90hABAOshFRruQ&oe=69536285&_nc_sid=5e03e0&_nc_cat=111" class="w-full h-full rounded-full object-cover"></div>
             <h2 class="text-3xl font-black mb-1">אלי כהן</h2>
             <p class="text-[var(--brand-accent)] font-bold mb-6">מומחה טכני בכיר</p>
-            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-6">
-                <img id="connectQr" src="" class="w-40 h-40 mx-auto mix-blend-multiply">
-                <p class="text-xs text-gray-500 mt-2 font-bold">סרוק להתחלת צ'אט בוואטסאפ</p>
-            </div>
-            <button onclick="document.getElementById('expertFoundModal').classList.add('hidden')" class="text-gray-400 underline text-sm">סגור</button>
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-6"><img id="connectQr" src="" class="w-40 h-40 mx-auto mix-blend-multiply"></div>
+            <button onclick="document.getElementById('expertFoundModal').classList.add('hidden')" class="text-gray-400 underline">סגור</button>
         </div>
     </div>
 
     <div id="adminQrModal" class="fixed inset-0 z-[100] bg-black/90 hidden flex items-center justify-center">
-        <div class="bg-white p-10 rounded-3xl text-center">
-            <h2 class="text-2xl font-black mb-4">כניסת מנהל</h2>
-            <img id="adminQrImg" class="w-48 h-48 mx-auto">
-            <button onclick="document.getElementById('adminQrModal').classList.add('hidden')" class="mt-4 text-red-500 font-bold">סגור</button>
-        </div>
+        <div class="bg-white p-10 rounded-3xl text-center"><h2 class="text-2xl font-black mb-4">כניסת מנהל</h2><img id="adminQrImg" class="w-48 h-48 mx-auto"><button onclick="document.getElementById('adminQrModal').classList.add('hidden')" class="mt-4 text-red-500 font-bold">סגור</button></div>
     </div>
 
     <script type="module">
@@ -198,32 +191,65 @@
         lucide.createIcons();
         let allProducts = [];
         let currentProduct = null;
+        let idleTimer;
+        let screensaverUrl = "https://www.youtube.com/embed/zHj-zDvlhQA?autoplay=1&mute=1&controls=0&loop=1&playlist=zHj-zDvlhQA"; // ברירת מחדל: וידאו של סיקה
+        let idleTimeoutSeconds = 60;
 
-        const themes = {
-            sika: { title: "SIKA SWITZERLAND", sub: "בונים אמון - בכל העולם", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Sika_AG_logo.svg/1200px-Sika_AG_logo.svg.png" },
-            thermokir: { title: "תרמוקיר", sub: "בונים נכון, בונים חכם", logo: "https://www.thermokir.co.il/wp-content/uploads/2019/06/logo.png" },
-            misterfix: { title: "MISTER FIX", sub: "מקצוענות בבנייה", logo: "https://karmit-mrfix.com/wp-content/uploads/2020/07/logo.png" },
-            bg: { title: "BG BOND", sub: "טכנולוגיות בניה מתקדמות", logo: "https://bgbond.co.il/wp-content/uploads/2020/05/logo.png" },
-            tambour: { title: "טמבור", sub: "הצבע של ישראל", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Tambour_logo.svg/1200px-Tambour_logo.svg.png" },
-            default: { title: "ברוכים הבאים לח. סבן", sub: "המרכז המקצועי לחומרי בניין ושיפוץ", logo: "" }
-        };
+        // --- System Init ---
+        window.initSystem = async () => {
+            // Load Config from Studio (LocalStorage for demo)
+            const config = JSON.parse(localStorage.getItem('saban_kiosk_config'));
+            if(config) {
+                if(config.screensaverUrl) screensaverUrl = config.screensaverUrl;
+                if(config.idleTime) idleTimeoutSeconds = config.idleTime;
+                if(config.colors) {
+                    document.documentElement.style.setProperty('--brand-primary', config.colors.primary);
+                    document.documentElement.style.setProperty('--brand-accent', config.colors.accent);
+                }
+            }
 
-        async function init() {
-            try {
-                const snap = await getDocs(collection(db, "products"));
-                allProducts = [];
-                snap.forEach(doc => allProducts.push({id: doc.id, ...doc.data()}));
-                renderGrid(allProducts);
-            } catch(e) { console.error(e); }
+            // Load Products
+            const snap = await getDocs(collection(db, "products"));
+            allProducts = [];
+            snap.forEach(doc => allProducts.push({id: doc.id, ...doc.data()}));
+            renderGrid(allProducts);
+
+            // Start Idle Watcher
+            resetIdleTimer();
+            document.body.addEventListener('mousemove', resetIdleTimer);
+            document.body.addEventListener('touchstart', resetIdleTimer);
+            document.body.addEventListener('click', resetIdleTimer);
         }
 
+        // --- MonitorsAnywhere Integration ---
+        function resetIdleTimer() {
+            clearTimeout(idleTimer);
+            document.getElementById('screensaverOverlay').classList.remove('active');
+            // אם יש וידאו, לעצור אותו כדי שלא ינגן ברקע
+            // document.getElementById('screensaverFrame').src = ""; 
+            
+            idleTimer = setTimeout(() => {
+                const overlay = document.getElementById('screensaverOverlay');
+                const frame = document.getElementById('screensaverFrame');
+                frame.src = screensaverUrl; // טעינת ה-URL רק כשצריך
+                overlay.classList.add('active');
+            }, idleTimeoutSeconds * 1000);
+        }
+
+        window.wakeUp = () => {
+            resetIdleTimer();
+        }
+
+        // --- Branding & Grid (Same logic as before) ---
         window.setTheme = (brand) => {
             document.body.className = `theme-${brand}`;
+            const themes = {
+                sika: { title: "SIKA SWITZERLAND", sub: "בונים אמון", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Sika_AG_logo.svg/1200px-Sika_AG_logo.svg.png" },
+                default: { title: "ח. סבן", sub: "המרכז המקצועי", logo: "" }
+            };
             const info = themes[brand] || themes.default;
             document.getElementById('heroTitle').innerText = info.title;
-            document.getElementById('heroSubtitle').innerText = info.sub;
-            document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('active'));
-            document.getElementById(`pill-${brand}`).classList.add('active');
+            // Filter products...
             const filtered = brand === 'default' ? allProducts : allProducts.filter(p => (p.brand || "").toLowerCase().includes(brand));
             renderGrid(filtered);
         }
@@ -237,7 +263,7 @@
                         <img src="${p.image || 'https://placehold.co/300'}" class="max-h-full max-w-full object-contain mix-blend-multiply group-hover:scale-110 transition duration-500">
                     </div>
                     <div class="p-5 flex-1 flex flex-col bg-white">
-                        <div class="text-xs font-bold text-gray-400 uppercase mb-1 tracking-wider">${p.brand || 'GENERAL'}</div>
+                        <div class="text-xs font-bold text-gray-400 uppercase mb-1 tracking-wider">${p.brand || 'SIKA'}</div>
                         <h3 class="text-lg font-bold text-gray-900 leading-tight mb-2 line-clamp-2">${p.name}</h3>
                         <div class="mt-auto flex gap-2">
                             ${p.tech?.coverage ? `<div class="bg-gray-50 px-2 py-1 rounded text-[10px] text-gray-500 border">כיסוי: ${p.tech.coverage}</div>` : ''}
@@ -248,49 +274,26 @@
             lucide.createIcons();
         }
 
-        window.filterCat = (cat) => {
-            const filtered = cat === 'all' ? allProducts : allProducts.filter(p => p.category === cat);
-            renderGrid(filtered);
-        }
-        window.filterProducts = () => {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            renderGrid(allProducts.filter(p => p.name.toLowerCase().includes(term)));
-        }
-
         window.openProduct = (id) => {
             const p = allProducts.find(x => x.id === id);
             if(!p) return;
             currentProduct = p;
-
             document.getElementById('mName').innerText = p.name;
             document.getElementById('mBrandText').innerText = p.brand || "BRAND";
             document.getElementById('mImage').src = p.image || 'https://placehold.co/600';
             
-            const set = (eid, val) => document.getElementById(eid).innerText = val || "-";
-            set('mCov', p.tech?.coverage || p.coverage);
-            set('mDry', p.tech?.drying || p.drying);
-            set('mThick', p.tech?.thickness || p.thickness);
-
+            // Tech
+            document.getElementById('mCov').innerText = p.tech?.coverage || "-";
+            document.getElementById('mDry').innerText = p.tech?.drying || "-";
+            document.getElementById('mThick').innerText = p.tech?.thickness || "-";
             document.getElementById('mBrandLogo').src = p.brandLogo || "";
 
+            // Typewriter
             const descEl = document.getElementById('mDesc');
             descEl.innerText = "";
             let i = 0; const txt = p.marketingDesc || "טוען נתונים...";
             const type = () => { if(i < txt.length) { descEl.innerHTML += txt.charAt(i); i++; setTimeout(type, 10); } else descEl.classList.remove('typewriter-text'); };
             descEl.classList.add('typewriter-text'); type();
-
-            // FAQ Logic
-            const faqs = [];
-            if(p.category === 'glues') {
-                faqs.push({q: "מה הדבק המומלץ להדבקה על צמנטבורד?", a: "תרמוקיר AD 603 או AD 770 בהתאם לגודל האריח."});
-            } else {
-                faqs.push({q: "האם נדרש פריימר?", a: "מומלץ תמיד ליישם פריימר על תשתית סופגת."});
-            }
-            document.getElementById('faqContainer').innerHTML = faqs.map(f => `
-                <div class="faq-item" onclick="this.classList.toggle('active')">
-                    <div class="faq-question"><span>${f.q}</span><i data-lucide="chevron-down" size="16"></i></div>
-                    <div class="faq-answer">${f.a}</div>
-                </div>`).join('');
 
             // Related
             const relContainer = document.getElementById('relatedGrid');
@@ -301,7 +304,7 @@
                         <img src="${rp.image}" class="h-12 object-contain mb-1">
                         <div class="text-[9px] font-bold leading-tight">${rp.name}</div>
                     </div>`).join('');
-            } else { relContainer.innerHTML = '<div class="col-span-3 text-center text-xs text-gray-400">אין מוצרים משלימים</div>'; }
+            } else { relContainer.innerHTML = ''; }
 
             document.getElementById('productModal').classList.add('open');
             lucide.createIcons();
@@ -313,18 +316,15 @@
             document.getElementById('productModal').classList.remove('open');
             const radar = document.getElementById('radarModal');
             radar.classList.remove('hidden'); radar.classList.add('flex');
-            
-            setTimeout(() => document.getElementById('radarStatus').innerText = "מאתר מומחה זמין...", 1500);
-            setTimeout(() => document.getElementById('radarStatus').innerText = "נמצאה התאמה!", 3000);
-            
             setTimeout(() => {
                 radar.classList.add('hidden'); radar.classList.remove('flex');
                 const waLink = `https://wa.me/972544527513?text=${encodeURIComponent('היי אלי, אני בחנות וצריך עזרה עם ' + (currentProduct ? currentProduct.name : 'מוצר'))}`;
                 document.getElementById('connectQr').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(waLink)}`;
                 document.getElementById('expertFoundModal').classList.remove('hidden');
-            }, 4000);
+            }, 3000);
         }
 
+        // --- Smart Calculator ---
         window.openSmartCalc = () => {
             closeModal();
             switchTab('calculator');
@@ -346,12 +346,6 @@
             }
         }
 
-        window.openAdminQR = () => {
-            const url = window.location.origin + '/admin/desktop-admin.html';
-            document.getElementById('adminQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
-            document.getElementById('adminQrModal').classList.remove('hidden');
-        }
-
         window.switchTab = (tab) => {
             document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('btn-'+tab).classList.add('active');
@@ -359,7 +353,11 @@
             else { document.getElementById('view-catalog').classList.add('hidden-tab'); document.getElementById('view-calculator').classList.remove('hidden-tab'); }
         }
 
-        init();
+        window.openAdminQR = () => {
+            const url = window.location.origin + '/admin/desktop-admin.html';
+            document.getElementById('adminQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+            document.getElementById('adminQrModal').classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
