@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sika OS</title>
+    
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
     <style>
         :root { --sika-yellow: #FFC500; --sika-red: #E3000F; --bg: #f8fafc; }
         body { font-family: 'Heebo', sans-serif; background: var(--bg); color: #1e293b; overflow: hidden; user-select: none; }
@@ -97,7 +100,7 @@
             
             <div class="w-1/2 bg-gray-100 relative flex items-center justify-center p-10">
                 <img id="modal-img" src="" class="max-h-full max-w-full object-contain mix-blend-multiply">
-                <button id="modal-video-btn" class="absolute bottom-10 left-10 bg-white/90 px-6 py-3 rounded-full flex items-center gap-3 shadow-lg hover:scale-105 transition font-bold text-red-600">
+                <button id="modal-video-btn" class="absolute bottom-10 left-10 bg-white/90 px-6 py-3 rounded-full flex items-center gap-3 shadow-lg hover:scale-105 transition font-bold text-red-600 hidden">
                     <i data-lucide="play-circle" size="24"></i> צפה בסרטון יישום
                 </button>
             </div>
@@ -126,6 +129,24 @@
         </div>
     </div>
 
+    <div id="video-player-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 backdrop-blur-md hidden transition-opacity duration-500 opacity-0">
+        
+        <button onclick="closeVideo()" class="absolute top-6 right-6 z-20 text-white/50 hover:text-white hover:scale-110 transition p-4">
+            <i data-lucide="x" size="48"></i>
+        </button>
+
+        <div class="relative w-full max-w-6xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-gray-800 mx-4">
+            <iframe id="youtube-frame" 
+                    class="w-full h-full" 
+                    src="" 
+                    title="Sika Player" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+
     <div id="ai-chat-overlay" class="absolute inset-0 bg-white z-40 hidden flex-col">
         <div class="bg-black text-white p-4 flex justify-between items-center">
             <span class="font-bold flex gap-2"><i data-lucide="bot"></i> Sika Expert AI</span>
@@ -143,7 +164,6 @@
     <div id="print-area"></div>
 
     <script src="data.js"></script>
-<script type="module" src="logic.js">
-</script>
+    <script type="module" src="logic.js"></script>
 </body>
 </html>
