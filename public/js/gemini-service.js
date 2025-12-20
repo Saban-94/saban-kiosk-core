@@ -1,6 +1,6 @@
 // public/js/gemini-service.js
 
-const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug"; // 🔴 הכנס כאן את המפתח שלך
+const GEMINI_API_KEY = "AIzaSyDn2bU0mnmNpj26UeBZYAirLnXf-FtPgCg"; // 🔴 הכנס כאן את המפתח שלך
 
 export async function askGeminiAdmin(productName) {
     const prompt = `
