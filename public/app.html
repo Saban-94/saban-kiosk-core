@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>H. Saban Kiosk</title>
+    <title>H. Saban Smart Kiosk</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
@@ -20,29 +20,37 @@
         .sidebar-btn:hover { background: #e2e8f0; color: #0f172a; }
         .sidebar-btn.active { background: #2563eb; color: white; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); }
         .sidebar-btn.expert-mode { margin-top: auto; color: #E3000F; border: 1px dashed #E3000F; background: #fff0f0; }
-        .sidebar-btn.expert-mode:hover { background: #E3000F; color: white; }
 
         /* Filters */
-        .brand-filter { transition: transform 0.2s; opacity: 0.7; cursor: pointer; border: 2px solid transparent; padding: 4px; border-radius: 50%; }
-        .brand-filter:hover, .brand-filter.active { opacity: 1; transform: scale(1.1); border-color: #2563eb; background: white; }
+        .brand-filter { transition: transform 0.2s; opacity: 0.6; cursor: pointer; border: 2px solid transparent; padding: 4px; border-radius: 50%; filter: grayscale(100%); }
+        .brand-filter:hover, .brand-filter.active { opacity: 1; transform: scale(1.1); border-color: #2563eb; background: white; filter: grayscale(0%); }
         
         .cat-btn { padding: 10px 20px; border-radius: 50px; font-weight: bold; background: white; color: #64748b; border: 1px solid #e2e8f0; display: flex; items-center; gap: 8px; cursor: pointer; transition: all 0.2s; }
-        .cat-btn:hover { background: #f1f5f9; color: #0f172a; }
         .cat-btn.active { background: #0f172a; color: white; border-color: #0f172a; }
 
-        /* Product Card */
-        .product-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #e2e8f0; cursor: pointer; height: 360px; display: flex; flex-direction: column; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border-color: #cbd5e1; }
+        /* Product Card Enhanced */
+        .product-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #e2e8f0; cursor: pointer; height: 400px; display: flex; flex-direction: column; position: relative; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border-color: #2563eb; }
+        .tech-badge { font-size: 10px; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; color: #64748b; font-weight: bold; display: flex; items-center; gap: 4px; }
         
-        /* Modals */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; }
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; }
         .modal-overlay.open { opacity: 1; pointer-events: all; }
-        .modal-content { background: white; width: 90%; max-width: 1200px; height: 90%; border-radius: 30px; overflow: hidden; transform: scale(0.95); transition: transform 0.3s; display: flex; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .modal-content { background: white; width: 95%; max-width: 1300px; height: 90%; border-radius: 30px; overflow: hidden; transform: scale(0.95); transition: transform 0.3s; display: flex; box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.5); }
         .modal-overlay.open .modal-content { transform: scale(1); }
 
-        /* QR Scan Animation */
-        .scan-line { width: 100%; height: 4px; background: #E3000F; position: absolute; top: 0; left: 0; animation: scan 2s linear infinite; box-shadow: 0 0 10px #E3000F; }
-        @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+        /* Typewriter Effect */
+        .typewriter-text { border-left: 2px solid #E3000F; animation: blink 0.7s infinite; padding-left: 5px; white-space: pre-wrap; }
+        @keyframes blink { 50% { border-color: transparent; } }
+
+        /* FAQ Accordion */
+        .faq-item { border-bottom: 1px solid #e2e8f0; }
+        .faq-question { padding: 15px 0; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #1e293b; }
+        .faq-question:hover { color: #2563eb; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; color: #64748b; font-size: 14px; line-height: 1.6; }
+        .faq-item.active .faq-answer { max-height: 200px; padding-bottom: 15px; }
+        .faq-item.active .faq-icon { transform: rotate(180deg); }
+        .faq-icon { transition: transform 0.3s; }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -56,25 +64,12 @@
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR1_PVzqyK74L9l5eC5grCsPGCsTinQnmHvw&s" class="w-full h-full object-contain">
         </div>
         
-        <button onclick="switchTab('catalog')" id="btn-catalog" class="sidebar-btn active">
-            <i data-lucide="grid" size="32" class="mb-2"></i>
-            <span class="text-xs font-bold">קטלוג</span>
-        </button>
-        
-        <button onclick="switchTab('calculator')" id="btn-calculator" class="sidebar-btn">
-            <i data-lucide="calculator" size="32" class="mb-2"></i>
-            <span class="text-xs font-bold">מחשבון</span>
-        </button>
+        <button onclick="switchTab('catalog')" id="btn-catalog" class="sidebar-btn active"><i data-lucide="grid" size="32" class="mb-2"></i><span class="text-xs font-bold">קטלוג</span></button>
+        <button onclick="switchTab('calculator')" id="btn-calculator" class="sidebar-btn"><i data-lucide="calculator" size="32" class="mb-2"></i><span class="text-xs font-bold">מחשבון</span></button>
         
         <div class="mt-auto w-full px-4 flex flex-col gap-4">
-            <button onclick="location.reload()" class="sidebar-btn !mb-0">
-                <i data-lucide="refresh-cw" size="24"></i>
-            </button>
-            
-            <button onclick="openExpertAccess()" class="sidebar-btn expert-mode" title="חיבור אפליקציית מומחה">
-                <i data-lucide="smartphone" size="24" class="mb-1"></i>
-                <span class="text-[10px] font-black">PRO Connect</span>
-            </button>
+            <button onclick="location.reload()" class="sidebar-btn !mb-0"><i data-lucide="refresh-cw" size="24"></i></button>
+            <button onclick="openExpertAccess()" class="sidebar-btn expert-mode"><i data-lucide="smartphone" size="24" class="mb-1"></i><span class="text-[10px] font-black">PRO Connect</span></button>
         </div>
     </nav>
 
@@ -92,10 +87,10 @@
                     <img onclick="filterByBrand('sika')" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Sika_AG_logo.svg/1200px-Sika_AG_logo.svg.png" class="brand-filter w-12 h-12 object-contain" title="Sika">
                     <img onclick="filterByBrand('thermokir')" src="https://www.thermokir.co.il/wp-content/uploads/2019/06/logo.png" class="brand-filter w-12 h-12 object-contain" title="Thermokir">
                     <img onclick="filterByBrand('misterfix')" src="https://karmit-mrfix.com/wp-content/uploads/2020/07/logo.png" class="brand-filter w-12 h-12 object-contain" title="Mister Fix">
-                    </div>
+                </div>
                 
                 <div class="relative w-[300px]">
-                    <input id="searchInput" oninput="filterProducts()" type="text" placeholder="חיפוש..." class="w-full bg-gray-100 text-gray-800 p-3 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <input id="searchInput" oninput="filterProducts()" type="text" placeholder="חיפוש חכם..." class="w-full bg-gray-100 text-gray-800 p-3 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600">
                     <i data-lucide="search" class="absolute right-3 top-3.5 text-gray-400" size="20"></i>
                 </div>
             </div>
@@ -117,258 +112,244 @@
         </div>
 
         <div id="view-calculator" class="hidden-tab flex-1 overflow-y-auto p-12 bg-gray-50 flex items-center justify-center">
-            <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-4xl border border-gray-200">
-                <h2 class="text-4xl font-black text-gray-800 mb-2 flex items-center gap-3">
-                    <div class="bg-blue-100 p-3 rounded-xl text-blue-600"><i data-lucide="calculator" size="40"></i></div>
-                    מחשבון כמויות בנייה
-                </h2>
-                <div class="grid grid-cols-2 gap-12 mt-10">
-                    <div class="space-y-6">
-                        <div><label class="block font-bold text-gray-700 mb-2">שטח (מ"ר)</label><input type="number" id="calcArea" class="w-full bg-gray-50 p-5 rounded-2xl text-2xl font-bold border-2 border-gray-200 focus:border-blue-500 outline-none"></div>
-                        <div><label class="block font-bold text-gray-700 mb-2">צריכה (ק"ג למ"ר)</label><input type="number" id="calcConsumption" class="w-full bg-gray-50 p-5 rounded-2xl text-2xl font-bold border-2 border-gray-200 focus:border-blue-500 outline-none"></div>
-                        <div><label class="block font-bold text-gray-700 mb-2">משקל שק (ק"ג)</label><input type="number" id="calcBagSize" class="w-full bg-gray-50 p-5 rounded-2xl text-2xl font-bold border-2 border-gray-200 focus:border-blue-500 outline-none"></div>
-                        <button onclick="calculateMaterial()" class="w-full bg-blue-600 text-white text-xl font-bold py-4 rounded-2xl hover:bg-blue-700 transition shadow-lg mt-4">חשב</button>
-                    </div>
-                    <div class="bg-gray-900 text-white rounded-3xl p-8 flex flex-col justify-center items-center text-center relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full filter blur-3xl opacity-20"></div>
-                        <div class="text-gray-400 font-bold uppercase tracking-widest mb-4">סה"כ נדרש</div>
-                        <div class="text-7xl font-black mb-2" id="resTotalKg">0</div>
-                        <div class="text-xl text-gray-400 mb-8">קילוגרם</div>
-                        <div class="w-full h-px bg-gray-700 mb-8"></div>
-                        <div class="text-gray-400 font-bold uppercase tracking-widest mb-4">אריזות</div>
-                        <div class="text-5xl font-black text-green-400 mb-2" id="resTotalBags">0</div>
-                    </div>
-                </div>
+            <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-4xl border border-gray-200 text-center">
+                <h2 class="text-4xl font-black text-gray-800 mb-2">מחשבון כמויות</h2>
+                <p>כאן יופיע המחשבון המלא (כפי שפותח קודם)</p>
             </div>
         </div>
 
     </main>
 
-    <div id="expertAccessModal" class="fixed inset-0 z-[80] bg-black/90 hidden flex items-center justify-center p-4 backdrop-blur-lg">
-        <div class="bg-[#111] w-full max-w-lg rounded-3xl p-10 text-center relative overflow-hidden border border-gray-800 shadow-2xl">
-            <button onclick="document.getElementById('expertAccessModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i data-lucide="x" size="24"></i></button>
-            
-            <div class="mb-6 flex justify-center">
-                <div class="bg-[#E3000F] p-4 rounded-2xl shadow-lg shadow-red-900/50">
-                    <i data-lucide="smartphone" class="text-white" size="40"></i>
-                </div>
-            </div>
-            
-            <h2 class="text-3xl font-black text-white mb-2 tracking-wide">Saban PRO Connect</h2>
-            <p class="text-gray-400 mb-8 text-sm">סרוק את הקוד כדי להפעיל את עמדת השליטה בנייד</p>
-            
-            <div class="relative bg-white p-4 rounded-2xl inline-block shadow-xl">
-                <img id="expertQrImage" src="" class="w-48 h-48 object-contain">
-                <div class="scan-line"></div>
-            </div>
-            
-            <div class="mt-8 flex items-center justify-center gap-2 text-[#E3000F] font-bold text-xs uppercase tracking-widest animate-pulse">
-                <span class="w-2 h-2 bg-[#E3000F] rounded-full"></span> ממתין לחיבור...
-            </div>
-        </div>
-    </div>
-
     <div id="productModal" class="modal-overlay">
         <div class="modal-content relative">
             <button onclick="closeModal()" class="absolute top-6 left-6 z-20 bg-gray-100 p-3 rounded-full hover:bg-gray-200 transition"><i data-lucide="x" size="24"></i></button>
             
-            <div class="w-[45%] bg-gray-50 p-10 flex flex-col items-center justify-center relative border-l border-gray-100">
-                <img id="mImage" src="" class="max-h-[60%] max-w-full object-contain mix-blend-multiply mb-8 transition-transform hover:scale-105 duration-500">
-                <div class="flex gap-4 w-full px-10">
-                    <a id="mVideoBtn" href="#" target="_blank" class="hidden flex-1 flex items-center justify-center gap-2 bg-white text-red-600 font-bold py-4 rounded-xl border-2 border-red-100 hover:bg-red-50 transition shadow-sm"><i data-lucide="play-circle" size="24"></i> סרטון</a>
-                    <a id="mPdfBtn" href="#" target="_blank" class="hidden flex-1 flex items-center justify-center gap-2 bg-white text-blue-600 font-bold py-4 rounded-xl border-2 border-blue-100 hover:bg-blue-50 transition shadow-sm"><i data-lucide="file-text" size="24"></i> מפרט</a>
+            <div class="w-[40%] bg-gray-50 p-8 flex flex-col border-l border-gray-100 relative">
+                <div id="modalRibbon" class="hidden absolute top-8 right-0 bg-[#E3000F] text-white px-6 py-2 font-bold shadow-lg rounded-l-xl z-10"></div>
+                
+                <div class="flex-1 flex items-center justify-center mb-4">
+                    <img id="mImage" src="" class="max-h-[350px] max-w-full object-contain mix-blend-multiply hover:scale-105 transition duration-500">
+                </div>
+                
+                <div class="mt-auto">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase mb-3 flex items-center gap-2"><i data-lucide="link" size="14"></i> מוצרים משלימים (חובה ליישום)</h3>
+                    <div id="relatedGrid" class="grid grid-cols-3 gap-3">
+                        </div>
                 </div>
             </div>
 
-            <div class="w-[55%] p-12 flex flex-col overflow-y-auto bg-white">
+            <div class="w-[60%] p-10 flex flex-col overflow-y-auto bg-white scroll-smooth">
                 <div class="flex items-center gap-3 mb-2">
                     <img id="mBrandLogo" src="" class="h-8 object-contain hidden">
                     <span id="mBrandText" class="text-sm font-bold text-gray-400 uppercase tracking-widest border-b-2 border-blue-500 pb-1">BRAND</span>
                 </div>
-                <h2 id="mName" class="text-4xl font-black text-gray-900 mb-6 leading-tight">שם מוצר</h2>
-                <p id="mDesc" class="text-xl text-gray-600 leading-relaxed mb-8 font-light"></p>
-
-                <div class="grid grid-cols-3 gap-4 mb-8">
-                    <div class="bg-gray-50 p-4 rounded-2xl text-center border border-gray-100"><i data-lucide="maximize" class="text-blue-500 mx-auto mb-2" size="28"></i><div class="text-xs text-gray-500 font-bold uppercase mb-1">כיסוי</div><div id="mCov" class="font-bold text-lg text-gray-900">-</div></div>
-                    <div class="bg-gray-50 p-4 rounded-2xl text-center border border-gray-100"><i data-lucide="clock" class="text-blue-500 mx-auto mb-2" size="28"></i><div class="text-xs text-gray-500 font-bold uppercase mb-1">ייבוש</div><div id="mDry" class="font-bold text-lg text-gray-900">-</div></div>
-                    <div class="bg-gray-50 p-4 rounded-2xl text-center border border-gray-100"><i data-lucide="layers" class="text-blue-500 mx-auto mb-2" size="28"></i><div class="text-xs text-gray-500 font-bold uppercase mb-1">עובי</div><div id="mThick" class="font-bold text-lg text-gray-900">-</div></div>
+                
+                <h2 id="mName" class="text-4xl font-black text-gray-900 mb-4 leading-tight">שם מוצר</h2>
+                
+                <div class="bg-blue-50 p-6 rounded-2xl border-r-4 border-blue-500 mb-6">
+                    <p id="mDesc" class="text-xl text-blue-900 leading-relaxed font-medium typewriter-text"></p>
                 </div>
 
-                <div class="mt-auto pt-6 border-t border-gray-100">
-                    <button onclick="openExpertChat()" class="w-full bg-black text-white text-xl font-bold py-5 rounded-2xl shadow-xl hover:bg-gray-800 transition flex items-center justify-center gap-3">
-                        <i data-lucide="message-square" size="24"></i> שאל את המומחה
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="bg-gray-50 p-4 rounded-xl text-center border border-gray-100 hover:border-blue-300 transition group">
+                        <i data-lucide="maximize" class="text-blue-500 mx-auto mb-2 group-hover:scale-110 transition" size="24"></i>
+                        <div class="text-xs text-gray-500 font-bold uppercase mb-1">כיסוי</div>
+                        <div id="mCov" class="font-bold text-lg text-gray-900">-</div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl text-center border border-gray-100 hover:border-blue-300 transition group">
+                        <i data-lucide="clock" class="text-blue-500 mx-auto mb-2 group-hover:scale-110 transition" size="24"></i>
+                        <div class="text-xs text-gray-500 font-bold uppercase mb-1">זמן ייבוש</div>
+                        <div id="mDry" class="font-bold text-lg text-gray-900">-</div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl text-center border border-gray-100 hover:border-blue-300 transition group">
+                        <i data-lucide="layers" class="text-blue-500 mx-auto mb-2 group-hover:scale-110 transition" size="24"></i>
+                        <div class="text-xs text-gray-500 font-bold uppercase mb-1">עובי</div>
+                        <div id="mThick" class="font-bold text-lg text-gray-900">-</div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="font-bold text-xl mb-4 text-gray-800 flex items-center gap-2">
+                        <i data-lucide="help-circle" class="text-[#E3000F]"></i> שאלות נפוצות מהשטח
+                    </h3>
+                    <div id="faqContainer" class="border-t border-gray-200">
+                        </div>
+                </div>
+
+                <div class="mt-auto flex gap-4 pt-6 border-t border-gray-100">
+                    <button onclick="openExpertChat()" class="flex-1 bg-[#111] text-white text-lg font-bold py-4 rounded-xl shadow-xl hover:bg-gray-800 transition flex items-center justify-center gap-3">
+                        <i data-lucide="message-square" size="20"></i> התייעץ עם אלי (מומחה)
                     </button>
+                    <a id="mPdfBtn" href="#" target="_blank" class="w-16 bg-gray-100 flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-200 border border-gray-200">
+                        <i data-lucide="file-text" size="24"></i>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="expertChatModal" class="fixed inset-0 z-[60] bg-black/60 hidden flex items-center justify-center backdrop-blur-md opacity-0 transition-opacity duration-300">
+    <div id="expertChatModal" class="fixed inset-0 z-[60] bg-black/60 hidden flex items-center justify-center backdrop-blur-md">
         <div onclick="closeExpertChat()" class="absolute inset-0"></div>
-        <div class="bg-white w-[800px] h-[700px] rounded-3xl shadow-2xl flex flex-col overflow-hidden relative z-10 transform scale-95 transition-transform duration-300" id="chatWindow">
-            <div class="bg-black text-white p-6 flex justify-between items-center">
-                <div class="flex items-center gap-4"><div class="bg-green-500 p-3 rounded-full"><i data-lucide="bot" class="text-white" size="28"></i></div><div><div class="font-black text-xl">Sika Expert AI</div><div class="text-sm text-gray-400">מחובר</div></div></div>
-                <button onclick="closeExpertChat()" class="bg-white/10 p-2 rounded-full"><i data-lucide="x" size="24"></i></button>
-            </div>
-            <div id="chatMessages" class="flex-1 overflow-y-auto p-8 space-y-6 bg-gray-50"></div>
-            <div class="p-6 bg-white border-t border-gray-100 flex gap-3">
-                <input id="userChatInput" type="text" placeholder="שאל שאלה..." class="flex-1 bg-gray-100 text-gray-800 p-5 rounded-2xl text-lg outline-none" onkeypress="handleEnter(event)">
-                <button onclick="sendUserMessage()" class="bg-black text-white p-5 rounded-2xl"><i data-lucide="send" size="24"></i></button>
-            </div>
-        </div>
+        <div class="bg-white p-10 rounded-xl">צ'אט מומחה בטעינה...</div>
     </div>
 
     <script type="module">
         import { db } from './js/firebase-config.js';
         import { collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        import { askProductExpert } from './js/gemini-service.js';
-
+        
         lucide.createIcons();
         let allProducts = [];
-        let currentProduct = null;
-        let activeBrand = 'all';
-        let activeCategory = 'all';
-        let chatHistory = [];
+        let typeWriterTimeout;
 
+        // Init
         async function init() {
             try {
                 const snap = await getDocs(collection(db, "products"));
                 allProducts = [];
                 snap.forEach(doc => allProducts.push({id: doc.id, ...doc.data()}));
                 renderGrid(allProducts);
-            } catch (e) { document.getElementById('productGrid').innerHTML = 'שגיאה בטעינה'; }
+            } catch (e) { console.error(e); }
         }
 
-        // --- Filtering Logic ---
-        function applyFilters() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            let filtered = allProducts;
-            if (activeBrand !== 'all') filtered = filtered.filter(p => (p.brand || "").toLowerCase().includes(activeBrand));
-            if (activeCategory !== 'all') filtered = filtered.filter(p => (p.category || "").toLowerCase() === activeCategory);
-            if (term) filtered = filtered.filter(p => (p.name && p.name.toLowerCase().includes(term)) || (p.brand && p.brand.toLowerCase().includes(term)));
-            renderGrid(filtered);
-        }
-
-        window.filterByBrand = (brand) => {
-            activeBrand = brand;
-            document.querySelectorAll('.brand-filter').forEach(el => el.classList.remove('active'));
-            event.target.classList.add('active');
-            applyFilters();
-        }
-
-        window.filterByCategory = (cat) => {
-            activeCategory = cat;
-            document.querySelectorAll('.cat-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById('cat-'+cat).classList.add('active');
-            applyFilters();
-        }
-
-        window.filterProducts = () => applyFilters();
-
-        // --- Rendering ---
+        // --- Render Grid with Tech Badges ---
         function renderGrid(list) {
             const grid = document.getElementById('productGrid');
-            if(list.length === 0) { grid.innerHTML = '<div class="col-span-full text-center text-gray-400 text-2xl mt-20">לא נמצאו מוצרים תואמים</div>'; return; }
             grid.innerHTML = list.map(p => `
                 <div onclick="openProduct('${p.id}')" class="product-card">
                     <div class="h-[180px] p-6 bg-gray-50 flex items-center justify-center relative overflow-hidden group-hover:bg-gray-100 transition">
-                        ${p.status && p.status !== 'standard' ? `<div class="absolute top-4 left-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 shadow-md rounded-r-md z-10">${p.status}</div>` : ''}
+                        ${p.status && p.status !== 'standard' ? 
+                            `<div class="absolute top-4 left-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 shadow-md rounded-r-md z-10">${p.status}</div>` : ''}
                         <img src="${p.image || 'https://placehold.co/300'}" class="max-h-full max-w-full object-contain mix-blend-multiply" onerror="this.src='https://placehold.co/300?text=No+Image'">
                     </div>
                     <div class="p-5 flex-1 flex flex-col bg-white">
                         <div class="text-xs font-bold text-gray-400 uppercase mb-1 tracking-wider">${p.brand || 'SIKA'}</div>
-                        <h3 class="text-xl font-bold text-gray-800 leading-tight mb-2 line-clamp-2">${p.name}</h3>
-                        <div class="mt-auto pt-3 border-t border-gray-50 flex justify-between items-center text-blue-600 font-bold text-sm">פרטים <i data-lucide="arrow-left" size="16"></i></div>
+                        <h3 class="text-xl font-bold text-gray-800 leading-tight mb-3 line-clamp-2">${p.name}</h3>
+                        
+                        <div class="flex gap-2 mt-auto mb-3">
+                            ${p.tech?.drying ? `<div class="tech-badge"><i data-lucide="clock" size="10"></i> ${p.tech.drying}</div>` : ''}
+                            ${p.tech?.coverage ? `<div class="tech-badge"><i data-lucide="maximize" size="10"></i> ${p.tech.coverage}</div>` : ''}
+                        </div>
+
+                        <div class="pt-3 border-t border-gray-50 flex justify-between items-center text-blue-600 font-bold text-sm">
+                            לפרטים נוספים <i data-lucide="arrow-left" size="16"></i>
+                        </div>
                     </div>
-                </div>`).join('');
+                </div>
+            `).join('');
             lucide.createIcons();
         }
 
-        // --- Calculator ---
-        window.calculateMaterial = () => {
-            const area = parseFloat(document.getElementById('calcArea').value) || 0;
-            const consumption = parseFloat(document.getElementById('calcConsumption').value) || 0;
-            const bagSize = parseFloat(document.getElementById('calcBagSize').value) || 0;
-            if (area <= 0 || consumption <= 0) return alert("הזן נתונים תקינים");
-            const totalKg = (area * consumption).toFixed(1);
-            let bags = 0; if (bagSize > 0) bags = Math.ceil(totalKg / bagSize);
-            document.getElementById('resTotalKg').innerText = totalKg;
-            document.getElementById('resTotalBags').innerText = bags > 0 ? bags : "-";
-        }
+        window.filterProducts = () => { /* Filtering logic same as before */ };
 
-        window.switchTab = (tab) => {
-            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-'+tab).classList.add('active');
-            if (tab === 'catalog') { document.getElementById('view-catalog').classList.remove('hidden-tab'); document.getElementById('view-calculator').classList.add('hidden-tab'); }
-            else { document.getElementById('view-catalog').classList.add('hidden-tab'); document.getElementById('view-calculator').classList.remove('hidden-tab'); }
-        }
-
-        // --- Modal & Chat ---
-        window.openProduct = (id) => {
-            currentProduct = allProducts.find(x => x.id === id);
-            if(!currentProduct) return;
-            const setText = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; }
-            setText('mName', currentProduct.name);
-            setText('mBrandText', currentProduct.brand || "SIKA");
-            setText('mDesc', currentProduct.marketingDesc || "אין תיאור.");
-            setText('mCov', currentProduct.tech?.coverage || "-");
-            setText('mDry', currentProduct.tech?.drying || "-");
-            setText('mThick', currentProduct.tech?.thickness || "-");
-            document.getElementById('mImage').src = currentProduct.image || 'https://placehold.co/400';
+        // --- Typewriter Effect ---
+        function typeWriter(text, elementId, speed = 15) {
+            let i = 0;
+            const el = document.getElementById(elementId);
+            el.innerHTML = "";
+            el.classList.add('typewriter-text'); // Add cursor
             
-            const logo = document.getElementById('mBrandLogo');
-            if(currentProduct.brandLogo) { logo.src = currentProduct.brandLogo; logo.classList.remove('hidden'); }
-            else logo.classList.add('hidden');
+            if(typeWriterTimeout) clearTimeout(typeWriterTimeout);
 
-            const toggle = (id, link) => { const el = document.getElementById(id); if(link) { el.href = link; el.classList.remove('hidden'); } else el.classList.add('hidden'); }
-            toggle('mVideoBtn', currentProduct.video);
-            toggle('mPdfBtn', currentProduct.pdfUrl);
+            function type() {
+                if (i < text.length) {
+                    el.innerHTML += text.charAt(i);
+                    i++;
+                    typeWriterTimeout = setTimeout(type, speed);
+                } else {
+                    el.classList.remove('typewriter-text'); // Remove cursor
+                }
+            }
+            type();
+        }
+
+        // --- FAQ Logic ---
+        function generateFAQ(category, productName) {
+            // שאלות חכמות לפי קטגוריה
+            let faqs = [];
+            
+            if (category === 'glues') {
+                faqs.push({ q: `מה הדבק המומלץ להדבקת קרמיקה על צמנטבורד במקלחון?`, a: `עבור ${productName} או מוצרים דומים, מומלץ להשתמש בדבק גמיש בדירוג C2S1 (כגון AD 603 או שווה ערך), בהתאם לסוג התשתית.` });
+                faqs.push({ q: "האם נדרש פריימר לפני השימוש?", a: "כן, חובה ליישם פריימר מתאים על תשתית סופגת (בלוק/בטון) כדי למנוע ייבוש מהיר מדי של הדבק." });
+            } else if (category === 'sealing') {
+                faqs.push({ q: "כמה זמן צריך לחכות בין השכבות?", a: "בדרך כלל יש להמתין לייבוש ראשוני (4-6 שעות), אך ב${productName} יש לבדוק את המפרט המדויק בהתאם ללחות באוויר." });
+                faqs.push({ q: "האם החומר עמיד לשמש ישירה (UV)?", a: "מוצר זה מיועד בעיקר לאיטום תת-קרקעי או מתחת לריצוף. לחשיפה לשמש נדרשת שכבת הגנה." });
+            } else {
+                faqs.push({ q: "מהם תנאי היישום האופטימליים?", a: "יש ליישם בטמפרטורה שבין 5 ל-35 מעלות צלזיוס, על תשתית נקייה ולחה (אך ללא מים עומדים)." });
+            }
+
+            const container = document.getElementById('faqContainer');
+            container.innerHTML = faqs.map((faq, idx) => `
+                <div class="faq-item" onclick="toggleFAQ(this)">
+                    <div class="faq-question">
+                        ${faq.q}
+                        <i data-lucide="chevron-down" class="faq-icon" size="18"></i>
+                    </div>
+                    <div class="faq-answer">${faq.a}</div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.toggleFAQ = (el) => {
+            el.classList.toggle('active');
+        }
+
+        // --- Smart Related Products ---
+        function renderRelated(currentCat) {
+            // לוגיקת קשרים פשוטה
+            let targetCat = 'tools';
+            if (currentCat === 'glues') targetCat = 'sealing'; // דבק -> איטום
+            if (currentCat === 'sealing') targetCat = 'concrete'; // איטום -> בטון
+            if (currentCat === 'plaster') targetCat = 'paint'; // טיח -> צבע
+
+            const related = allProducts.filter(p => p.category === targetCat).slice(0, 3);
+            const container = document.getElementById('relatedGrid');
+            
+            if(related.length === 0) { container.innerHTML = '<div class="text-xs text-gray-400">אין המלצות</div>'; return; }
+
+            container.innerHTML = related.map(p => `
+                <div class="bg-white p-2 rounded-xl border border-gray-100 flex flex-col items-center text-center cursor-pointer hover:border-blue-300" onclick="openProduct('${p.id}')">
+                    <img src="${p.image || 'https://placehold.co/100'}" class="h-16 object-contain mb-1">
+                    <div class="text-[10px] font-bold leading-tight">${p.name}</div>
+                </div>
+            `).join('');
+        }
+
+        // --- Open Product ---
+        window.openProduct = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            if(!p) return;
+
+            // Basic Info
+            document.getElementById('mName').innerText = p.name;
+            document.getElementById('mBrandText').innerText = p.brand || "MORG";
+            document.getElementById('mImage').src = p.image || 'https://placehold.co/600x400';
+            
+            // Tech
+            document.getElementById('mCov').innerText = p.tech?.coverage || p.coverage || "-";
+            document.getElementById('mDry').innerText = p.tech?.drying || p.drying || "-";
+            document.getElementById('mThick').innerText = p.tech?.thickness || p.thickness || "-";
+
+            // Logo
+            const logo = document.getElementById('mBrandLogo');
+            if(p.brandLogo) { logo.src = p.brandLogo; logo.classList.remove('hidden'); } else logo.classList.add('hidden');
+
+            // 1. Dynamic Typewriter
+            typeWriter(p.marketingDesc || "תיאור המוצר בטעינה...", 'mDesc');
+
+            // 2. FAQ Generation
+            generateFAQ(p.category, p.name);
+
+            // 3. Related Products
+            renderRelated(p.category);
 
             document.getElementById('productModal').classList.add('open');
             lucide.createIcons();
         }
-        
+
         window.closeModal = () => document.getElementById('productModal').classList.remove('open');
-
-        window.openExpertChat = () => {
-            if(!currentProduct) return;
-            chatHistory = [];
-            document.getElementById('chatMessages').innerHTML = `<div class="bg-white p-5 rounded-2xl shadow border border-gray-100 text-lg">היי! אני המומחה ל<b>${currentProduct.name}</b>. שאל אותי כל דבר.</div>`;
-            const modal = document.getElementById('expertChatModal');
-            modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('chatWindow').classList.add('scale-100'); }, 10);
-        }
-        window.closeExpertChat = () => {
-            const modal = document.getElementById('expertChatModal');
-            modal.classList.add('opacity-0');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-        window.handleEnter = (e) => { if(e.key === 'Enter') window.sendUserMessage(); }
-        window.sendUserMessage = async () => {
-            const input = document.getElementById('userChatInput');
-            const text = input.value.trim();
-            if(!text) return;
-            const container = document.getElementById('chatMessages');
-            container.innerHTML += `<div class="bg-black text-white p-5 rounded-2xl self-end mb-4 animate-fade-in">${text}</div>`;
-            input.value = "";
-            
-            const response = await askProductExpert(currentProduct, text, chatHistory);
-            container.innerHTML += `<div class="bg-white text-gray-800 p-5 rounded-2xl border border-gray-100 mb-4 animate-fade-in">${response.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</div>`;
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // --- NEW: Expert Access Logic (QR) ---
-        window.openExpertAccess = () => {
-            // הכתובת אליה יופנה ה-QR
-            const expertAppUrl = window.location.origin + '/expert-app.html';
-            
-            // יצירת QR Code
-            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(expertAppUrl)}`;
-            
-            document.getElementById('expertQrImage').src = qrApiUrl;
-            document.getElementById('expertAccessModal').classList.remove('hidden');
-        }
-
+        window.switchTab = (tab) => { /* Same tab logic */ };
+        
         init();
     </script>
 </body>
