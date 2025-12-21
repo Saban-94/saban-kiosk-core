@@ -3,334 +3,352 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sika AI - The Future is Here</title>
+    <title>Sika AI - The Cinema Experience</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --sika-yellow: #FFC500;
-            --sika-red: #E3000F;
-            --sika-black: #111111;
-        }
-        body { font-family: 'Heebo', sans-serif; overflow: hidden; background: #000; color: white; }
-
-        /* --- STAGE & SLIDES --- */
-        #stage { position: relative; width: 100vw; height: 100vh; }
-        .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
-        .slide.active { opacity: 1; display: flex; z-index: 20; }
-
-        /* --- SIKA AI ROBOT --- */
-        #sikaRobot {
-            position: absolute;
-            z-index: 50;
-            transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1);
-            filter: drop-shadow(0 10px 40px rgba(0,0,0,0.6));
-            width: 350px;
-            bottom: -50px; right: -50px; /* Start hidden */
+            --brand-color: #FFC500;
+            --brand-accent: #E3000F;
+            --brand-dark: #111111;
         }
         
-        /* Robot States */
-        .pos-center { bottom: 5%; right: 50%; transform: translateX(50%) scale(1.2); }
-        .pos-side { bottom: 0; right: 65%; transform: scale(0.9); }
-        .pos-corner { bottom: -20px; right: -20px; transform: scale(0.8); }
-        .anim-breathe { animation: breathe 3s ease-in-out infinite; }
-        .anim-blush { filter: sepia(1) hue-rotate(300deg) saturate(3); } /* אפקט הסמקה */
+        body { font-family: 'Heebo', sans-serif; background: #000; color: white; overflow: hidden; height: 100vh; width: 100vw; }
         
-        @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-        /* --- CHAT BUBBLES & TYPING --- */
-        .bubble {
-            background: white; color: black; padding: 25px; border-radius: 30px; 
-            font-size: 22px; font-weight: bold; max-width: 600px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 4px solid var(--sika-yellow);
-            position: relative; opacity: 0; transform: scale(0.8); transition: 0.5s;
+        /* --- STAGE MANAGEMENT --- */
+        .slide { position: absolute; inset: 0; opacity: 0; transition: all 1s ease-in-out; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; pointer-events: none; }
+        .slide.active { opacity: 1; z-index: 20; pointer-events: auto; }
+        
+        /* --- SIKA AI CHARACTER --- */
+        #sikaBot {
+            position: fixed; bottom: -50px; right: -50px; width: 350px; z-index: 100;
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 10px 40px rgba(255, 197, 0, 0.3));
         }
-        .bubble.show { opacity: 1; transform: scale(1); }
-        .bubble::after { content: ''; position: absolute; border: 15px solid transparent; border-top-color: white; bottom: -25px; right: 50px; }
+        .anim-breathe { animation: breathe 4s ease-in-out infinite; }
+        .anim-pop { animation: popIn 0.5s forwards; }
+        @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        /* States for Robot */
+        .bot-hidden { transform: translateY(100%); opacity: 0; }
+        .bot-presenter { bottom: 0; right: 0; transform: scale(1); }
+        .bot-center { bottom: 50%; right: 50%; transform: translate(50%, 50%) scale(1.5); }
+        .bot-corner-small { bottom: 20px; right: 20px; transform: scale(0.6); }
+
+        /* --- SCENE 1: THE CHAMELEON --- */
+        .website-frame { width: 80%; height: 70%; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 0 100px rgba(255,255,255,0.1); transition: 1s; position: relative; }
+        .website-header { height: 80px; display: flex; items-center; padding: 0 40px; justify-content: space-between; transition: 0.5s; }
+        .brand-logo { font-size: 30px; font-weight: 900; }
         
-        .cursor { display: inline-block; width: 3px; height: 24px; background: var(--sika-red); animation: blink 0.8s infinite; vertical-align: middle; }
+        /* --- SCENE 2: REAL DATA CARD --- */
+        .product-card-3d {
+            width: 400px; height: 600px; background: white; border-radius: 30px; color: black;
+            transform-style: preserve-3d; transform: rotateY(-10deg) rotateX(5deg);
+            box-shadow: -50px 50px 100px rgba(0,0,0,0.5); transition: 1s; position: relative;
+        }
+        .tech-row { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0; }
+        .tech-label { font-weight: bold; color: #666; }
+        .tech-val { font-weight: 900; color: #000; }
+
+        /* --- SCENE 3: CHAT SIMULATION --- */
+        .chat-container { width: 600px; height: 500px; display: flex; flex-col; gap: 15px; perspective: 1000px; }
+        .msg { padding: 15px 25px; border-radius: 20px; font-size: 20px; opacity: 0; transform: translateY(20px); transition: 0.5s; max-width: 80%; }
+        .msg.show { opacity: 1; transform: translateY(0); }
+        .msg-user { background: rgba(255,255,255,0.1); color: white; align-self: flex-start; border-bottom-right-radius: 0; }
+        .msg-bot { background: var(--brand-color); color: black; align-self: flex-end; border-bottom-left-radius: 0; font-weight: bold; }
+
+        /* --- SCENE 4: THE JOURNEY (MAP) --- */
+        #mapContainer { position: absolute; inset: 0; background: #0f172a; opacity: 0; transition: 1s; }
+        .world-map { width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
+        .location-dot { width: 20px; height: 20px; background: var(--brand-accent); border-radius: 50%; position: absolute; box-shadow: 0 0 20px var(--brand-accent); z-index: 10; }
+        .kiosk-loc { top: 40%; right: 45%; } /* Israel approx */
+        .eli-loc { top: 55%; right: 25%; } /* Thailand approx */
+        
+        .flight-path {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
+        }
+        .path-line { stroke: var(--brand-color); stroke-width: 3; fill: none; stroke-dasharray: 10; stroke-dashoffset: 1000; animation: dash 3s linear forwards; }
+        @keyframes dash { to { stroke-dashoffset: 0; } }
+
+        /* --- SCENE 5: ELI'S PHONE --- */
+        .phone-mockup {
+            width: 300px; height: 600px; border: 10px solid #333; border-radius: 40px; 
+            background: url('https://images.unsplash.com/photo-1540541338287-417002060f60?q=80&w=1000&auto=format&fit=crop'); 
+            background-size: cover; position: relative; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            transform: translateY(100px); opacity: 0; transition: 1s;
+        }
+        .phone-mockup.active { transform: translateY(0); opacity: 1; }
+        .notification-popup {
+            position: absolute; top: 20px; left: 10px; right: 10px; background: rgba(255,255,255,0.95);
+            border-radius: 15px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transform: translateY(-100px); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .notification-popup.show { transform: translateY(0); }
+
+        /* --- TYPING & EFFECTS --- */
+        .typing-cursor::after { content: '|'; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* --- PRODUCT SHOWCASE --- */
-        .product-stage { display: flex; gap: 20px; perspective: 1000px; margin-top: 20px; }
-        .p-card { background: white; border-radius: 20px; width: 250px; padding: 15px; opacity: 0; transform: translateY(50px) rotateY(20deg); transition: 0.8s; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .p-card.show { opacity: 1; transform: translateY(0) rotateY(0); }
-        .p-card img { width: 100%; height: 200px; object-fit: contain; mix-blend-mode: multiply; }
-
-        /* --- EFFECTS --- */
-        .glitter { position: absolute; animation: glitter 1s infinite; pointer-events: none; }
-        @keyframes glitter { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(1.5) rotate(180deg); opacity: 0; } }
-
-        .list-item { font-size: 24px; margin-bottom: 10px; opacity: 0; transform: translateX(-20px); transition: 0.5s; display: flex; align-items: center; gap: 10px; }
-        .list-item.show { opacity: 1; transform: translateX(0); }
-
-        /* --- CONTROLS --- */
-        #nextBtn {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: var(--sika-red); color: white; padding: 15px 40px; border-radius: 50px;
-            font-size: 20px; font-weight: bold; cursor: pointer; z-index: 1000;
-            box-shadow: 0 0 20px rgba(227, 0, 15, 0.5); animation: pulse 2s infinite;
+        /* --- CONTROL BTN --- */
+        #actionBtn {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+            background: var(--brand-accent); color: white; padding: 15px 50px; border-radius: 50px;
+            font-size: 24px; font-weight: 900; cursor: pointer; z-index: 1000;
+            box-shadow: 0 0 30px rgba(227, 0, 15, 0.6); animation: pulseBtn 2s infinite; border: 2px solid white;
         }
-        @keyframes pulse { 0% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } 100% { transform: translateX(-50%) scale(1); } }
+        @keyframes pulseBtn { 0% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } 100% { transform: translateX(-50%) scale(1); } }
 
     </style>
 </head>
 <body>
 
-    <img src="https://saban-kiosk-core.pages.dev/1000187746.jpg" id="sikaRobot" class="anim-breathe" 
-         onerror="this.src='https://cdn3d.iconscout.com/3d/premium/thumb/robot-6454743-5326888.png'">
+    <img src="https://saban-kiosk-core.pages.dev/sikabot.png" id="sikaBot" class="bot-hidden">
 
-    <div id="mainBubble" class="bubble" style="position: absolute; top: 20%; right: 40%;">
-        <span id="bubbleText"></span><span class="cursor"></span>
+    <div class="slide active" id="slide-1">
+        <h1 class="text-7xl font-black mb-10 typing-cursor" id="introText">המהפכה כבר כאן.</h1>
+        
+        <div class="website-frame" id="chameleonSite">
+            <div class="website-header" id="chameleonHeader" style="background: #FFC500; color: black;">
+                <div class="brand-logo">SIKA CENTER</div>
+                <div class="flex gap-4 text-sm font-bold opacity-70">
+                    <span>קטלוג</span><span>מחשבון</span><span>מומחה</span>
+                </div>
+            </div>
+            <div class="p-10 flex gap-8">
+                <div class="w-1/3 h-64 bg-gray-100 rounded-xl animate-pulse"></div>
+                <div class="w-1/3 h-64 bg-gray-100 rounded-xl animate-pulse" style="animation-delay: 0.2s"></div>
+                <div class="w-1/3 h-64 bg-gray-100 rounded-xl animate-pulse" style="animation-delay: 0.4s"></div>
+            </div>
+        </div>
+        <p class="mt-8 text-xl text-gray-400">הקיוסק של ח. סבן הוא זיקית. הוא מתאים את עצמו לכל מותג בשניות.</p>
     </div>
 
-    <div id="stage">
-
-        <div class="slide active" id="slide-1">
-            <h1 class="text-9xl font-black text-[#E3000F] mb-4">SHHH... 🤫</h1>
-            <h2 class="text-4xl">החבר החדש נכנס לחדר</h2>
-        </div>
-
-        <div class="slide" id="slide-2">
-            <div class="bg-gray-100 w-[800px] h-[500px] rounded-3xl p-6 flex flex-col relative text-black">
-                <div class="bg-white p-4 rounded-xl shadow-sm mb-4 self-start max-w-md flex items-center gap-3">
-                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">👤</div>
-                    <span id="userQ"></span> </div>
-                <div id="botAnswer" class="bg-[#111] text-white p-4 rounded-xl shadow-lg mb-4 self-end max-w-lg hidden">
-                    <div class="flex items-center gap-2 mb-2 border-b border-gray-700 pb-2">
-                        <span class="text-[#E3000F] font-bold">Sika-AI:</span> אנחנו לא מלכלכים על מתחרים, אנחנו מציגים עובדות!
+    <div class="slide" id="slide-2">
+        <div class="flex items-center gap-20">
+            <div class="text-right">
+                <h2 class="text-6xl font-black text-[#FFC500] mb-4">דיוק של מילימטר.</h2>
+                <p class="text-2xl mb-8">אנחנו שולפים מידע אמת בזמן אמת.<br>בלי טעויות. אלי לא מרשה טעויות.</p>
+                <div class="flex gap-4">
+                    <div class="bg-gray-800 p-4 rounded-xl text-center min-w-[120px]">
+                        <div class="text-3xl">🏗️</div>
+                        <div class="font-bold mt-2">C2TE S1</div>
                     </div>
-                    <div class="text-lg">
-                        סרם 255 הוא <span class="text-[#E3000F] font-bold">הדבק הגמיש</span> שאתה צריך.
-                        C2TE S1, עבידות מושלמת, ללא גלישה.
+                    <div class="bg-gray-800 p-4 rounded-xl text-center min-w-[120px]">
+                        <div class="text-3xl">💧</div>
+                        <div class="font-bold mt-2">עמיד מים</div>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-xl text-center min-w-[120px]">
+                        <div class="text-3xl">⏱️</div>
+                        <div class="font-bold mt-2">Open Time</div>
                     </div>
                 </div>
+            </div>
+
+            <div class="product-card-3d p-8 flex flex-col items-center">
+                <div class="bg-[#FFC500] text-black font-black px-4 py-1 rounded-full text-xs absolute top-6 right-6">BEST SELLER</div>
+                <img src="https://gilar.co.il/wp-content/uploads/2020/03/SikaCeram-255-Starflex-LD.png" class="h-48 object-contain mb-6 drop-shadow-xl">
+                <h3 class="text-3xl font-black mb-2">Sika Ceram 255</h3>
+                <div class="text-gray-500 font-bold mb-6">StarFlex - דבק גמיש במיוחד</div>
                 
-                <div id="productVisuals" class="flex justify-center gap-4 mt-auto opacity-0 transition duration-1000">
-                    <img src="https://gilar.co.il/wp-content/uploads/2020/03/GLR_MOCKUP_SITE_PICS_013-400x400.png" class="h-40 object-contain drop-shadow-xl">
-                    <div class="flex flex-col gap-2">
-                        <img src="https://gilar.co.il/wp-content/uploads/2020/03/SikaCeram-255-Starflex-LD.png" class="h-20 object-contain border-2 border-white rounded-lg shadow-md bg-white">
-                        <img src="https://gilar.co.il/wp-content/uploads/2020/03/SikaCeram-355-Starpaste.png" class="h-20 object-contain border-2 border-white rounded-lg shadow-md bg-white">
+                <div class="w-full space-y-2">
+                    <div class="tech-row"><span class="tech-label">תקן:</span><span class="tech-val">C2TE S1</span></div>
+                    <div class="tech-row"><span class="tech-label">צבע:</span><span class="tech-val">לבן / אפור</span></div>
+                    <div class="tech-row"><span class="tech-label">עובי יישום:</span><span class="tech-val">עד 10 מ"מ</span></div>
+                    <div class="tech-row"><span class="tech-label">צריכה:</span><span class="tech-val">~1.2 ק"ג/מ"ר</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-3">
+        <h2 class="text-4xl font-bold mb-10 text-gray-400">סימולציית צ'אט חי: <span class="text-white">זיהוי צרכים</span></h2>
+        <div class="chat-container" id="chatContainer">
+            </div>
+    </div>
+
+    <div class="slide" id="slide-4">
+        <div id="mapContainer">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/World_map_blank_without_borders.svg/2000px-World_map_blank_without_borders.svg.png" class="world-map invert opacity-20">
+            
+            <div class="location-dot kiosk-loc"></div>
+            <div class="location-dot eli-loc"></div>
+
+            <svg class="flight-path">
+                <path d="M 550 400 Q 700 300 850 500" class="path-line" stroke="red" fill="transparent"/>
+            </svg>
+
+            <div class="absolute top-[30%] right-[40%] bg-white p-1 rounded-lg shadow-[0_0_30px_white]">
+                <img src="https://bite.co.il/wp-content/uploads/2020/09/%D7%A2%D7%9E%D7%93%D7%94-%D7%A9%D7%A0%D7%99%D7%94.d110a0.webp" class="h-24 rounded">
+            </div>
+
+            <div class="absolute top-[45%] right-[20%]">
+                <div class="phone-mockup" id="eliPhone">
+                    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+                    <div class="notification-popup" id="notiPopup">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-6 h-6 bg-[#E3000F] rounded text-white flex items-center justify-center font-bold text-xs">S</div>
+                            <span class="text-xs font-bold text-gray-500 uppercase">Sika AI • עכשיו</span>
+                        </div>
+                        <div class="font-bold text-sm">הודעה חדשה מ-AI:</div>
+                        <p class="text-sm text-gray-800 mt-1 leading-tight">"אחי, סליחה על ההפרעה... תשים מגבת 🩳, לא נעים מול הלקוח. יש פה שאלה דחופה על סרם 255."</p>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="slide" id="slide-3">
-            <div class="relative w-full h-full flex items-center justify-center">
-                <h2 class="text-6xl font-black text-center leading-tight">
-                    רגע רגע!! 😱<br>
-                    <span class="text-[#E3000F]" id="oopsText">שכחתי את הדבר הכי חשוב!</span>
-                </h2>
-                <div id="glitterContainer" class="absolute inset-0 pointer-events-none"></div>
-            </div>
+        <div class="absolute bottom-20 text-center w-full z-20">
+            <h2 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">Cross-Continent Connection 🌍</h2>
         </div>
-
-        <div class="slide" id="slide-4">
-            <div class="bg-white text-black p-10 rounded-3xl max-w-3xl text-center shadow-[0_0_100px_rgba(255,255,255,0.2)]">
-                <div class="text-8xl mb-6">🫂</div>
-                <h3 class="text-4xl font-black mb-4">בלי חיבוק מלטף (פריימר)...</h3>
-                <p class="text-2xl text-gray-600">גם הדבק הכי חזק בעולם לא יתפוס לאורך זמן.</p>
-                <div class="mt-8 bg-black text-white p-4 rounded-xl inline-block">
-                    🤖 <span class="text-[#E3000F]">טיפ מסיקה AI:</span> תמיד תמרח סיקה פריימר 3N לפני ה-255.
-                </div>
-            </div>
-        </div>
-
-        <div class="slide" id="slide-5">
-            <div class="flex gap-10 items-center">
-                <div class="bg-gray-900 p-6 rounded-3xl border-4 border-[#E3000F] w-80">
-                    <h4 class="text-xl font-bold mb-4 flex gap-2"><i data-lucide="calculator"></i> מחשבון כמויות</h4>
-                    <div class="bg-black p-4 rounded-xl text-right text-green-400 font-mono text-2xl mb-2">12 שקים</div>
-                    <div class="text-xs text-gray-400">היום הוא מחשב שקים... מחר הוא קונה סיליקון שקוף 😉</div>
-                </div>
-                <div class="text-right max-w-md">
-                    <h3 class="text-4xl font-black mb-4">אני לא ישן אף פעם! 👁️</h3>
-                    <p class="text-xl text-gray-300">הקיוסק לעולם לא "שקוף". אני מציג סרטונים, ואם משעמם לי? אני נוקש על המסך וקורא ללקוח!</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="slide" id="slide-6">
-            <h2 class="text-5xl font-black mb-10 text-center">קבלן = הייטקיסט 👷‍♂️💻</h2>
-            <div class="grid grid-cols-2 gap-20 text-2xl">
-                <div class="opacity-50">מתכנת כותב קוד...</div>
-                <div class="font-bold text-[#E3000F]">קבלן מיישם מפרט!</div>
-                <div class="opacity-50">באג בקוד = קריסה...</div>
-                <div class="font-bold text-[#E3000F]">באג באיטום = נזילה!</div>
-            </div>
-            <div class="mt-10 bg-blue-900/50 p-6 rounded-2xl border border-blue-500">
-                אני כאן כדי לתת לו את ה-Documentation (המפרט) בזמן אמת.
-            </div>
-        </div>
-
-        <div class="slide" id="slide-7">
-            <div class="flex gap-20 w-full px-20">
-                <div class="w-1/2">
-                    <h3 class="text-3xl font-black text-[#E3000F] mb-6 border-b border-gray-700 pb-2">יתרונות הקיוסק (עכשיו)</h3>
-                    <div id="benefitsList"></div>
-                </div>
-                <div class="w-1/2">
-                    <h3 class="text-3xl font-black text-blue-400 mb-6 border-b border-gray-700 pb-2">העתיד (במימון שלכם 😉)</h3>
-                    <div id="futureList"></div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <button id="nextBtn" onclick="nextSlide()">המשך ></button>
+    <div class="slide" id="slide-5">
+        <div class="flex gap-20 items-center justify-center w-full px-20">
+            <div class="w-1/2">
+                <img src="https://saban-kiosk-core.pages.dev/sikabot.png" class="w-full drop-shadow-[0_0_50px_rgba(255,255,255,0.2)] anim-breathe">
+            </div>
+            <div class="w-1/2 space-y-8">
+                <h2 class="text-6xl font-black text-white leading-tight">
+                    "ידע זה כוח.<br>
+                    <span class="text-[#FFC500]">מצוינות זו דרך חיים.</span>"
+                </h2>
+                <div class="bg-[#111] border-l-4 border-[#E3000F] p-6 rounded-r-xl">
+                    <p class="text-xl text-gray-300 typing-cursor" id="finalSpeech"></p>
+                </div>
+                <div class="flex gap-4 mt-10">
+                    <div class="bg-gray-800 px-6 py-3 rounded-full font-bold text-sm text-gray-400">Secure Firebase 🔥</div>
+                    <div class="bg-gray-800 px-6 py-3 rounded-full font-bold text-sm text-gray-400">Realtime AI ⚡</div>
+                    <div class="bg-gray-800 px-6 py-3 rounded-full font-bold text-sm text-gray-400">Eli Protocol 🚀</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="actionBtn" onclick="nextSlide()">התחל מופע 🎬</button>
 
     <script>
         lucide.createIcons();
-        let currentSlide = 1;
-        const totalSlides = 7;
-        const robot = document.getElementById('sikaRobot');
-        const bubble = document.getElementById('mainBubble');
-        const bubbleText = document.getElementById('bubbleText');
-
-        // --- SCENARIO DATA ---
-        const scenario = {
-            1: { robot: "pos-center", text: "שו שו... 🤫 החבר החדש נכנס לחדר!" },
-            2: { robot: "pos-side", text: "בואו נראה איך אני עונה לשאלה אמיתית..." },
-            3: { robot: "pos-center", text: "אוי ואבוי!! סליחה מרינה!! 😱" },
-            4: { robot: "pos-side", text: "שכחתי שאני לא רק מוכר... אני יועץ!" },
-            5: { robot: "pos-corner", text: "משעמם לי מהר... אל תתנו לי לחכות!" },
-            6: { robot: "pos-side", text: "אנחנו בונים פה את דור העתיד." },
-            7: { robot: "pos-corner", text: "אז... איך מתקדמים מפה? 😎" }
-        };
-
-        function updateState() {
-            // Update Slides
-            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
-            document.getElementById(`slide-${currentSlide}`).classList.add('active');
-
-            // Update Robot & Text
-            const scene = scenario[currentSlide];
-            robot.className = `anim-breathe ${scene.robot}`; // Reset class + anim
-            
-            // Text Typing
-            bubble.classList.remove('show');
-            setTimeout(() => {
-                if(currentSlide === 3) { // Special Emotion Slide
-                    robot.classList.add('anim-blush'); // Blush effect
-                    createGlitter();
-                } else {
-                    robot.classList.remove('anim-blush');
-                }
-                
-                typeText(scene.text);
-                bubble.classList.add('show');
-                
-                // Specific Slide Actions
-                if(currentSlide === 2) playChatDemo();
-                if(currentSlide === 7) playSummary();
-
-            }, 800);
-        }
+        let currentSlide = 0;
+        
+        const slides = [
+            { id: 1, action: runChameleon },
+            { id: 2, action: showProduct },
+            { id: 3, action: runChatSim },
+            { id: 4, action: runJourney },
+            { id: 5, action: runFinale }
+        ];
 
         function nextSlide() {
-            if(currentSlide < totalSlides) {
+            if (currentSlide < slides.length) {
                 currentSlide++;
-                updateState();
-            } else {
-                alert("תודה רבה! (עכשיו תורכם לשלוף את הארנק 😉)");
+                
+                // Hide Button temporarily
+                const btn = document.getElementById('actionBtn');
+                btn.style.display = 'none';
+                setTimeout(() => { 
+                    btn.style.display = 'block'; 
+                    btn.innerText = (currentSlide === slides.length) ? "סיום המופע" : "הבא >>";
+                }, 2000);
+
+                // Change Slide
+                document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+                document.getElementById(`slide-${currentSlide}`).classList.add('active');
+                
+                // Run specific scene logic
+                slides[currentSlide-1].action();
             }
         }
 
-        // --- EFFECTS ---
-        function typeText(text) {
-            bubbleText.innerText = "";
+        // --- SCENE 1: CHAMELEON ---
+        function runChameleon() {
+            const header = document.getElementById('chameleonHeader');
+            const logo = header.querySelector('.brand-logo');
+            const bot = document.getElementById('sikaBot');
+            
+            bot.className = "bot-presenter anim-breathe anim-pop"; // Show Bot
+
+            const brands = [
+                { color: "#FFC500", text: "#000", name: "SIKA CENTER" },
+                { color: "#0057B8", text: "#FFF", name: "THERMOKIR" },
+                { color: "#E31E24", text: "#FFF", name: "TAMBOUR" },
+                { color: "#FFC500", text: "#000", name: "SIKA CENTER" }
+            ];
+
             let i = 0;
-            const speed = 30;
-            function type() {
-                if (i < text.length) {
-                    bubbleText.innerHTML += text.charAt(i);
-                    i++;
-                    setTimeout(type, speed);
-                }
-            }
-            type();
+            const interval = setInterval(() => {
+                i++;
+                if (i >= brands.length) { clearInterval(interval); return; }
+                header.style.background = brands[i].color;
+                header.style.color = brands[i].text;
+                logo.innerText = brands[i].name;
+            }, 1500);
         }
 
-        function typeList(elementId, items, colorClass) {
-            const container = document.getElementById(elementId);
-            container.innerHTML = "";
-            items.forEach((item, index) => {
+        // --- SCENE 2: PRODUCT ---
+        function showProduct() {
+            const bot = document.getElementById('sikaBot');
+            bot.className = "bot-corner-small anim-breathe"; // Move bot aside
+        }
+
+        // --- SCENE 3: CHAT ---
+        function runChatSim() {
+            const container = document.getElementById('chatContainer');
+            container.innerHTML = ''; // Reset
+            
+            const script = [
+                { type: 'user', text: "באיזה גוונים הסרם 255 מגיע?", delay: 500 },
+                { type: 'bot', text: "הוא מגיע בלבן ובאפור. הלבן מושלם לאבן טבעית.", delay: 2000 },
+                { type: 'user', text: "ותוך כמה זמן הוא מתייבש לדריכה?", delay: 4000 },
+                { type: 'bot', text: "כ-24 שעות בטמפרטורה רגילה. (Open time של 30 דקות)", delay: 5500 },
+                { type: 'user', text: "רגע, יש לי שאלה מורכבת על יישום בבריכה...", delay: 7500 },
+                { type: 'bot', text: "זה כבר דורש מומחה. אני מחבר אותך לאלי... 🚀", delay: 9000 }
+            ];
+
+            script.forEach(line => {
                 setTimeout(() => {
-                    container.innerHTML += `
-                        <div class="list-item show text-xl mb-3 flex items-center gap-3">
-                            <i data-lucide="check" class="${colorClass}"></i> ${item}
-                        </div>`;
-                    lucide.createIcons();
-                }, index * 800);
+                    const div = document.createElement('div');
+                    div.className = `msg msg-${line.type}`;
+                    div.innerText = line.text;
+                    container.appendChild(div);
+                    setTimeout(() => div.classList.add('show'), 100);
+                }, line.delay);
             });
         }
 
-        function createGlitter() {
-            const container = document.getElementById('glitterContainer');
-            container.innerHTML = '';
-            for(let i=0; i<20; i++) {
-                const star = document.createElement('div');
-                star.innerText = "✨";
-                star.className = "glitter";
-                star.style.left = Math.random() * 100 + "%";
-                star.style.top = Math.random() * 100 + "%";
-                star.style.fontSize = (Math.random() * 30 + 10) + "px";
-                star.style.animationDelay = Math.random() + "s";
-                container.appendChild(star);
-            }
+        // --- SCENE 4: JOURNEY ---
+        function runJourney() {
+            const map = document.getElementById('mapContainer');
+            map.style.opacity = '1';
+            
+            const bot = document.getElementById('sikaBot');
+            bot.className = "bot-hidden"; // Hide bot for map view
+
+            // Trigger Phone Popup
+            setTimeout(() => {
+                document.getElementById('eliPhone').classList.add('active');
+                setTimeout(() => {
+                    document.getElementById('notiPopup').classList.add('show');
+                }, 1000);
+            }, 2500);
         }
 
-        // --- SCENE LOGIC ---
-        function playChatDemo() {
-            const q = "מה עדיף? סיקה סרם 255 או 603?";
-            const qEl = document.getElementById('userQ');
-            qEl.innerText = "";
-            let i=0;
+        // --- SCENE 5: FINALE ---
+        function runFinale() {
+            const bot = document.getElementById('sikaBot');
+            bot.className = "bot-presenter anim-breathe"; // Bot returns
             
-            // 1. Type Question
-            const typeQ = setInterval(() => {
-                qEl.innerText += q.charAt(i);
+            const text = "חברים, אנחנו מוכנים. כרגע יצאתי ממפעלי סיקה, עברתי הדרכה וירטואלית על כל בורג וכל שק מלט. האמת? התרשמתי. אתם מוזמנים לנסות ממחר בבוקר את המהפכה הטכנולוגית. אין קבלן שירצה לעבוד בפחות ממצוינות.";
+            
+            const target = document.getElementById('finalSpeech');
+            target.innerText = "";
+            let i = 0;
+            const type = setInterval(() => {
+                target.innerText += text.charAt(i);
                 i++;
-                if(i >= q.length) {
-                    clearInterval(typeQ);
-                    // 2. Show Answer
-                    setTimeout(() => {
-                        document.getElementById('botAnswer').classList.remove('hidden');
-                        // 3. Show Images
-                        setTimeout(() => {
-                            document.getElementById('productVisuals').style.opacity = '1';
-                        }, 1000);
-                    }, 500);
-                }
-            }, 50);
+                if (i >= text.length) clearInterval(type);
+            }, 30);
         }
-
-        function playSummary() {
-            const benefits = [
-                "זמינות 24/7 ללקוח",
-                "איסוף לידים חכם למאגר",
-                "סמכות מקצועית בשטח",
-                "חיסכון בזמן לאנשי מכירות",
-                "חיבור ישיר לאפליקציית אלי"
-            ];
-            const future = [
-                "זיהוי אריחים בתמונה והתאמת רובה",
-                "מועדון לקוחות וצבירת נקודות",
-                "ניהול פרויקטים לקבלן",
-                "הזמנה מהירה מהאתר",
-                "AI שלומד ומשתפר כל יום"
-            ];
-            
-            typeList('benefitsList', benefits, 'text-green-400');
-            setTimeout(() => typeList('futureList', future, 'text-blue-400'), 4000);
-        }
-
-        // Start
-        setTimeout(updateState, 500);
 
     </script>
 </body>
