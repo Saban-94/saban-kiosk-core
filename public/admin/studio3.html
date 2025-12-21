@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saban AI Studio 🧠</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Heebo', sans-serif; background: #0f172a; color: #e2e8f0; height: 100vh; overflow: hidden; }
+        .sidebar { width: 280px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; height: 100%; }
+        .nav-btn { display: flex; items-center; gap: 12px; padding: 16px; width: 100%; text-align: right; transition: 0.2s; color: #94a3b8; }
+        .nav-btn.active { background: #0f172a; color: #38bdf8; border-right: 3px solid #38bdf8; font-weight: bold; }
+        .workspace { flex: 1; padding: 40px; overflow-y: auto; display: flex; gap: 40px; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+        .input-dark { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 10px; width: 100%; }
+        .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .media-item { height: 100px; background: #000; border-radius: 8px; cursor: pointer; border: 2px solid transparent; overflow: hidden; }
+        .media-item:hover, .media-item.selected { border-color: #38bdf8; transform: scale(1.05); }
+        .media-item img { width: 100%; height: 100%; object-fit: cover; }
+    </style>
+</head>
+<body class="flex">
+
+    <nav class="sidebar">
+        <div class="p-6 border-b border-gray-700"><h1 class="text-2xl font-black text-white">SABAN <span class="text-blue-400">BRAIN</span></h1></div>
+        <button onclick="switchView('product')" class="nav-btn active" id="nav-product"><i data-lucide="package"></i> הקמת מוצר (Google)</button>
+        <button onclick="switchView('chat')" class="nav-btn" id="nav-chat"><i data-lucide="message-square"></i> ניהול שיחות AI</button>
+        <button onclick="switchView('keys')" class="nav-btn" id="nav-keys"><i data-lucide="key"></i> מפתחות API</button>
+        <div class="mt-auto p-6"><button onclick="saveAll()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">שמור שינויים</button></div>
+    </nav>
+
+    <div class="workspace">
+        <div id="view-product" class="w-1/2">
+            <h2 class="text-3xl font-bold mb-6">הקמת מוצר חכם</h2>
+            
+            <div class="card">
+                <label class="text-sm font-bold text-gray-400">1. חפש מוצר בגוגל</label>
+                <div class="flex gap-2 mb-4">
+                    <input id="searchTerm" class="input-dark" placeholder="למשל: Sika TopSeal 107">
+                    <button onclick="searchGoogle()" class="bg-green-600 px-6 rounded-lg text-white font-bold">חפש</button>
+                </div>
+                
+                <div id="googleResults" class="hidden">
+                    <label class="text-xs font-bold text-gray-400">בחר תמונה מהתוצאות:</label>
+                    <div class="media-grid" id="resultsGrid"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <label class="text-sm font-bold text-gray-400">2. עריכת פרטים</label>
+                <div class="flex gap-4">
+                    <img id="previewImg" src="https://placehold.co/100" class="w-24 h-24 rounded-lg object-contain bg-white">
+                    <div class="w-full space-y-2">
+                        <input id="pName" class="input-dark" placeholder="שם מוצר">
+                        <textarea id="pDesc" class="input-dark h-20" placeholder="תיאור שיווקי"></textarea>
+                    </div>
+                </div>
+                <button onclick="addToCatalog()" class="w-full bg-blue-600 mt-4 py-2 rounded-lg font-bold">הוסף לקטלוג הקיוסק</button>
+            </div>
+        </div>
+
+        <div id="view-chat" class="w-1/2 hidden">
+            <h2 class="text-3xl font-bold mb-6">במאי השיחות של Sika AI</h2>
+            
+            <div class="card">
+                <h3 class="font-bold mb-4 text-yellow-400">הוסף טריגר חדש</h3>
+                <div class="space-y-3">
+                    <input id="chatTrigger" class="input-dark" placeholder="מילת מפתח (למשל: מחיר / הנחה / אלי)">
+                    
+                    <select id="chatActionType" class="input-dark" onchange="toggleActionFields()">
+                        <option value="text">תשובה טקסט רגילה</option>
+                        <option value="expert">נוהל "הקפצת מומחה" (אלי)</option>
+                        <option value="product">הצגת כרטיס מוצר</option>
+                    </select>
+
+                    <textarea id="chatResponse" class="input-dark h-24" placeholder="הטקסט שיכתוב הרובוט..."></textarea>
+                    
+                    <button onclick="addChatRule()" class="w-full bg-yellow-500 text-black font-bold py-2 rounded-lg">הוסף למוח 🧠</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="font-bold mb-2">חוקים קיימים במוח</h3>
+                <div id="brainList" class="space-y-2 text-sm text-gray-400 h-64 overflow-y-auto"></div>
+            </div>
+        </div>
+
+        <div id="view-keys" class="w-1/2 hidden">
+            <div class="card">
+                <h3 class="font-bold mb-4">הגדרות חיבור</h3>
+                <label>Google Search API Key</label>
+                <input id="apiKey" type="password" class="input-dark mb-4">
+                <label>Search Engine ID (CX)</label>
+                <input id="cxKey" type="text" class="input-dark mb-4">
+                <button onclick="saveKeys()" class="bg-green-600 text-white px-4 py-2 rounded">שמור מפתחות</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let brain = JSON.parse(localStorage.getItem('sika_brain')) || [
+            {trigger: "מחיר", type: "text", content: "המחירים אצלנו משתנים בהתאם לכמות. רוצה הצעת מחיר לכמות גדולה?"},
+            {trigger: "מומחה", type: "expert", content: "זה נשמע כמו משהו רציני."}
+        ];
+        
+        function switchView(id) {
+            ['product', 'chat', 'keys'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
+            ['nav-product', 'nav-chat', 'nav-keys'].forEach(n => document.getElementById(n).classList.remove('active'));
+            document.getElementById('view-'+id).classList.remove('hidden');
+            document.getElementById('nav-'+id).classList.add('active');
+            if(id === 'chat') renderBrain();
+        }
+
+        // --- GOOGLE SEARCH LOGIC ---
+        async function searchGoogle() {
+            const term = document.getElementById('searchTerm').value;
+            const apiKey = localStorage.getItem('saban_google_key');
+            const cx = localStorage.getItem('saban_google_cx');
+            
+            if(!apiKey || !cx) return alert("חסרים מפתחות API! הגדר אותם בטאב המפתחות.");
+
+            const btn = event.target;
+            btn.innerText = "מחפש...";
+            
+            try {
+                // Real Google API Call
+                const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(term)}&cx=${cx}&key=${apiKey}&searchType=image&num=6`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                const grid = document.getElementById('resultsGrid');
+                grid.innerHTML = "";
+                
+                if(data.items) {
+                    data.items.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'media-item';
+                        div.innerHTML = `<img src="${item.link}" onclick="selectImage(this.src)">`;
+                        grid.appendChild(div);
+                    });
+                    document.getElementById('googleResults').classList.remove('hidden');
+                    
+                    // Auto-fill text
+                    document.getElementById('pName').value = term;
+                    document.getElementById('pDesc').value = "מוצר איכותי מבית סיקה..."; 
+                } else {
+                    alert("לא נמצאו תוצאות (בדוק את המכסה או המפתחות)");
+                }
+            } catch(e) {
+                console.error(e);
+                alert("שגיאה בחיפוש (בדוק קונסול)");
+            }
+            btn.innerText = "חפש";
+        }
+
+        function selectImage(src) {
+            document.querySelectorAll('.media-item').forEach(el => el.classList.remove('selected'));
+            event.target.parentElement.classList.add('selected');
+            document.getElementById('previewImg').src = src;
+        }
+
+        function addToCatalog() {
+            const product = {
+                name: document.getElementById('pName').value,
+                image: document.getElementById('previewImg').src,
+                desc: document.getElementById('pDesc').value
+            };
+            // In real app: Push to Firebase/JSON
+            console.log("Adding Product:", product);
+            alert("מוצר נוסף לקטלוג! (הדמיה)");
+        }
+
+        // --- CHAT BRAIN LOGIC ---
+        function addChatRule() {
+            const trigger = document.getElementById('chatTrigger').value;
+            const type = document.getElementById('chatActionType').value;
+            const content = document.getElementById('chatResponse').value;
+            
+            brain.push({trigger, type, content});
+            saveBrain();
+            renderBrain();
+            
+            document.getElementById('chatTrigger').value = "";
+            document.getElementById('chatResponse').value = "";
+        }
+
+        function renderBrain() {
+            const list = document.getElementById('brainList');
+            list.innerHTML = brain.map((rule, i) => `
+                <div class="bg-gray-800 p-2 rounded border border-gray-700 flex justify-between">
+                    <div>
+                        <span class="text-blue-400 font-bold">${rule.trigger}</span> 
+                        <span class="text-xs bg-gray-700 px-1 rounded">${rule.type}</span>
+                        <div class="text-gray-300 truncate w-64">${rule.content}</div>
+                    </div>
+                    <button onclick="brain.splice(${i},1); saveBrain(); renderBrain()" class="text-red-500 hover:text-red-400"><i data-lucide="trash" size="14"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function saveBrain() {
+            localStorage.setItem('sika_brain', JSON.stringify(brain));
+        }
+
+        function saveKeys() {
+            localStorage.setItem('saban_google_key', document.getElementById('apiKey').value);
+            localStorage.setItem('saban_google_cx', document.getElementById('cxKey').value);
+            alert("נשמר!");
+        }
+        
+        function saveAll() {
+            // Trigger update in Kiosk
+            alert("המוח עודכן! הקיוסק יתעדכן כעת.");
+        }
+    </script>
+</body>
+</html>
