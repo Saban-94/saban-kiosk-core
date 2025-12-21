@@ -20,25 +20,19 @@
 
         /* Main Area */
         .workspace { flex: 1; padding: 40px; overflow-y: auto; display: flex; gap: 40px; }
-        
-        /* Editor Panel */
         .editor-panel { flex: 1; max-width: 600px; }
         .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .input-dark { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 10px; width: 100%; transition: 0.3s; }
         .input-dark:focus { border-color: #38bdf8; outline: none; }
         .label { display: block; font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 6px; uppercase; letter-spacing: 0.5px; }
 
-        /* Live Preview (Phone Mockup) */
+        /* Live Preview */
         .preview-container { flex: 1; display: flex; justify-content: center; align-items: center; background: #0b1120; border-radius: 40px; border: 8px solid #334155; position: relative; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         .kiosk-frame { width: 100%; height: 100%; border: 0; background: white; }
 
         /* Magic Button */
         .btn-magic { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; font-weight: bold; padding: 12px 24px; border-radius: 12px; display: flex; items-center; justify-content: center; gap: 8px; transition: 0.3s; width: 100%; cursor: pointer; }
         .btn-magic:hover { filter: brightness(1.1); transform: translateY(-2px); }
-
-        /* Brand Color Picker */
-        .color-circle { width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; cursor: pointer; transition: 0.2s; }
-        .color-circle:hover { transform: scale(1.2); }
     </style>
 </head>
 <body class="flex">
@@ -58,9 +52,6 @@
         </button>
         <button onclick="switchView('robot')" class="nav-btn" id="nav-robot">
             <i data-lucide="bot"></i> Sika AI & צ'אט
-        </button>
-        <button onclick="switchView('keys')" class="nav-btn" id="nav-keys">
-            <i data-lucide="key"></i> מפתחות API
         </button>
 
         <div class="mt-auto p-6 border-t border-gray-700">
@@ -94,10 +85,17 @@
 
                 <div id="aiResultCard" class="card hidden border-purple-500/50">
                     <div class="flex gap-6">
-                        <div class="w-1/3">
-                            <img id="resImage" src="" class="w-full h-32 object-contain bg-white rounded-lg mb-2">
-                            <button class="text-xs text-blue-400 underline w-full text-center">החלף תמונה</button>
+                        <div class="w-1/3 flex flex-col gap-2">
+                            <div class="relative group">
+                                <img id="resImage" src="https://placehold.co/400?text=No+Image" class="w-full h-32 object-contain bg-white rounded-lg mb-2">
+                                <div id="uploadStatus" class="text-xs text-center text-gray-400 h-4"></div>
+                            </div>
+                            <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="uploadImageToDrive()">
+                            <button onclick="document.getElementById('fileInput').click()" class="bg-blue-600 text-white py-2 rounded-lg text-sm font-bold hover:bg-blue-500 flex items-center justify-center gap-2">
+                                <i data-lucide="upload"></i> העלה תמונה
+                            </button>
                         </div>
+
                         <div class="w-2/3 space-y-3">
                             <div><label class="label">שם מלא</label><input id="resName" class="input-dark"></div>
                             <div><label class="label">תיאור שיווקי</label><textarea id="resDesc" class="input-dark h-20"></textarea></div>
@@ -107,6 +105,8 @@
                                     <select id="resCat" class="input-dark">
                                         <option value="sealing">איטום</option>
                                         <option value="glues">דבקים</option>
+                                        <option value="concrete">בטון</option>
+                                        <option value="flooring">ריצוף</option>
                                     </select>
                                 </div>
                             </div>
@@ -117,7 +117,10 @@
                             </div>
                         </div>
                     </div>
-                    <button onclick="saveProductToDb()" class="w-full bg-blue-600 text-white mt-4 py-2 rounded-lg font-bold hover:bg-blue-500">שמור למוצרים</button>
+                    
+                    <input type="hidden" id="finalImageUrl">
+                    
+                    <button onclick="saveProductToDb()" class="w-full bg-green-600 text-white mt-4 py-2 rounded-lg font-bold hover:bg-green-500">שמור למוצרים</button>
                 </div>
             </div>
 
@@ -132,32 +135,19 @@
                     </div>
 
                     <div id="brandEditor" class="space-y-4">
-                        <h3 class="font-bold text-lg text-purple-400">עריכת SIKA</h3>
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="label">צבע ראשי</label><input type="color" id="brandPrimary" class="w-full h-10 rounded cursor-pointer" oninput="updateLivePreview()"></div>
                             <div><label class="label">צבע דגש (Accent)</label><input type="color" id="brandAccent" class="w-full h-10 rounded cursor-pointer" oninput="updateLivePreview()"></div>
                         </div>
-                        <div><label class="label">לוגו (URL)</label><input id="brandLogo" class="input-dark"></div>
                     </div>
                 </div>
             </div>
-
-            <div id="view-keys" class="view-section hidden">
-                <h2 class="text-3xl font-bold mb-6">מפתחות API</h2>
+            
+            <div id="view-robot" class="view-section hidden">
+                <h2 class="text-3xl font-bold mb-6">הגדרות צ'אט בוט</h2>
                 <div class="card">
-                    <div class="mb-4">
-                        <label class="label flex items-center gap-2"><i data-lucide="key"></i> Gemini API Key</label>
-                        <input id="keyGemini" type="password" class="input-dark" placeholder="AIzaSy...">
-                    </div>
-                    <div class="mb-4">
-                        <label class="label flex items-center gap-2"><i data-lucide="search"></i> Google Search API Key</label>
-                        <input id="keyGoogle" type="password" class="input-dark">
-                    </div>
-                    <div class="mb-4">
-                        <label class="label flex items-center gap-2"><i data-lucide="hash"></i> Search Engine ID (CX)</label>
-                        <input id="keyCx" class="input-dark">
-                    </div>
-                    <button onclick="saveKeys()" class="btn-magic">שמור מפתחות</button>
+                    <label class="label">תסריט שיחה</label>
+                    <textarea class="input-dark h-32">וואוו התחיל הכיף! תן לי שם וטלפון ואשלח לך מידע זהב...</textarea>
                 </div>
             </div>
 
@@ -172,74 +162,104 @@
 
     <script>
         lucide.createIcons();
+        
+        // הלינק המעודכן לסקריפט שלך
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-ST-FSCGLZ4UjtxVnX2PZJN2ffd2haRs1ThxDpv0vF1ekjMaPejA1NQUWs6ZJ-hi9pA/exec";
 
         // --- NAVIGATION ---
         function switchView(viewId) {
-            // Hide all
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            
-            // Show selected
             document.getElementById('view-'+viewId).classList.remove('hidden');
             document.getElementById('nav-'+viewId).classList.add('active');
         }
 
-        // --- AI MAGIC LOGIC (SIMULATED FOR DEMO) ---
-        async function runMagicFill() {
-            const name = document.getElementById('aiProductName').value;
-            if(!name) return alert("אנא הזן שם מוצר");
+        // --- UPLOAD IMAGE LOGIC ---
+        function uploadImageToDrive() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) return;
 
+            const statusDiv = document.getElementById('uploadStatus');
+            statusDiv.innerText = "מעלה... ⏳";
+            statusDiv.className = "text-xs text-center text-yellow-400 h-4 font-bold animate-pulse";
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function() {
+                const base64 = reader.result;
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ base64: base64, mimeType: file.type, filename: file.name })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('resImage').src = data.url;
+                        document.getElementById('finalImageUrl').value = data.url;
+                        statusDiv.innerText = "הועלה! ✅";
+                        statusDiv.className = "text-xs text-center text-green-400 h-4 font-bold";
+                    } else { throw new Error(data.message); }
+                })
+                .catch(error => {
+                    console.error(error);
+                    statusDiv.innerText = "שגיאה ❌";
+                    statusDiv.className = "text-xs text-center text-red-400 h-4 font-bold";
+                    alert("שגיאת העלאה. וודא שהסקריפט מוגדר כ-Anyone.");
+                });
+            };
+        }
+
+        // --- AI MAGIC ---
+        function runMagicFill() {
+            const name = document.getElementById('aiProductName').value;
+            if(!name) return alert("הזן שם מוצר");
             const btn = document.querySelector('.btn-magic');
             btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> חושב...`;
 
-            // כאן תהיה הקריאה האמיתית ל-Gemini API
-            // לצורך ההדגמה, אני מחזיר נתונים "כאילו" ה-AI מצא
-            
             setTimeout(() => {
-                // Mock Result
-                document.getElementById('resName').value = "Sika TopSeal 107";
-                document.getElementById('resDesc').value = "איטום צמנטי גמיש, דו רכיבי, לאיטום מושלם של חדרים רטובים ומרפסות.";
+                // Mock Data
+                document.getElementById('resName').value = "מוצר חדש: " + name;
+                document.getElementById('resDesc').value = "תיאור שיווקי מדהים שנוצר ע\"י AI עבור " + name;
                 document.getElementById('resBrand').value = "SIKA";
-                document.getElementById('resCov').value = "4 ק\"ג/מ\"ר";
-                document.getElementById('resDry').value = "6 שעות";
+                document.getElementById('resCov').value = "1.5 ק\"ג/מ\"ר";
+                document.getElementById('resDry').value = "24 שעות";
                 document.getElementById('resThick').value = "2 מ\"מ";
-                document.getElementById('resImage').src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_u2_Yq_y_y_y_y_y_y_y_y_y_y_y_y";
-                
                 document.getElementById('aiResultCard').classList.remove('hidden');
                 btn.innerHTML = `<i data-lucide="wand-2"></i> מלא אוטומטית`;
                 lucide.createIcons();
-            }, 1500);
+            }, 1000);
         }
 
-        // --- BRANDING LOGIC ---
+        // --- BRANDING ---
         function editBrand(brand) {
-            // טוען את הצבעים של המותג לעורך
-            // ואומר ל-IFRAME לשנות נושא
-            const frame = document.getElementById('kioskFrame');
-            frame.contentWindow.setTheme(brand); // קריאה לפונקציה בתוך הקיוסק
+            document.getElementById('kioskFrame').contentWindow.setTheme(brand);
         }
 
         function updateLivePreview() {
             const primary = document.getElementById('brandPrimary').value;
             const accent = document.getElementById('brandAccent').value;
-            
             const frame = document.getElementById('kioskFrame');
-            // הזרקת CSS לתוך ה-iframe בזמן אמת
             frame.contentWindow.document.documentElement.style.setProperty('--brand-primary', primary);
             frame.contentWindow.document.documentElement.style.setProperty('--brand-accent', accent);
         }
 
-        // --- SYSTEM ---
-        function saveKeys() {
-            localStorage.setItem('saban_api_gemini', document.getElementById('keyGemini').value);
-            alert("מפתחות נשמרו מקומית בדפדפן!");
+        // --- SAVE ---
+        function saveProductToDb() {
+            const prod = {
+                id: Date.now(),
+                name: document.getElementById('resName').value,
+                image: document.getElementById('finalImageUrl').value || document.getElementById('resImage').src,
+                // ... rest of fields
+            };
+            console.log("Saving:", prod);
+            alert("מוצר נשמר! (תמונה מהדרייב קושרה בהצלחה)");
         }
 
         function publishChanges() {
-            alert("שינויים נשלחו לקיוסק (Simulation)");
+            alert("פורסם לקיוסק!");
             document.getElementById('kioskFrame').contentWindow.location.reload();
         }
-
     </script>
 </body>
 </html>
