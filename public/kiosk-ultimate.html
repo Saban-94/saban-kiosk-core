@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saban Pro Kiosk - Ultimate Live</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- BRANDING --- */
+        :root {
+            --sika-yellow: #FFC500;
+            --sika-red: #E3000F;
+            --sika-black: #111111;
+            --glass-bg: rgba(255, 255, 255, 0.95);
+        }
+        body { font-family: 'Heebo', sans-serif; background: #f0f2f5; overflow: hidden; user-select: none; }
+
+        /* --- SIKA AI ROBOT ANIMATIONS --- */
+        #sikaAiWrapper {
+            position: fixed;
+            z-index: 9999;
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); /* תנועה חלקה וקפיצית */
+            pointer-events: none; /* כדי לא להפריע ללחיצות כשהוא בצד */
+        }
+
+        /* הדמות עצמה (התמונה) */
+        .robot-character {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+            pointer-events: auto; /* כדי שנוכל ללחוץ עליו */
+            cursor: pointer;
+        }
+
+        /* אנימציית "נשימה" (ריחוף עדין) */
+        .breathing-effect {
+            animation: breathe 4s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.02); }
+        }
+
+        /* מצבים (States) של הרובוט והחלון */
+        
+        /* 1. מצב רגיל (בצד) */
+        .state-corner {
+            bottom: -30px;
+            right: -30px;
+            width: 250px;
+            height: 250px;
+        }
+        .state-corner:hover { transform: scale(1.1); }
+
+        /* 2. מצב טופס ליד (מתחיל לגדול) */
+        .state-lead {
+            bottom: 50%;
+            right: 50%;
+            transform: translate(50%, 50%);
+            width: 400px;
+            height: auto;
+        }
+
+        /* 3. מצב צ'אט פעיל (זז הצידה ומפנה מקום לחלון) */
+        .state-chat-active {
+            bottom: 50%;
+            right: 65%; /* זז שמאלה כדי לפנות מקום לצ'אט */
+            transform: translateY(50%) scale(1.2);
+            width: 300px;
+        }
+
+        /* --- THE CHAT WINDOW --- */
+        #aiWindow {
+            position: absolute;
+            bottom: 20px; /* ממוקם יחסית לרובוט או למסך */
+            left: -320px; /* מוסתר בהתחלה */
+            width: 380px;
+            background: var(--glass-bg);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            border: 4px solid var(--sika-yellow);
+            overflow: hidden;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* כשהצ'אט נפתח למרכז המסך */
+        .state-lead #aiWindow {
+            opacity: 1;
+            transform: scale(1);
+            bottom: 100%; /* מעל הרובוט */
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 20px;
+        }
+
+        .state-chat-active #aiWindow {
+            opacity: 1;
+            transform: scale(1);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-40%, -50%); /* ממורכז ליד הרובוט */
+            width: 500px;
+            height: 600px;
+        }
+
+        /* --- UI COMPONENTS --- */
+        .sidebar-btn { @apply flex flex-col items-center justify-center p-4 text-gray-400 rounded-xl transition-all duration-300 hover:bg-white hover:text-black hover:shadow-md; }
+        .sidebar-btn.active { @apply bg-[#111] text-[#FFC500] shadow-lg transform scale-105; }
+        
+        .product-card { @apply bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-transparent hover:border-[#2563eb] h-80 flex flex-col cursor-pointer hover:-translate-y-2; }
+        
+        .cat-btn { @apply flex items-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 font-bold text-gray-600 transition hover:border-[#E3000F] hover:text-[#E3000F]; }
+        .cat-btn.active { @apply bg-[#111] text-white border-[#111]; }
+
+        /* Modal Overlay */
+        .modal-overlay { @apply fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity duration-300; }
+        .modal-overlay.open { @apply flex animate-fade-in; }
+        
+        /* Tech Badge */
+        .tech-badge { @apply bg-gray-50 p-2 rounded-lg text-center border border-gray-100 flex flex-col items-center gap-1; }
+        .tech-val { @apply font-bold text-gray-800 text-sm; }
+        .tech-label { @apply text-[10px] text-gray-400 font-bold uppercase; }
+
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="flex h-screen w-screen">
+
+    <nav class="w-32 bg-white h-full flex flex-col items-center py-8 shadow-2xl z-40 relative">
+        <div class="mb-10 w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center p-2">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Sika_AG_logo.svg/1200px-Sika_AG_logo.svg.png" class="w-full h-full object-contain">
+        </div>
+        <button onclick="switchTab('catalog')" id="btn-catalog" class="sidebar-btn active mb-4"><i data-lucide="layout-grid" size="32"></i><span class="text-xs font-bold mt-1">קטלוג</span></button>
+        <button onclick="switchTab('calculator')" id="btn-calculator" class="sidebar-btn"><i data-lucide="calculator" size="32"></i><span class="text-xs font-bold mt-1">מחשבון</span></button>
+        <div class="mt-auto opacity-40 hover:opacity-100 transition"><button class="sidebar-btn"><i data-lucide="settings" size="24"></i></button></div>
+    </nav>
+
+    <main class="flex-1 flex flex-col relative h-full overflow-hidden p-8">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-4xl font-black text-gray-900">Saban <span class="text-[#E3000F]">Center</span></h1>
+                <p class="text-gray-400 font-medium">המרכז המקצועי לבנייה ושיפוץ</p>
+            </div>
+            <div class="relative w-[500px]">
+                <input id="searchInput" oninput="filterProducts()" type="text" placeholder="חפש מוצר, פתרון או בעיה..." class="w-full bg-white p-5 pr-14 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#E3000F] text-lg font-medium">
+                <i data-lucide="search" class="absolute right-5 top-5 text-gray-400" size="24"></i>
+            </div>
+        </header>
+
+        <div class="flex gap-4 mb-8 overflow-x-auto pb-2 no-scrollbar">
+            <button class="cat-btn active">הכל</button>
+            <button class="cat-btn"><i data-lucide="droplets" size="18"></i> איטום</button>
+            <button class="cat-btn"><i data-lucide="layers" size="18"></i> ריצוף</button>
+            <button class="cat-btn"><i data-lucide="hammer" size="18"></i> בטון</button>
+            <button class="cat-btn"><i data-lucide="paint-bucket" size="18"></i> צבע</button>
+        </div>
+
+        <div id="view-catalog" class="flex-1 overflow-y-auto pb-32"> <div id="productGrid" class="grid grid-cols-4 gap-6">
+                </div>
+        </div>
+
+        <div id="view-calculator" class="hidden h-full flex items-center justify-center">
+            <div class="bg-white p-12 rounded-[40px] shadow-2xl w-full max-w-3xl text-center">
+                <h2 class="text-5xl font-black mb-8">מחשבון כמויות</h2>
+                <div class="grid grid-cols-2 gap-8 mb-8">
+                    <input id="calcArea" type="number" placeholder="שטח (מ''ר)" class="bg-gray-50 border-2 border-gray-100 p-6 rounded-2xl text-2xl font-bold outline-none focus:border-[#E3000F]">
+                    <input id="calcConsumption" type="number" placeholder="צריכה (ק''ג למ''ר)" class="bg-gray-50 border-2 border-gray-100 p-6 rounded-2xl text-2xl font-bold outline-none focus:border-[#E3000F]">
+                </div>
+                <div class="bg-black text-white p-8 rounded-3xl mb-8">
+                    <div class="text-sm text-gray-400 uppercase font-bold tracking-widest mb-2">סה"כ חומר נדרש</div>
+                    <div class="text-6xl font-black" id="resKg">0 <span class="text-2xl text-gray-500">ק"ג</span></div>
+                </div>
+                <button onclick="calculate()" class="bg-[#E3000F] text-white w-full py-5 rounded-2xl text-2xl font-black hover:bg-red-600 transition shadow-xl">בצע חישוב</button>
+            </div>
+        </div>
+    </main>
+
+    <div id="sikaAiWrapper" class="state-corner">
+        
+        <div class="robot-character breathing-effect" onclick="triggerInteraction()">
+            <img src="https://saban-kiosk-core.pages.dev/admin/sika-ai.png" class="w-full h-full object-contain">
+            
+            <div id="ctaBubble" class="absolute -top-10 right-10 bg-white px-5 py-3 rounded-2xl shadow-lg border-2 border-[#E3000F] whitespace-nowrap animate-bounce">
+                <span class="font-black text-lg">צריך עזרה? לחץ עלי!</span> 🤖
+            </div>
+        </div>
+
+        <div id="aiWindow">
+            <div class="bg-[#111] p-4 text-white flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-[#FFC500] rounded-full flex items-center justify-center text-black font-bold border-2 border-white">Ai</div>
+                    <span class="font-bold">Sika Expert</span>
+                </div>
+                <button onclick="event.stopPropagation(); closeInteraction()" class="hover:text-red-500"><i data-lucide="x"></i></button>
+            </div>
+
+            <div class="flex-1 p-6 bg-white overflow-y-auto relative">
+                
+                <div id="leadForm" class="flex flex-col h-full justify-center text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600"><i data-lucide="message-circle" size="32"></i></div>
+                    <h3 class="text-2xl font-black mb-2">בוא נתחיל!</h3>
+                    <p class="text-gray-500 mb-6 text-sm">כדי שאוכל לתת לך שירות VIP ולשלוח לך את המפרט לנייד, אני צריך להכיר אותך.</p>
+                    
+                    <input type="text" id="leadName" placeholder="שם מלא" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 font-bold focus:border-[#E3000F] outline-none">
+                    <input type="tel" id="leadPhone" placeholder="נייד (050...)" class="w-full bg-gray-50 border p-3 rounded-xl mb-4 font-bold focus:border-[#E3000F] outline-none">
+                    
+                    <button onclick="submitLead()" class="bg-[#E3000F] text-white w-full py-4 rounded-xl font-bold shadow-lg hover:bg-red-600 transition flex items-center justify-center gap-2">
+                        התחבר לצ'אט <i data-lucide="arrow-left"></i>
+                    </button>
+                </div>
+
+                <div id="chatInterface" class="hidden h-full flex flex-col">
+                    <div id="chatHistory" class="flex-1 space-y-4 overflow-y-auto pb-4">
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center">🤖</div>
+                            <div class="bg-gray-100 p-3 rounded-2xl rounded-tr-none text-sm text-gray-800">
+                                היי <span id="userNameInsert" class="font-bold"></span>! איזה כיף שהצטרפת.<br>אני יכול לעזור לך למצוא מוצר, לחשב כמויות או לפתור בעיה. מה על הפרק?
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-auto pt-2 border-t flex gap-2">
+                        <input id="chatInput" type="text" placeholder="כתוב הודעה..." class="flex-1 bg-gray-50 border p-3 rounded-xl outline-none focus:border-[#E3000F]">
+                        <button onclick="sendMessage()" class="bg-[#111] text-white p-3 rounded-xl"><i data-lucide="send"></i></button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="productModal" class="modal-overlay">
+        <div class="modal-content relative flex">
+            <button onclick="closeModal()" class="absolute top-6 left-6 z-20 bg-gray-100 p-3 rounded-full hover:bg-gray-200"><i data-lucide="x" size="24"></i></button>
+            <div class="w-[40%] bg-gray-50 p-10 flex flex-col items-center justify-center border-l border-gray-100">
+                <img id="mImage" src="" class="max-h-[400px] max-w-full object-contain mix-blend-multiply transition duration-500 hover:scale-105">
+            </div>
+            <div class="w-[60%] p-12 overflow-y-auto bg-white flex flex-col">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2" id="mBrand">BRAND</div>
+                <h2 class="text-5xl font-black mb-6 text-gray-900 leading-tight" id="mName">שם מוצר</h2>
+                <div class="bg-yellow-50 p-6 rounded-2xl border-r-4 border-[#E3000F] mb-8"><p id="mDesc" class="text-xl leading-relaxed text-gray-800"></p></div>
+                
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="tech-badge"><i data-lucide="maximize" class="text-blue-500 mb-1"></i><span class="tech-label">כיסוי</span><span class="tech-val" id="mCov">-</span></div>
+                    <div class="tech-badge"><i data-lucide="clock" class="text-blue-500 mb-1"></i><span class="tech-label">ייבוש</span><span class="tech-val" id="mDry">-</span></div>
+                    <div class="tech-badge"><i data-lucide="layers" class="text-blue-500 mb-1"></i><span class="tech-label">עובי</span><span class="tech-val" id="mThick">-</span></div>
+                </div>
+
+                <div class="mt-auto pt-6 border-t flex gap-4">
+                    <button onclick="openSmartCalc()" class="flex-1 bg-white border-2 border-gray-200 text-gray-800 font-bold py-4 rounded-xl hover:border-[#E3000F]">מחשבון</button>
+                    <button onclick="closeModal(); triggerInteraction()" class="flex-[2] bg-[#111] text-white font-bold py-4 rounded-xl shadow-xl flex items-center justify-center gap-2"><i data-lucide="bot"></i> התייעץ עם Sika AI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        // --- DATA ---
+        const products = [
+            { id: 1, name: "Sika TopSeal 107", brand: "SIKA", desc: "איטום צמנטי גמיש לחדרים רטובים.", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_u2_Yq_y_y_y_y_y_y_y_y_y_y_y_y", tech: {cov: "1.5 ק\"ג", dry: "6 שעות", thick: "2 מ\"מ"} },
+            { id: 2, name: "Sikaflex 11FC+", brand: "SIKA", desc: "דבק ואיטום פוליאוריטני רב תכליתי.", image: "https://placehold.co/400?text=Sikaflex", tech: {cov: "משתנה", dry: "24 שעות", thick: "-"} },
+            { id: 3, name: "Thermokir 603", brand: "THERMOKIR", desc: "טיח תרמי לבידוד מעולה.", image: "https://placehold.co/400?text=Thermo+603", tech: {cov: "14 ק\"ג", dry: "48 שעות", thick: "30 מ\"מ"} },
+            { id: 4, name: "Mister Fix 109", brand: "MISTER FIX", desc: "דבק אקרילי לאריחים.", image: "https://placehold.co/400?text=Glue+109", tech: {cov: "5 ק\"ג", dry: "24 שעות", thick: "5 מ\"מ"} }
+        ];
+        
+        let currentProduct = null;
+
+        // --- INIT ---
+        function init() {
+            renderGrid(products);
+        }
+
+        // --- ROBOT INTERACTION LOGIC (THE MAGIC) ---
+        function triggerInteraction() {
+            const wrapper = document.getElementById('sikaAiWrapper');
+            const bubble = document.getElementById('ctaBubble');
+            
+            // 1. Hide bubble
+            bubble.style.opacity = '0';
+            
+            // 2. Move Robot to Center (Lead Form State)
+            wrapper.classList.remove('state-corner');
+            wrapper.classList.remove('state-chat-active');
+            wrapper.classList.add('state-lead');
+        }
+
+        function closeInteraction() {
+            const wrapper = document.getElementById('sikaAiWrapper');
+            const bubble = document.getElementById('ctaBubble');
+            
+            // Reset to corner
+            wrapper.classList.remove('state-lead');
+            wrapper.classList.remove('state-chat-active');
+            wrapper.classList.add('state-corner');
+            
+            // Show bubble again
+            setTimeout(() => bubble.style.opacity = '1', 800);
+            
+            // Reset internal views
+            setTimeout(() => {
+                document.getElementById('leadForm').classList.remove('hidden');
+                document.getElementById('chatInterface').classList.add('hidden');
+            }, 600);
+        }
+
+        function submitLead() {
+            const name = document.getElementById('leadName').value;
+            const phone = document.getElementById('leadPhone').value;
+            
+            if(!name || !phone) return alert("אחי, מלא פרטים כדי שנתקדם!");
+            
+            // --- ANIMATION: LEAD -> CHAT ---
+            const wrapper = document.getElementById('sikaAiWrapper');
+            
+            // 1. Change State (Move Robot, Expand Window)
+            wrapper.classList.remove('state-lead');
+            wrapper.classList.add('state-chat-active');
+            
+            // 2. Switch Content
+            document.getElementById('leadForm').classList.add('hidden');
+            document.getElementById('chatInterface').classList.remove('hidden');
+            document.getElementById('chatInterface').classList.add('flex');
+            
+            // 3. Update Name
+            document.getElementById('userNameInsert').innerText = name;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value;
+            if(!text) return;
+            
+            const history = document.getElementById('chatHistory');
+            history.innerHTML += `
+                <div class="flex justify-end">
+                    <div class="bg-black text-white p-3 rounded-2xl rounded-br-none max-w-[80%] text-sm">${text}</div>
+                </div>`;
+            input.value = "";
+            history.scrollTop = history.scrollHeight;
+            
+            // Simulate AI Reply
+            setTimeout(() => {
+                history.innerHTML += `
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center">🤖</div>
+                        <div class="bg-gray-100 p-3 rounded-2xl rounded-tr-none text-sm text-gray-800 max-w-[80%]">
+                            אני בודק את זה... (כאן נחבר את ג'מיני האמיתי)
+                        </div>
+                    </div>`;
+                history.scrollTop = history.scrollHeight;
+            }, 1000);
+        }
+
+        // --- CATALOG & TOOLS ---
+        function renderGrid(list) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = list.map(p => `
+                <div onclick="openProduct(${p.id})" class="product-card group bg-white rounded-3xl p-4 shadow-sm hover:shadow-xl transition border border-transparent hover:border-blue-500 cursor-pointer h-72 flex flex-col">
+                    <div class="h-1/2 flex items-center justify-center">
+                        <img src="${p.image}" class="max-h-full max-w-full object-contain mix-blend-multiply group-hover:scale-110 transition">
+                    </div>
+                    <div class="mt-4">
+                        <div class="text-xs text-gray-400 font-bold tracking-widest uppercase">${p.brand}</div>
+                        <h3 class="text-lg font-bold text-gray-900 leading-tight">${p.name}</h3>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.openProduct = (id) => {
+            const p = products.find(x => x.id === id);
+            currentProduct = p;
+            document.getElementById('mName').innerText = p.name;
+            document.getElementById('mDesc').innerText = p.desc;
+            document.getElementById('mImage').src = p.image;
+            document.getElementById('mBrand').innerText = p.brand;
+            
+            document.getElementById('mCov').innerText = p.tech.cov;
+            document.getElementById('mDry').innerText = p.tech.dry;
+            document.getElementById('mThick').innerText = p.tech.thick;
+            
+            document.getElementById('productModal').classList.add('open');
+        }
+
+        window.closeModal = () => document.getElementById('productModal').classList.remove('open');
+
+        window.openSmartCalc = () => {
+            closeModal();
+            switchTab('calculator');
+        }
+
+        window.calculate = () => {
+            const area = document.getElementById('calcArea').value;
+            const cons = document.getElementById('calcConsumption').value;
+            if(area && cons) document.getElementById('resKg').innerHTML = (area * cons).toFixed(1) + ' <span class="text-2xl text-gray-500">ק"ג</span>';
+        }
+
+        window.switchTab = (tab) => {
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-'+tab).classList.add('active');
+            if(tab === 'catalog') {
+                document.getElementById('view-catalog').classList.remove('hidden');
+                document.getElementById('view-calculator').classList.add('hidden');
+            } else {
+                document.getElementById('view-catalog').classList.add('hidden');
+                document.getElementById('view-calculator').classList.remove('hidden');
+                document.getElementById('view-calculator').classList.add('flex');
+            }
+        }
+
+        window.filterProducts = () => {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            renderGrid(products.filter(p => p.name.toLowerCase().includes(term)));
+        }
+
+        init();
+    </script>
+</body>
+</html>
