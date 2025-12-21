@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sika AI - The Premiere</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sika-yellow: #FFC500;
+            --sika-red: #E3000F;
+            --sika-black: #111111;
+        }
+        body { font-family: 'Heebo', sans-serif; overflow: hidden; background: #000; color: white; }
+
+        /* --- STAGE ELEMENTS --- */
+        #stage { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+        
+        /* Backgrounds */
+        .bg-dark { background: #111; position: absolute; inset: 0; z-index: 10; transition: 1s; }
+        .bg-kiosk { 
+            background: #f8fafc; position: absolute; inset: 0; z-index: 5; opacity: 0; transition: 1s; 
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 20px 20px;
+        }
+        .bg-kiosk.active { opacity: 1; }
+
+        /* The Star: Sika AI */
+        #sikaRobot {
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            width: 300px;
+            z-index: 100;
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 20px 50px rgba(0,0,0,0.5));
+            cursor: pointer;
+        }
+
+        /* Animations */
+        .anim-peek { transform: translate(-50px, -50px) rotate(-10deg); }
+        .anim-center { bottom: 10%; right: 50%; transform: translateX(50%) scale(1.5); }
+        .anim-side { bottom: 0; right: 60%; transform: scale(1.1); }
+        .anim-knock { animation: knock 0.5s infinite; }
+        .anim-float { animation: float 3s ease-in-out infinite; }
+        
+        @keyframes knock { 0% { transform: translate(-50px, -50px) rotate(-10deg); } 50% { transform: translate(-60px, -50px) rotate(-10deg); } 100% { transform: translate(-50px, -50px) rotate(-10deg); } }
+        @keyframes float { 0%, 100% { transform: translateX(50%) scale(1.5) translateY(0); } 50% { transform: translateX(50%) scale(1.5) translateY(-20px); } }
+
+        /* Speech Bubble */
+        .bubble {
+            position: absolute;
+            top: 20%; right: 50%; transform: translateX(50%);
+            background: white; color: black;
+            padding: 30px; border-radius: 40px;
+            font-size: 24px; font-weight: bold;
+            border: 5px solid var(--sika-yellow);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px; text-align: center;
+            opacity: 0; transition: 0.5s; z-index: 101;
+        }
+        .bubble.show { opacity: 1; top: 30%; }
+        .bubble::after { content: ''; position: absolute; bottom: -20px; right: 50%; border-width: 20px; border-style: solid; border-color: white transparent transparent transparent; }
+
+        /* Branding */
+        .sika-logo-overlay { position: absolute; top: 40px; left: 40px; width: 120px; z-index: 1000; mix-blend-mode: multiply; }
+        
+        /* Typing Cursor */
+        .cursor { display: inline-block; width: 3px; height: 24px; background: var(--sika-red); animation: blink 0.8s infinite; margin-right: 5px; vertical-align: middle; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Kiosk Simulation Elements (CSS Only) */
+        .sim-header { position: absolute; top: 0; left: 0; width: 100%; height: 100px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; padding: 0 150px 0 50px; }
+        .sim-card { background: white; border-radius: 20px; width: 220px; height: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); position: absolute; top: 150px; transition: 0.5s; opacity: 0; transform: translateY(50px); }
+        .sim-card.show { opacity: 1; transform: translateY(0); }
+        
+        /* Start Button */
+        #startBtn {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--sika-red); color: white; padding: 20px 60px; font-size: 30px; font-weight: 900;
+            border-radius: 100px; cursor: pointer; z-index: 200; box-shadow: 0 0 50px rgba(227, 0, 15, 0.5);
+            transition: 0.3s; animation: pulse 2s infinite;
+        }
+        #startBtn:hover { transform: translate(-50%, -50%) scale(1.1); }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(227, 0, 15, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(227, 0, 15, 0); } 100% { box-shadow: 0 0 0 0 rgba(227, 0, 15, 0); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="stage">
+        
+        <button id="startBtn" onclick="startShow()">🔥 בואו נתחיל!</button>
+
+        <div class="bg-dark" id="layerDark"></div>
+        
+        <div class="bg-kiosk" id="layerKiosk">
+            <div class="sim-header">
+                <h1 class="text-4xl font-black text-gray-800">Saban <span class="text-[#E3000F]">Pro</span> Center</h1>
+                <div class="mr-auto flex gap-4">
+                    <span class="bg-[#111] text-[#FFC500] px-4 py-2 rounded-full font-bold">SIKA</span>
+                    <span class="bg-white border px-4 py-2 rounded-full font-bold text-gray-400">Thermokir</span>
+                </div>
+            </div>
+            <div class="sim-card" style="right: 50px; transition-delay: 0.1s;"></div>
+            <div class="sim-card" style="right: 300px; transition-delay: 0.2s;"></div>
+            <div class="sim-card" style="right: 550px; transition-delay: 0.3s;"></div>
+            <div class="sim-card" style="right: 800px; transition-delay: 0.4s;"></div>
+        </div>
+
+        <img src="logo sika.jpg" class="sika-logo-overlay">
+
+        <img src="1000187746.jpg" id="sikaRobot" class="hidden">
+
+        <div class="bubble" id="speechBubble">
+            <span id="typeTarget"></span><span class="cursor"></span>
+        </div>
+
+    </div>
+
+    <script>
+        // --- SCRIPT & DIRECTOR ---
+        const script = [
+            {
+                text: "טוק טוק... ✊ יש מישהו בבית?",
+                action: "knock",
+                delay: 1000
+            },
+            {
+                text: "אהלן חברים! 👋 נעים מאוד, אני Sika-AI. נולדתי ממש אתמול, בשבת חנוכה... אני הנס החדש שלכם! ✨",
+                action: "center",
+                delay: 3000
+            },
+            {
+                text: "עזבו אתכם מטקסטים משעממים. בואו תראו מה רמי ואני בנינו פה. תראו איזה יופי! 😍",
+                action: "reveal_kiosk",
+                delay: 4000
+            },
+            {
+                text: "אני לא סתם פרצוף יפה (למרות שתודו שאני חתיך 😎). אני המוח מאחורי הקיוסק.",
+                action: "float",
+                delay: 4000
+            },
+            {
+                text: "תשאלו אותי על Sika Ceram 255? אני אספר לכם שהוא גמיש בטירוף ונדבק לקיר כמו שרמי נדבק למטרה! 💪",
+                action: "excited",
+                delay: 5000
+            },
+            {
+                text: "והשוס הגדול? הלידים! 🎯 אני לוקח לקוח, משיג טלפון, והופך אותו לליד חם שמגיע ישר לאלי!",
+                action: "serious",
+                delay: 5000
+            },
+            {
+                text: "אז... הקניון מוכן. אני מוכן. גילאר, אתם מוכנים למהפכה? 🚀",
+                action: "center",
+                delay: 4000
+            }
+        ];
+
+        let currentStep = 0;
+
+        function startShow() {
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('sikaRobot').classList.remove('hidden');
+            nextStep();
+        }
+
+        function nextStep() {
+            if (currentStep >= script.length) return; // End
+
+            const scene = script[currentStep];
+            const robot = document.getElementById('sikaRobot');
+            const bubble = document.getElementById('speechBubble');
+            
+            // 1. Actions
+            if (scene.action === 'knock') {
+                robot.className = 'anim-peek anim-knock';
+            } 
+            else if (scene.action === 'center') {
+                robot.className = 'anim-center';
+                bubble.classList.add('show');
+            }
+            else if (scene.action === 'reveal_kiosk') {
+                document.getElementById('layerDark').style.opacity = '0';
+                document.getElementById('layerKiosk').classList.add('active');
+                document.querySelectorAll('.sim-card').forEach(c => c.classList.add('show'));
+                robot.className = 'anim-side';
+                bubble.style.top = "10%";
+            }
+            else if (scene.action === 'float') {
+                robot.classList.add('anim-float');
+            }
+
+            // 2. Typing
+            typeWriter(scene.text, () => {
+                // Wait for delay then next
+                setTimeout(() => {
+                    currentStep++;
+                    nextStep();
+                }, scene.delay);
+            });
+        }
+
+        function typeWriter(text, callback) {
+            const target = document.getElementById('typeTarget');
+            target.innerHTML = '';
+            let i = 0;
+            
+            // Play typing sound logic could go here
+            
+            function type() {
+                if (i < text.length) {
+                    target.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, 40); // Typing speed
+                } else {
+                    callback();
+                }
+            }
+            type();
+        }
+
+    </script>
+</body>
+</html>
