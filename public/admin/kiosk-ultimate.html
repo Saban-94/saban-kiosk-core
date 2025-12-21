@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sika Studio - מרכז השליטה</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Heebo', sans-serif; background: #1e1e1e; color: white; }
+        .panel { background: #2a2a2a; border: 1px solid #444; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .input-dark { background: #111; border: 1px solid #555; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 10px; }
+        .btn-action { background: #E3000F; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-action:hover { background: #ff1f1f; }
+        .preview-box { border: 2px dashed #555; height: 150px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: #000; position: relative; overflow: hidden; }
+        
+        /* Robot Preview */
+        .robot-preview { width: 60px; position: absolute; transition: all 0.5s; }
+        .pos-br { bottom: 10px; right: 10px; }
+        .pos-bl { bottom: 10px; left: 10px; }
+        .pos-tr { top: 10px; right: 10px; }
+    </style>
+</head>
+<body class="p-8">
+
+    <header class="flex justify-between items-center mb-8 border-b border-gray-700 pb-4">
+        <div>
+            <h1 class="text-3xl font-black text-[#FFC500]">Sika Studio 🎛️</h1>
+            <p class="text-gray-400">ניהול המוח, העיצוב והמלאי</p>
+        </div>
+        <button onclick="saveAll()" class="btn-action flex items-center gap-2"><i data-lucide="save"></i> שמור ועדכן קיוסק</button>
+    </header>
+
+    <div class="grid grid-cols-2 gap-8">
+        
+        <div class="panel">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-[#FFC500]"><i data-lucide="bot"></i> הגדרות Sika AI</h2>
+            
+            <label class="text-sm text-gray-400">מיקום הרובוט במסך</label>
+            <select id="botPosition" class="input-dark" onchange="updatePreview()">
+                <option value="br">פינה ימנית תחתונה (ברירת מחדל)</option>
+                <option value="bl">פינה שמאלית תחתונה</option>
+                <option value="tr">פינה ימנית עליונה</option>
+            </select>
+
+            <label class="text-sm text-gray-400">אפקט כניסה (בשומר מסך)</label>
+            <select id="botEffect" class="input-dark">
+                <option value="peek">הצצה (Peek)</option>
+                <option value="zoom">זום אין (Zoom In)</option>
+                <option value="bounce">קפיצה (Bounce)</option>
+            </select>
+
+            <div class="preview-box mb-4">
+                <img src="https://saban-kiosk-core.pages.dev/admin/sika-ai.png" id="robotImg" class="robot-preview pos-br">
+            </div>
+
+            <h3 class="font-bold mt-4 mb-2">תסריט לידים ("שיחת הזהב")</h3>
+            <textarea id="leadScript" class="input-dark h-24">וואוו התחיל הכיף! בוא נתחיל.
+רגע רגע, אני "סיקה-Ai".
+מה השם אחי? וטלפון יעזור לי לשלוח לך מידע זהב שתודה לי בסוף 😉</textarea>
+        </div>
+
+        <div class="panel">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-blue-400"><i data-lucide="brain"></i> המוח של המערכת</h2>
+            <p class="text-xs text-gray-400 mb-4">כאן מגדירים תשובות קבועות. אם לא יימצא כאן - נפנה ל-Gemini.</p>
+            
+            <div id="qaContainer" class="space-y-2 h-64 overflow-y-auto pr-2">
+                </div>
+            
+            <div class="flex gap-2 mt-4 border-t border-gray-700 pt-4">
+                <input id="newQ" placeholder="שאלה/מילת מפתח (למשל: הנחה)" class="input-dark mb-0">
+                <input id="newA" placeholder="תשובה שהרובוט יענה" class="input-dark mb-0">
+                <button onclick="addQA()" class="bg-green-600 text-white p-2 rounded"><i data-lucide="plus"></i></button>
+            </div>
+        </div>
+
+        <div class="panel col-span-2">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-green-400"><i data-lucide="package"></i> ניהול מלאי מהיר</h2>
+            
+            <div class="grid grid-cols-4 gap-4 mb-4">
+                <input id="pName" placeholder="שם המוצר" class="input-dark">
+                <select id="pBrand" class="input-dark">
+                    <option value="SIKA">SIKA</option>
+                    <option value="THERMOKIR">THERMOKIR</option>
+                    <option value="MISTER FIX">MISTER FIX</option>
+                </select>
+                <div class="flex gap-2 col-span-2">
+                    <input id="pImage" placeholder="לינק לתמונה" class="input-dark">
+                    <button onclick="searchGoogleImage()" class="bg-blue-600 text-white px-4 rounded h-[42px] mt-[1px] whitespace-nowrap"><i data-lucide="search"></i> גוגל</button>
+                </div>
+            </div>
+            <textarea id="pDesc" placeholder="תיאור שיווקי קצר..." class="input-dark h-20"></textarea>
+            <button onclick="addProduct()" class="w-full btn-action mt-2">הוסף לקטלוג</button>
+        </div>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        // Mock Data
+        let config = {
+            botPosition: 'br',
+            botEffect: 'peek',
+            leadScript: document.getElementById('leadScript').value,
+            qa: [
+                {q: "סניף", a: "אנחנו נמצאים ברחוב החרש 12, אשדוד. פתוחים מ-7:00 עד 17:00."},
+                {q: "טלפון", a: "המספר של אלי המומחה: 054-452-7513"},
+                {q: "בדיחה", a: "למה בטון הלך לפסיכולוג? כי היו לו סדקים נפשיים! 😂"}
+            ],
+            products: []
+        };
+
+        // Load Config
+        function load() {
+            const saved = localStorage.getItem('sika_studio_data');
+            if(saved) {
+                config = JSON.parse(saved);
+                document.getElementById('botPosition').value = config.botPosition;
+                document.getElementById('botEffect').value = config.botEffect;
+                document.getElementById('leadScript').value = config.leadScript;
+                updatePreview();
+                renderQA();
+            }
+        }
+
+        // Preview Logic
+        function updatePreview() {
+            const pos = document.getElementById('botPosition').value;
+            const img = document.getElementById('robotImg');
+            img.className = `robot-preview pos-${pos}`;
+        }
+
+        // QA Logic
+        function renderQA() {
+            const div = document.getElementById('qaContainer');
+            div.innerHTML = config.qa.map((item, i) => `
+                <div class="bg-black p-2 rounded flex justify-between items-center border border-gray-800">
+                    <div><span class="text-[#FFC500] font-bold">${item.q}:</span> <span class="text-sm">${item.a}</span></div>
+                    <button onclick="deleteQA(${i})" class="text-red-500 hover:text-red-400"><i data-lucide="trash-2" size="14"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function addQA() {
+            const q = document.getElementById('newQ').value;
+            const a = document.getElementById('newA').value;
+            if(q && a) {
+                config.qa.push({q, a});
+                renderQA();
+                document.getElementById('newQ').value = '';
+                document.getElementById('newA').value = '';
+            }
+        }
+
+        window.deleteQA = (i) => {
+            config.qa.splice(i, 1);
+            renderQA();
+        }
+
+        // Product Logic
+        function searchGoogleImage() {
+            const name = document.getElementById('pName').value;
+            if(!name) return alert("הכנס שם מוצר לחיפוש");
+            // Simulation: In real app, this calls Google Custom Search API
+            const dummyImages = [
+                "https://placehold.co/400?text=Product+1",
+                "https://placehold.co/400?text=Product+2"
+            ];
+            const url = prompt("במערכת האמיתית כאן יפתחו תוצאות גוגל.\nהדבק כאן לינק לתמונה שמצאת:", "https://...");
+            if(url) document.getElementById('pImage').value = url;
+        }
+
+        function addProduct() {
+            // Add logic to save product
+            alert("מוצר נוסף (בהדמיה)");
+        }
+
+        // Save
+        function saveAll() {
+            config.botPosition = document.getElementById('botPosition').value;
+            config.botEffect = document.getElementById('botEffect').value;
+            config.leadScript = document.getElementById('leadScript').value;
+            
+            localStorage.setItem('sika_studio_data', JSON.stringify(config));
+            
+            const btn = document.querySelector('.btn-action');
+            btn.innerHTML = `<i data-lucide="check"></i> נשמר!`;
+            setTimeout(() => { btn.innerHTML = `<i data-lucide="save"></i> שמור ועדכן קיוסק`; lucide.createIcons(); }, 2000);
+        }
+
+        load();
+    </script>
+</body>
+</html>
