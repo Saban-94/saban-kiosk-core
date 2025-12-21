@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sika App Installation Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            background: #0f172a; 
+            color: white; 
+            font-family: 'Heebo', sans-serif; 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* PHONE FRAME */
+        .phone-mockup {
+            width: 380px;
+            height: 750px;
+            background: black;
+            border-radius: 50px;
+            border: 12px solid #333;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            transition: transform 0.5s;
+        }
+        .phone-mockup:hover { transform: scale(1.02); }
+        
+        /* Notch */
+        .notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 150px; height: 30px; background: #333;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            z-index: 100;
+        }
+
+        /* SCREENS */
+        .screen {
+            position: absolute; inset: 0; background: white; color: black;
+            display: flex; flex-direction: column;
+            transition: opacity 0.5s, transform 0.5s;
+            opacity: 0; pointer-events: none; transform: scale(0.9);
+        }
+        .screen.active { opacity: 1; pointer-events: auto; transform: scale(1); }
+
+        /* APP STORE SCREEN */
+        .app-icon-lg {
+            width: 120px; height: 120px; border-radius: 25px;
+            background: white; border: 1px solid #eee;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            object-fit: contain; padding: 10px;
+        }
+        
+        .btn-install {
+            background: #007AFF; color: white; font-weight: bold;
+            padding: 12px 30px; border-radius: 30px; font-size: 16px;
+            width: 100%; transition: 0.2s; border: none; cursor: pointer;
+        }
+        .btn-install.loading { background: #e5e7eb; color: #9ca3af; pointer-events: none; }
+
+        /* INSTALL ANIMATION */
+        .install-ring {
+            width: 24px; height: 24px; border: 3px solid #ccc;
+            border-top-color: #007AFF; border-radius: 50%;
+            animation: spin 1s linear infinite; display: none; margin: 0 auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* APP HOME SCREEN */
+        .app-header { background: #111; color: white; padding: 20px; padding-top: 50px; border-bottom: 4px solid #FFC500; }
+        .chat-bubble { background: #f1f5f9; padding: 12px; border-radius: 16px; border-bottom-right-radius: 4px; margin-bottom: 10px; font-size: 14px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .chat-bubble.bot { background: #111; color: white; border-bottom-right-radius: 16px; border-bottom-left-radius: 4px; }
+        
+        @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* THE MESSAGE OVERLAY */
+        #punchlineOverlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 200;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 30px; color: white; opacity: 0; pointer-events: none;
+            transition: 0.5s;
+        }
+        #punchlineOverlay.show { opacity: 1; pointer-events: auto; }
+        .check-icon { width: 80px; height: 80px; background: #22c55e; border-radius: 50%; display: flex; items-center; justify-content: center; margin-bottom: 20px; animation: bounce 1s infinite; }
+
+        /* Typing Effect */
+        .typing::after { content: '|'; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+    </style>
+</head>
+<body>
+
+    <div class="flex gap-20 items-center">
+        
+        <div class="max-w-md hidden md:block">
+            <h1 class="text-6xl font-black mb-6 leading-tight">הכוח בידיים שלכם. <span class="text-[#FFC500]">פשוט.</span></h1>
+            <p class="text-xl text-gray-400 mb-8">בלי בירוקרטיה, בלי המתנה. הלקוח מתקין, ואלי כבר אצלו בכיס.</p>
+            <div class="bg-white/10 p-6 rounded-2xl border border-white/20">
+                <div class="flex items-center gap-3 mb-2 text-[#FFC500] font-bold">
+                    <i data-lucide="zap"></i> יתרון טכנולוגי
+                </div>
+                <p>האפליקציה מחברת את השטח למשרד בשניות. נסו בעצמכם.</p>
+            </div>
+        </div>
+
+        <div class="phone-mockup">
+            <div class="notch"></div>
+
+            <div class="screen active p-6 overflow-y-auto" id="screenStore">
+                <div class="flex justify-between items-center mt-8 mb-6">
+                    <span class="text-blue-500 font-bold text-lg">< חזרה</span>
+                    <span class="font-black text-lg">App Store</span>
+                    <span class="w-8"></span>
+                </div>
+
+                <div class="flex gap-4 mb-6">
+                    <img src="https://saban-kiosk-core.pages.dev/sikabot.png" class="app-icon-lg">
+                    <div class="flex-1">
+                        <h2 class="text-2xl font-black leading-tight">Sika Pro Center</h2>
+                        <p class="text-gray-500 text-sm">ח. סבן חומרי בניין</p>
+                        <div class="flex items-center gap-1 mt-2">
+                            <span class="bg-gray-100 text-xs px-2 py-1 rounded font-bold">TOOLS</span>
+                            <span class="bg-gray-100 text-xs px-2 py-1 rounded font-bold">4.9 ★</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-install mb-8" onclick="installApp(this)">
+                    <span class="btn-text">התקנה (Install)</span>
+                    <div class="install-ring"></div>
+                </button>
+
+                <div class="flex gap-3 overflow-x-auto pb-4 mb-6 no-scrollbar">
+                    <div class="w-40 h-72 bg-gray-100 rounded-xl flex-shrink-0 border"></div>
+                    <div class="w-40 h-72 bg-gray-100 rounded-xl flex-shrink-0 border"></div>
+                    <div class="w-40 h-72 bg-gray-100 rounded-xl flex-shrink-0 border"></div>
+                </div>
+
+                <p class="text-gray-600 text-sm leading-relaxed">
+                    האפליקציה הרשמית של המרכז המקצועי. מחשבוני כמויות, הזמנת חומרים, צ'אט חי עם מומחים וקשר ישיר לאלי מסיקה. הורידו עכשיו וקבלו הטבה ראשונה.
+                </p>
+            </div>
+
+            <div class="screen bg-gray-50" id="screenApp">
+                <div class="app-header">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-xs text-[#FFC500] font-bold">ברוך הבא</div>
+                            <div class="text-xl font-bold">משה הקבלן 👋</div>
+                        </div>
+                        <div class="w-10 h-10 bg-[#333] rounded-full flex items-center justify-center border border-[#FFC500]">
+                            <img src="https://saban-kiosk-core.pages.dev/sikabot.png" class="w-full h-full object-contain rounded-full">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 flex-1 overflow-y-auto" id="chatArea">
+                    </div>
+
+                <div class="p-4 bg-white border-t flex gap-2">
+                    <input disabled class="bg-gray-100 flex-1 p-3 rounded-xl text-sm" placeholder="הקלד הודעה...">
+                    <button class="bg-[#E3000F] text-white p-3 rounded-xl"><i data-lucide="send" size="18"></i></button>
+                </div>
+            </div>
+
+            <div id="punchlineOverlay">
+                <div class="check-icon"><i data-lucide="check" size="40" color="white"></i></div>
+                <h2 class="text-3xl font-black mb-6 text-[#FFC500]">הותקן בהצלחה!</h2>
+                <p class="text-xl leading-relaxed font-bold" id="punchText"></p>
+                <button onclick="enterApp()" class="mt-8 bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition">
+                    כנס לאפליקציה >>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function installApp(btn) {
+            // 1. Change button state
+            const text = btn.querySelector('.btn-text');
+            const ring = btn.querySelector('.install-ring');
+            
+            btn.classList.add('loading');
+            text.style.display = 'none';
+            ring.style.display = 'block';
+
+            // 2. Simulate Download (2 seconds)
+            setTimeout(() => {
+                ring.style.display = 'none';
+                text.style.display = 'block';
+                text.innerText = "פותח...";
+                
+                // 3. Show Punchline Overlay
+                setTimeout(() => {
+                    const overlay = document.getElementById('punchlineOverlay');
+                    overlay.classList.add('show');
+                    
+                    // Typing effect for the punchline
+                    typeText("ראיתם איך התקנתם את האפליקציה? ככה הלקוח יהיה איתנו לאחר התקנה. פשוט. מהיר. לתמיד.", "punchText");
+                }, 800);
+
+            }, 2000);
+        }
+
+        function typeText(text, elementId) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = "";
+            let i = 0;
+            const speed = 40;
+            
+            function type() {
+                if (i < text.length) {
+                    el.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    el.classList.remove('typing'); // Stop blinking cursor
+                }
+            }
+            el.classList.add('typing');
+            type();
+        }
+
+        function enterApp() {
+            // Hide Overlay
+            document.getElementById('punchlineOverlay').classList.remove('show');
+            
+            // Switch Screens
+            document.getElementById('screenStore').classList.remove('active');
+            document.getElementById('screenApp').classList.add('active');
+
+            // Simulate Welcome Message inside the app
+            setTimeout(() => addMessage("bot", "שלום משה! איזה כיף שהצטרפת למשפחת סבן. 🏗️"), 500);
+            setTimeout(() => addMessage("bot", "אני סיקה-AI, העוזר האישי שלך. צריך הצעת מחיר או מפרט טכני?"), 2000);
+            setTimeout(() => addMessage("bot", "ד\"א, אלי כבר קיבל עדכון שאתה איתנו 😉"), 4000);
+        }
+
+        function addMessage(type, text) {
+            const area = document.getElementById('chatArea');
+            const div = document.createElement('div');
+            div.className = `chat-bubble ${type}`;
+            div.innerText = text;
+            area.appendChild(div);
+            area.scrollTop = area.scrollHeight;
+        }
+
+    </script>
+</body>
+</html>
