@@ -1,7 +1,7 @@
 // המפתח שלך
 const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug";
 
-// שינוי למודל היציב ביותר למניעת שגיאות 404
+// מודל יציב
 const MODEL_NAME = "gemini-pro";
 
 /**
@@ -10,14 +10,15 @@ const MODEL_NAME = "gemini-pro";
 export async function askGeminiAdmin(productName) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
     
+    // שיניתי את הניסוח כדי להימנע מגרשיים הפוכים ששוברים את הקוד
     const prompt = `
-    תפקידך: מנהל שיווק של חנות חומרי בניין. מוצר: "${productName}".
-    החזר JSON בלבד (ללא ```json):
+    תפקידך: מנהל שיווק. מוצר: "${productName}".
+    החזר אובייקט JSON בלבד (ללא תגיות קוד או מרכאות עוטפות) עם המבנה הבא בעברית:
     {
         "name": "שם מלא",
         "brand": "מותג",
-        "marketingDesc": "תיאור שיווקי קצר בעברית",
-        "category": "sealing/glues/concrete/flooring/paint",
+        "marketingDesc": "תיאור שיווקי",
+        "category": "sealing",
         "status": "standard",
         "tech": { "coverage": "", "drying": "", "thickness": "" }
     }`;
@@ -31,9 +32,16 @@ export async function askGeminiAdmin(productName) {
 
         if (!response.ok) return null;
         const data = await response.json();
-        const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+        let text = data.candidates[0].content.parts[0].text;
+        
+        // ניקוי ידני של סימני קוד אם ה-AI בכל זאת הוסיף אותם
+        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        
         return JSON.parse(text);
-    } catch (e) { return null; }
+    } catch (e) {
+        console.error("Gemini Error:", e);
+        return null;
+    }
 }
 
 /**
@@ -43,9 +51,10 @@ export async function extractTechnicalSpecs(productName) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
     
     const prompt = `
-    מוצר: "${productName}". חלץ מפרט טכני ל-JSON בלבד (בעברית):
+    מוצר: "${productName}".
+    החזר JSON בלבד עם נתונים טכניים בעברית:
     { "coverage": "כיסוי", "drying": "ייבוש", "thickness": "עובי" }
-    אם אין מידע, הערך על סמך מוצרים דומים.
+    אם אין מידע, תן הערכה.
     `;
 
     try {
@@ -55,9 +64,12 @@ export async function extractTechnicalSpecs(productName) {
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
-        if (!response.ok) throw new Error("API Error");
+        if (!response.ok) return { coverage: "", drying: "", thickness: "" };
+        
         const data = await response.json();
-        const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+        let text = data.candidates[0].content.parts[0].text;
+        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        
         return JSON.parse(text);
     } catch (e) {
         return { coverage: "", drying: "", thickness: "" };
@@ -69,7 +81,9 @@ export async function extractTechnicalSpecs(productName) {
  */
 export async function improveText(currentText, style) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
-    const prompt = `שפר את הטקסט הבא שיהיה ${style === 'sales' ? 'שיווקי ומכירתי' : 'מקצועי ורשמי'} (בעברית): "${currentText}"`;
+    
+    const instruction = style === 'sales' ? 'שיווקי ומשכנע' : 'מקצועי וטכני';
+    const prompt = `שכתב את הטקסט הבא שיהיה ${instruction} (בעברית): "${currentText}"`;
 
     try {
         const response = await fetch(url, {
@@ -88,25 +102,34 @@ export async function improveText(currentText, style) {
 export async function askProductExpert(product, userQuestion, chatHistory = []) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
     
-    const context = `אתה המומחה של ח. סבן. מוצר: ${product.name}. שאלה: ${userQuestion}. ענה קצר ומקצועי בעברית.`;
+    const context = `מוצר: ${product.name}. שאלה: ${userQuestion}. ענה קצר ומקצועי בעברית.`;
     
-    // בניית ההיסטוריה בצורה פשוטה למניעת שגיאות
-    const contents = [{ role: "user", parts: [{ text: context }] }];
-
     try {
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: contents })
+            body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: context }] }] })
         });
         const data = await response.json();
         return data.candidates[0].content.parts[0].text;
     } catch (e) { return "תקלה בתקשורת."; }
 }
 
+/**
+ * 5. חיפוש תמונות (דמו למניעת קריסה)
+ */
 export async function searchImages(query) {
-    // דמו - למנוע קריסה
-    return [{link: "[https://placehold.co/600x400?text=Sika](https://placehold.co/600x400?text=Sika)", title: "Demo"}];
+    // מחזיר תמונות דמו כדי למנוע שגיאות בקונסול
+    return [
+        { link: "[https://placehold.co/600x400?text=Image+1](https://placehold.co/600x400?text=Image+1)", title: "Demo 1" },
+        { link: "[https://placehold.co/600x400?text=Image+2](https://placehold.co/600x400?text=Image+2)", title: "Demo 2" },
+        { link: "[https://placehold.co/600x400?text=Image+3](https://placehold.co/600x400?text=Image+3)", title: "Demo 3" }
+    ];
 }
 
-export async function searchVideos(query) { return []; }
+/**
+ * 6. חיפוש וידאו (דמו)
+ */
+export async function searchVideos(query) {
+    return [];
+}
