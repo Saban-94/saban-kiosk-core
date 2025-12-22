@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sika Admin Suite - Pro</title>
     
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <script src="[https://unpkg.com/lucide@latest](https://unpkg.com/lucide@latest)"></script>
-    <link href="[https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap](https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap)" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
     <style>
         body { font-family: 'Heebo', sans-serif; background-color: #f1f5f9; color: #0f172a; height: 100vh; display: flex; overflow: hidden; }
@@ -34,6 +34,9 @@
         .remove-btn { position: absolute; top: 4px; left: 4px; background: rgba(220, 38, 38, 0.9); color: white; padding: 4px; border-radius: 4px; opacity: 0; transition: 0.2s; cursor: pointer; }
         .gallery-item:hover .remove-btn { opacity: 1; }
         .main-badge { position: absolute; bottom: 4px; right: 4px; background: #2563eb; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+        .media-select { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .media-select img { width: 100%; height: 100%; object-fit: cover; }
+        .media-select:hover { transform: scale(1.02); border-color: #60a5fa; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.4s; z-index: 100; display: flex; gap: 10px; }
@@ -112,14 +115,14 @@
                                     <div>
                                         <label class="text-xs text-gray-500 mb-1 block">קישורי תמונות (מופרדים בפסיק)</label>
                                         <div class="flex gap-2">
-                                            <input id="manualImages" class="input-std text-xs" placeholder="[https://img1.jpg](https://img1.jpg), [https://img2.jpg](https://img2.jpg)...">
+                                            <input id="manualImages" class="input-std text-xs" placeholder="https://img1.jpg, https://img2.jpg...">
                                             <button onclick="app.addManualImages()" class="btn bg-white border border-gray-300 text-xs px-3">הוסף</button>
                                         </div>
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-500 mb-1 block">קישורי וידאו (מופרדים בפסיק)</label>
                                         <div class="flex gap-2">
-                                            <input id="manualVideos" class="input-std text-xs" placeholder="[https://youtube.com/](https://youtube.com/)..., https://...">
+                                            <input id="manualVideos" class="input-std text-xs" placeholder="https://youtube.com/..., https://...">
                                             <button onclick="app.addManualVideos()" class="btn bg-white border border-gray-300 text-xs px-3">הוסף</button>
                                         </div>
                                     </div>
@@ -129,14 +132,25 @@
                             <hr class="border-gray-100 mb-6">
 
                             <div class="flex gap-6 h-[300px]">
-                                <div class="w-1/2 flex flex-col">
-                                    <label class="text-xs font-bold text-green-600 mb-2">גלריית תמונות (הראשונה היא הראשית)</label>
-                                    <div id="selectedImagesGrid" class="grid grid-cols-3 gap-2 overflow-y-auto content-start p-1"></div>
+                                <div class="w-1/2 flex flex-col border-l pl-4">
+                                    <div class="flex justify-between mb-2 items-center">
+                                        <label class="text-xs font-bold text-blue-600">1. תוצאות חיפוש AI (לחץ להוספה)</label>
+                                        <div class="flex gap-1">
+                                            <button onclick="app.refreshMedia('img')" class="text-[10px] bg-gray-100 px-2 py-1 rounded hover:bg-gray-200">תמונות</button>
+                                            <button onclick="app.refreshMedia('vid')" class="text-[10px] bg-gray-100 px-2 py-1 rounded hover:bg-gray-200">וידאו</button>
+                                        </div>
+                                    </div>
+                                    <div id="searchResultsGrid" class="media-grid overflow-y-auto content-start flex-1 pr-2">
+                                        <div class="col-span-3 text-center text-xs text-gray-400 py-10">הזן שם מוצר ולחץ "הפעל קסם"</div>
+                                    </div>
                                 </div>
 
                                 <div class="w-1/2 flex flex-col">
-                                    <label class="text-xs font-bold text-red-600 mb-2">גלריית וידאו</label>
-                                    <div id="selectedVideosGrid" class="grid grid-cols-3 gap-2 overflow-y-auto content-start p-1"></div>
+                                    <label class="text-xs font-bold text-green-600 mb-2">2. הגלריה שנבחרה (הראשונה היא הראשית)</label>
+                                    <div class="text-[10px] font-bold text-gray-400 mb-1">תמונות:</div>
+                                    <div id="selectedImagesGrid" class="grid grid-cols-3 gap-2 mb-4 overflow-y-auto max-h-[150px]"></div>
+                                    <div class="text-[10px] font-bold text-gray-400 mb-1">וידאו:</div>
+                                    <div id="selectedVideosGrid" class="grid grid-cols-3 gap-2 overflow-y-auto max-h-[150px]"></div>
                                 </div>
                             </div>
                         </div>
@@ -161,8 +175,9 @@
 
     <script type="module">
         import { db } from '../js/firebase-config.js';
-        import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot } from "[https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js](https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js)";
-        import { askGeminiAdmin, extractTechnicalSpecs } from '../js/gemini-service.js';
+        // Clean URL for Firebase Import
+        import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { askGeminiAdmin, extractTechnicalSpecs, searchImages, searchVideos } from '../js/gemini-service.js';
 
         lucide.createIcons();
 
@@ -198,7 +213,7 @@
                     snap.forEach(d => {
                         const p = {id: d.id, ...d.data()};
                         app.allProducts.push(p);
-                        const displayImg = p.images?.[0] || p.image || '[https://placehold.co/50](https://placehold.co/50)';
+                        const displayImg = p.images?.[0] || p.image || 'https://placehold.co/50';
                         list.innerHTML += `
                             <div class="flex items-center gap-3 p-3 border-b hover:bg-gray-50 cursor-pointer transition" onclick="app.editProduct('${p.id}')">
                                 <img src="${displayImg}" class="w-10 h-10 rounded border object-contain bg-white">
@@ -224,7 +239,7 @@
                 document.getElementById('tThick').value = p.tech?.thickness || '';
 
                 app.currentImages = p.images || (p.image ? [p.image] : []);
-                app.currentVideos = p.videos || (p.videoUrl ? [{url: p.videoUrl, thumbnail: '[https://placehold.co/100?text=Video](https://placehold.co/100?text=Video)'}] : []);
+                app.currentVideos = p.videos || (p.videoUrl ? [{url: p.videoUrl, thumbnail: 'https://placehold.co/100?text=Video'}] : []);
                 
                 app.renderGallery();
             },
@@ -287,7 +302,7 @@
                 const input = document.getElementById('manualVideos');
                 const urls = input.value.split(',').map(u => u.trim()).filter(u => u);
                 urls.forEach(url => { 
-                    app.currentVideos.push({url: url, thumbnail: '[https://placehold.co/100?text=Video](https://placehold.co/100?text=Video)'}); 
+                    app.currentVideos.push({url: url, thumbnail: 'https://placehold.co/100?text=Video'}); 
                 });
                 input.value = "";
                 app.renderGallery();
@@ -314,6 +329,32 @@
                 lucide.createIcons();
             },
 
+            // Gallery Logic (AI)
+            addImage: (url) => { if(!app.currentImages.includes(url)) app.currentImages.push(url); app.renderGallery(); },
+            addVideo: (url, thumb) => { app.currentVideos.push({url, thumbnail: thumb}); app.renderGallery(); },
+
+            refreshMedia: async (type) => {
+                const query = document.getElementById('aiPrompt').value || document.getElementById('pName').value;
+                const grid = document.getElementById('searchResultsGrid');
+                grid.innerHTML = '<div class="col-span-3 text-center text-xs py-4">טוען...</div>';
+                
+                if(type === 'img') {
+                    const imgs = await searchImages(query);
+                    grid.innerHTML = imgs.map(img => `
+                        <div class="media-select" onclick="app.addImage('${img.link}')">
+                            <img src="${img.link}">
+                        </div>`).join('');
+                } else {
+                    const vids = await searchVideos(query);
+                    grid.innerHTML = vids.map(vid => `
+                        <div class="media-select bg-black" onclick="app.addVideo('${vid.embed}', '${vid.thumbnail}')">
+                            <img src="${vid.thumbnail}" class="opacity-70">
+                            <div class="absolute inset-0 flex items-center justify-center text-white"><i data-lucide="play-circle"></i></div>
+                        </div>`).join('');
+                }
+                lucide.createIcons();
+            },
+
             // AI
             runFullAI: async () => {
                 const query = document.getElementById('aiPrompt').value;
@@ -331,6 +372,7 @@
                 document.getElementById('tDry').value = tData.drying;
                 document.getElementById('tThick').value = tData.thickness;
                 
+                app.refreshMedia('img'); // Load images automatically
                 btn.innerHTML = '<i data-lucide="sparkles"></i> הפעל קסם';
                 lucide.createIcons();
             },
