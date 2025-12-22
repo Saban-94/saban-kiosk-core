@@ -1,33 +1,26 @@
 // המפתח שלך
 const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug";
 
-// שימוש במודל היציב והבטוח (ללא latest)
-const MODEL_NAME = "gemini-1.5-flash";
+// שינוי למודל היציב ביותר למניעת שגיאות 404
+const MODEL_NAME = "gemini-pro";
 
 /**
- * 1. AI שיווקי: יצירת תיאור כללי ונתונים בסיסיים
+ * 1. AI שיווקי
  */
 export async function askGeminiAdmin(productName) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
     
     const prompt = `
-    תפקידך: מנהל שיווק בכיר של חנות חומרי בניין (ח. סבן).
-    מוצר: "${productName}"
-    
-    עליך להחזיר JSON בלבד (ללא טקסט נוסף) עם המבנה הבא בעברית בלבד:
+    תפקידך: מנהל שיווק של חנות חומרי בניין. מוצר: "${productName}".
+    החזר JSON בלבד (ללא ```json):
     {
-        "name": "שם מוצר מלא ומקצועי",
-        "brand": "שם המותג (למשל Sika, Mister Fix, Tambour)",
-        "marketingDesc": "פסקה שיווקית משכנעת (עד 30 מילים) שפונה לקבלן או ללקוח הפרטי, מדגישה יתרונות.",
-        "category": "אחד מהבאים: sealing, glues, concrete, flooring, paint",
-        "status": "אחד מהבאים באנגלית: standard, recommended, sale, new",
-        "tech": {
-            "coverage": "כמות למ''ר (למשל: 5 ק''ג למ''ר)",
-            "drying": "זמן ייבוש (למשל: 24 שעות)",
-            "thickness": "עובי יישום (למשל: 2-5 מ''מ)"
-        }
-    }
-    `;
+        "name": "שם מלא",
+        "brand": "מותג",
+        "marketingDesc": "תיאור שיווקי קצר בעברית",
+        "category": "sealing/glues/concrete/flooring/paint",
+        "status": "standard",
+        "tech": { "coverage": "", "drying": "", "thickness": "" }
+    }`;
 
     try {
         const response = await fetch(url, {
@@ -36,37 +29,23 @@ export async function askGeminiAdmin(productName) {
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
-        if (!response.ok) {
-            console.warn(`Gemini Marketing Error: ${response.status}`);
-            return null;
-        }
-
+        if (!response.ok) return null;
         const data = await response.json();
         const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
         return JSON.parse(text);
-    } catch (error) {
-        console.error("Gemini Marketing Critical Error:", error);
-        return null;
-    }
+    } catch (e) { return null; }
 }
 
 /**
- * 2. חילוץ מפרט טכני בלבד
+ * 2. חילוץ מפרט טכני
  */
 export async function extractTechnicalSpecs(productName) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
     
     const prompt = `
-    תפקידך: מהנדס בניין מומחה.
-    מוצר: "${productName}"
-    
-    עליך להחזיר JSON בלבד עם המפתחות הבאים (ערכים בעברית):
-    {
-        "coverage": "צריכה/כיסוי (למשל: 1.5 ק''ג למ''ר)",
-        "drying": "זמן ייבוש/דריכה (למשל: 24 שעות)",
-        "thickness": "עובי יישום (למשל: 2-5 מ''מ)"
-    }
-    אם המידע לא ידוע, תן הערכה מקצועית מבוססת על מוצרים דומים.
+    מוצר: "${productName}". חלץ מפרט טכני ל-JSON בלבד (בעברית):
+    { "coverage": "כיסוי", "drying": "ייבוש", "thickness": "עובי" }
+    אם אין מידע, הערך על סמך מוצרים דומים.
     `;
 
     try {
@@ -76,33 +55,21 @@ export async function extractTechnicalSpecs(productName) {
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
-        if (!response.ok) throw new Error(`Status ${response.status}`);
-
+        if (!response.ok) throw new Error("API Error");
         const data = await response.json();
         const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
         return JSON.parse(text);
-
-    } catch (error) {
-        console.error("Gemini Tech Specs Error:", error);
+    } catch (e) {
         return { coverage: "", drying: "", thickness: "" };
     }
 }
 
 /**
- * 3. שכתוב ושיפור טקסט (AI Copywriter)
+ * 3. שכתוב טקסט
  */
 export async function improveText(currentText, style) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
-    
-    let instruction = "שפר את הניסוח שיהיה מקצועי יותר.";
-    if (style === 'sales') instruction = "הפוך את הטקסט לשיווקי, מוכר ומשכנע יותר.";
-    if (style === 'short') instruction = "קצר את הטקסט ל-2 משפטים חזקים.";
-
-    const prompt = `
-    טקסט מקורי: "${currentText}"
-    הוראה: ${instruction}
-    החזר רק את הטקסט החדש בעברית, ללא מרכאות או הקדמות.
-    `;
+    const prompt = `שפר את הטקסט הבא שיהיה ${style === 'sales' ? 'שיווקי ומכירתי' : 'מקצועי ורשמי'} (בעברית): "${currentText}"`;
 
     try {
         const response = await fetch(url, {
@@ -110,38 +77,21 @@ export async function improveText(currentText, style) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
-
-        if (!response.ok) return currentText;
-
         const data = await response.json();
         return data.candidates[0].content.parts[0].text.trim();
-    } catch (error) {
-        return currentText;
-    }
+    } catch (e) { return currentText; }
 }
 
 /**
- * 4. צ'אט עם מומחה (Sika-Bot)
+ * 4. צ'אט מומחה
  */
 export async function askProductExpert(product, userQuestion, chatHistory = []) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
-
-    const context = `
-    אתה המומחה הטכני של "המרכז המקצועי ח. סבן".
-    מוצר נוכחי: ${product.name} (${product.brand})
-    תיאור: ${product.marketingDesc}
-    נתונים טכניים: כיסוי: ${product.tech?.coverage}, ייבוש: ${product.tech?.drying}, עובי: ${product.tech?.thickness}.
     
-    שאלה של לקוח: "${userQuestion}"
+    const context = `אתה המומחה של ח. סבן. מוצר: ${product.name}. שאלה: ${userQuestion}. ענה קצר ומקצועי בעברית.`;
     
-    הנחיות: ענה בעברית, קצר ולעניין (מקסימום 2-3 משפטים). היה אדיב ומקצועי.
-    `;
-
-    const contents = chatHistory.map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.text }]
-    }));
-    contents.push({ role: "user", parts: [{ text: context }] });
+    // בניית ההיסטוריה בצורה פשוטה למניעת שגיאות
+    const contents = [{ role: "user", parts: [{ text: context }] }];
 
     try {
         const response = await fetch(url, {
@@ -149,32 +99,14 @@ export async function askProductExpert(product, userQuestion, chatHistory = []) 
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: contents })
         });
-        
-        if (!response.ok) return "מצטער, המערכת עמוסה כרגע. נסה שוב בעוד דקה.";
-
         const data = await response.json();
         return data.candidates[0].content.parts[0].text;
-    } catch (error) { 
-        return "יש בעיה בתקשורת כרגע, נסה שוב מאוחר יותר."; 
-    }
+    } catch (e) { return "תקלה בתקשורת."; }
 }
 
-/**
- * 5. חיפוש תמונות (דמו)
- */
 export async function searchImages(query) {
-    console.log(`Searching images for: ${query}`);
-    return [
-        { link: "https://placehold.co/600x400?text=Product", title: "תמונה 1" },
-        { link: "https://placehold.co/600x400?text=App", title: "תמונה 2" },
-        { link: "https://placehold.co/600x400?text=Result", title: "תמונה 3" }
-    ];
+    // דמו - למנוע קריסה
+    return [{link: "[https://placehold.co/600x400?text=Sika](https://placehold.co/600x400?text=Sika)", title: "Demo"}];
 }
 
-/**
- * 6. חיפוש וידאו (דמו)
- */
-export async function searchVideos(query) {
-    console.log(`Searching videos for: ${query}`);
-    return [];
-}
+export async function searchVideos(query) { return []; }
