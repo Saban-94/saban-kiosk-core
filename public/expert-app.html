@@ -9,17 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Heebo', sans-serif; background: #111; color: white; padding-bottom: 20px; }
-        
-        /* Chat UI */
         .chat-container { height: calc(100vh - 140px); display: flex; flex-direction: column; }
         .msg-bubble { max-width: 80%; padding: 12px; border-radius: 16px; font-size: 14px; margin-bottom: 8px; }
         .msg-client { background: #333; color: white; align-self: flex-start; border-bottom-right-radius: 4px; }
         .msg-me { background: #2563eb; color: white; align-self: flex-end; border-bottom-left-radius: 4px; }
-        
-        /* Product Picker Modal */
         .picker-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 70vh; background: #1e1e1e; border-top-left-radius: 20px; border-top-right-radius: 20px; transform: translateY(100%); transition: transform 0.3s; z-index: 50; padding: 20px; display: flex; flex-direction: column; }
         .picker-modal.open { transform: translateY(0); }
-        
         .prod-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #333; cursor: pointer; }
         .prod-item:hover { background: #333; }
         .prod-img { width: 40px; height: 40px; border-radius: 6px; background: white; object-fit: contain; }
@@ -35,21 +30,21 @@
             </div>
             <div>
                 <div class="font-bold">אלי כהן</div>
-                <div class="text-xs text-gray-400">מחובר • סניף הוד השרון</div>
+                <div class="text-xs text-gray-400">מחובר • שולט בקיוסק</div>
             </div>
         </div>
-        <div class="bg-gray-800 px-3 py-1 rounded-full text-xs font-bold">שיחה פעילה</div>
+        <div class="bg-gray-800 px-3 py-1 rounded-full text-xs font-bold text-green-400 border border-green-900">אונליין</div>
     </div>
 
     <div class="chat-container p-4 overflow-y-auto" id="expertChatStream">
-        <div class="msg-bubble msg-client">שלום, אני צריך פריימר לפני ריצוף. יש לכם?</div>
+        <div class="msg-bubble msg-client">ממתין לפקודות...</div>
     </div>
 
     <div class="fixed bottom-0 left-0 w-full bg-[#1e1e1e] p-3 border-t border-gray-800 flex gap-2 items-center">
         <button onclick="toggleProductPicker()" class="bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700">
-            <i data-lucide="plus"></i>
+            <i data-lucide="package-plus"></i>
         </button>
-        <input id="expertInput" type="text" placeholder="ענה ללקוח..." class="flex-1 bg-black text-white rounded-full px-4 py-3 text-sm border border-gray-700 focus:border-blue-500 outline-none">
+        <input id="expertInput" type="text" placeholder="הודעה ללקוח..." class="flex-1 bg-black text-white rounded-full px-4 py-3 text-sm border border-gray-700 focus:border-blue-500 outline-none">
         <button onclick="sendExpertMessage()" class="bg-blue-600 text-white p-3 rounded-full shadow-lg">
             <i data-lucide="send" size="18"></i>
         </button>
@@ -57,69 +52,27 @@
 
     <div id="productPicker" class="picker-modal shadow-2xl shadow-black">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-lg">בחר מוצר לשליחה</h3>
+            <h3 class="font-bold text-lg">בחר מוצר לשידור לקיוסק 📡</h3>
             <button onclick="toggleProductPicker()" class="bg-gray-800 p-2 rounded-full"><i data-lucide="x"></i></button>
         </div>
         <input type="text" id="prodSearch" oninput="renderPickerList()" placeholder="חפש בקטלוג..." class="w-full bg-black p-3 rounded-xl mb-4 border border-gray-700 text-white">
         
-        <div id="pickerList" class="flex-1 overflow-y-auto">
-            </div>
+        <div id="pickerList" class="flex-1 overflow-y-auto"></div>
     </div>
 
     <script type="module">
-        import { db } from '../js/firebase-config.js';
+        import { db } from './js/firebase-config.js';
         import { collection, getDocs, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         lucide.createIcons();
         let productsDB = [];
-        let currentChatId = null; // In real app, select from list
+        const KIOSK_ID = "kiosk_main_01"; // Target Kiosk
 
-        // --- Init ---
         async function init() {
             const snap = await getDocs(collection(db, "products"));
             productsDB = [];
             snap.forEach(doc => productsDB.push({id: doc.id, ...doc.data()}));
             renderPickerList();
-            listenToChat();
-        }
-
-        // --- Chat Logic ---
-        function listenToChat() {
-            const q = query(collection(db, "chats"), orderBy("timestamp", "asc"), limit(50));
-            onSnapshot(q, (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === "added") {
-                        const data = change.doc.data();
-                        currentChatId = data.chatId; // Lock on to latest chat for demo
-                        renderMessage(data);
-                    }
-                });
-            });
-        }
-
-        function renderMessage(data) {
-            const container = document.getElementById('expertChatStream');
-            const div = document.createElement('div');
-            
-            if (data.type === 'product' && data.productData) {
-                // Sent Product Card View
-                div.className = "msg-bubble msg-me bg-gray-800 border border-gray-700 p-0 overflow-hidden w-64";
-                div.innerHTML = `
-                    <div class="h-32 bg-white flex items-center justify-center p-2"><img src="${data.productData.image}" class="h-full object-contain"></div>
-                    <div class="p-3">
-                        <div class="text-xs text-gray-400 font-bold">${data.productData.brand}</div>
-                        <div class="font-bold text-white">${data.productData.name}</div>
-                        <div class="text-xs text-green-400 mt-1 flex items-center gap-1"><i data-lucide="check" size="10"></i> נשלח ללקוח</div>
-                    </div>`;
-            } else {
-                // Text Message
-                div.className = `msg-bubble ${data.sender === 'expert' ? 'msg-me' : 'msg-client'}`;
-                div.innerText = data.text;
-            }
-            
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-            lucide.createIcons();
         }
 
         window.sendExpertMessage = async () => {
@@ -128,8 +81,12 @@
             if(!text) return;
             
             input.value = '';
+            const container = document.getElementById('expertChatStream');
+            container.innerHTML += `<div class="msg-bubble msg-me">${text}</div>`;
+            
+            // Send to DB (Simulated chat)
             await addDoc(collection(db, "chats"), {
-                chatId: currentChatId,
+                chatId: KIOSK_ID,
                 sender: 'expert',
                 text: text,
                 type: 'text',
@@ -137,10 +94,7 @@
             });
         }
 
-        // --- Product Picker Logic ---
-        window.toggleProductPicker = () => {
-            document.getElementById('productPicker').classList.toggle('open');
-        }
+        window.toggleProductPicker = () => document.getElementById('productPicker').classList.toggle('open');
 
         window.renderPickerList = () => {
             const term = document.getElementById('prodSearch').value.toLowerCase();
@@ -154,31 +108,43 @@
                         <div class="font-bold text-sm">${p.name}</div>
                         <div class="text-xs text-gray-400">${p.brand}</div>
                     </div>
-                    <div class="bg-blue-600 p-2 rounded-full"><i data-lucide="send" size="14"></i></div>
+                    <div class="bg-blue-600 p-2 rounded-full hover:bg-blue-500"><i data-lucide="cast" size="14"></i></div>
                 </div>
             `).join('');
             lucide.createIcons();
         }
 
+        // --- THE MAGIC SEND FUNCTION ---
         window.sendProduct = async (id) => {
             const p = productsDB.find(x => x.id === id);
             if(!p) return;
             
             toggleProductPicker();
             
-            await addDoc(collection(db, "chats"), {
-                chatId: currentChatId,
-                sender: 'expert',
-                text: "Here is the product",
-                type: 'product',
-                productData: {
-                    id: p.id,
-                    name: p.name,
-                    brand: p.brand,
-                    image: p.image || 'https://placehold.co/200'
-                },
-                timestamp: new Date()
-            });
+            // Visual feedback
+            const container = document.getElementById('expertChatStream');
+            container.innerHTML += `
+                <div class="msg-bubble msg-me bg-green-900 border border-green-700 text-green-100 flex items-center gap-2">
+                    <i data-lucide="rss"></i> שידרת לקיוסק: ${p.name}
+                </div>`;
+            lucide.createIcons();
+
+            try {
+                // Send Push Command
+                await addDoc(collection(db, "chats"), {
+                    chatId: KIOSK_ID,
+                    sender: 'expert',
+                    text: `Shared product: ${p.name}`,
+                    type: 'product_push',
+                    productData: {
+                        id: p.id,
+                        name: p.name,
+                        brand: p.brand,
+                        image: p.image || 'https://placehold.co/200'
+                    },
+                    timestamp: new Date()
+                });
+            } catch (e) { alert("שגיאה בשליחה"); console.error(e); }
         }
 
         init();
