@@ -1,8 +1,8 @@
 // המפתח שלך
 const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug";
 
-// שימוש במודל יציב ומעודכן
-const MODEL_NAME = "gemini-1.5-flash-latest";
+// שימוש במודל היציב והבטוח (ללא latest)
+const MODEL_NAME = "gemini-1.5-flash";
 
 /**
  * 1. AI שיווקי: יצירת תיאור כללי ונתונים בסיסיים
@@ -51,7 +51,7 @@ export async function askGeminiAdmin(productName) {
 }
 
 /**
- * 2. חילוץ מפרט טכני בלבד (הפונקציה שהייתה חסרה!)
+ * 2. חילוץ מפרט טכני בלבד
  */
 export async function extractTechnicalSpecs(productName) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
@@ -89,7 +89,7 @@ export async function extractTechnicalSpecs(productName) {
 }
 
 /**
- * 3. שכתוב ושיפור טקסט (AI Copywriter - הייתה חסרה)
+ * 3. שכתוב ושיפור טקסט (AI Copywriter)
  */
 export async function improveText(currentText, style) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
@@ -160,19 +160,19 @@ export async function askProductExpert(product, userQuestion, chatHistory = []) 
 }
 
 /**
- * 5. חיפוש תמונות (דמו למניעת קריסה)
+ * 5. חיפוש תמונות (דמו)
  */
 export async function searchImages(query) {
     console.log(`Searching images for: ${query}`);
     return [
-        { link: "https://placehold.co/600x400?text=Product+Image", title: "תמונה 1" },
-        { link: "https://placehold.co/600x400?text=Application", title: "תמונה 2" },
-        { link: "https://placehold.co/600x400?text=Sika+Result", title: "תמונה 3" }
+        { link: "https://placehold.co/600x400?text=Product", title: "תמונה 1" },
+        { link: "https://placehold.co/600x400?text=App", title: "תמונה 2" },
+        { link: "https://placehold.co/600x400?text=Result", title: "תמונה 3" }
     ];
 }
 
 /**
- * 6. חיפוש וידאו
+ * 6. חיפוש וידאו (דמו)
  */
 export async function searchVideos(query) {
     console.log(`Searching videos for: ${query}`);
