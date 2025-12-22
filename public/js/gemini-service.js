@@ -1,8 +1,8 @@
-// המפתח שלך (שנמצא בקובץ שהעלית)
+// המפתח שלך
 const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug";
 
-// שימוש במודל החדש והמהיר
-const MODEL_NAME = "gemini-2.0-flash-exp";
+// שיניתי למודל יציב יותר כדי למנוע שגיאות 429
+const MODEL_NAME = "gemini-1.5-flash"; 
 
 /**
  * 1. AI שיווקי: יצירת תיאור כללי ונתונים בסיסיים
@@ -36,18 +36,29 @@ export async function askGeminiAdmin(productName) {
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
+        if (!response.ok) {
+            console.warn(`Gemini API Error: ${response.status} (Too Many Requests?)`);
+            return null;
+        }
+
         const data = await response.json();
-        // ניקוי תגיות קוד אם ה-AI הוסיף אותן
+        
+        if (!data.candidates || data.candidates.length === 0) {
+            console.warn("Gemini returned no candidates.");
+            return null;
+        }
+
         const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
         return JSON.parse(text);
+
     } catch (error) {
-        console.error("Gemini Marketing Error:", error);
+        console.error("Gemini Marketing Critical Error:", error);
         return null;
     }
 }
 
 /**
- * 2. חילוץ מפרט טכני בלבד (הפונקציה שהייתה חסרה!)
+ * 2. חילוץ מפרט טכני בלבד
  */
 export async function extractTechnicalSpecs(productName) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
@@ -72,17 +83,24 @@ export async function extractTechnicalSpecs(productName) {
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
+        if (!response.ok) throw new Error(`Status ${response.status}`);
+
         const data = await response.json();
+        
+        if (!data.candidates || !data.candidates[0]) throw new Error("No data");
+
         const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
         return JSON.parse(text);
+
     } catch (error) {
         console.error("Gemini Tech Specs Error:", error);
+        // מחזיר אובייקט ריק כדי שהתוכנה לא תקרוס
         return { coverage: "", drying: "", thickness: "" };
     }
 }
 
 /**
- * 3. שכתוב ושיפור טקסט (AI Copywriter)
+ * 3. שכתוב ושיפור טקסט
  */
 export async function improveText(currentText, style) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
@@ -104,10 +122,13 @@ export async function improveText(currentText, style) {
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
+        if (!response.ok) return currentText; // Fallback to original
+
         const data = await response.json();
+        if (!data.candidates || !data.candidates[0]) return currentText;
+
         return data.candidates[0].content.parts[0].text.trim();
     } catch (error) {
-        console.error("Gemini Rewrite Error:", error);
         return currentText;
     }
 }
@@ -129,13 +150,10 @@ export async function askProductExpert(product, userQuestion, chatHistory = []) 
     הנחיות: ענה בעברית, קצר ולעניין (מקסימום 2-3 משפטים). היה אדיב ומקצועי.
     `;
 
-    // המרת היסטוריית הצ'אט לפורמט של ג'מיני
     const contents = chatHistory.map(msg => ({
         role: msg.role === 'user' ? 'user' : 'model',
         parts: [{ text: msg.text }]
     }));
-    
-    // הוספת השאלה הנוכחית
     contents.push({ role: "user", parts: [{ text: context }] });
 
     try {
@@ -144,31 +162,31 @@ export async function askProductExpert(product, userQuestion, chatHistory = []) 
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: contents })
         });
+        
+        if (!response.ok) return "מצטער, המערכת עמוסה כרגע. נסה שוב בעוד דקה.";
+
         const data = await response.json();
         return data.candidates[0].content.parts[0].text;
     } catch (error) { 
-        console.error("Expert Chat Error:", error);
         return "יש בעיה בתקשורת כרגע, נסה שוב מאוחר יותר."; 
     }
 }
 
 /**
- * 5. חיפוש תמונות (מומלץ להשתמש ב-Google Custom Search API במציאות)
- * כרגע נחזיר תמונות דמו כדי למנוע שגיאות
+ * 5. חיפוש תמונות (דמו - Google API דורש מפתח נפרד בתשלום)
  */
 export async function searchImages(query) {
-    // כאן אפשר לחבר Google Custom Search אם יש לך מפתח מתאים
-    // כרגע נחזיר מערך ריק כדי לא לשבור את הממשק
     console.log(`Searching images for: ${query}`);
+    // מחזיר תמונות דמו כדי למנוע קריסה
     return [
-        { link: "https://placehold.co/600x400?text=Image+1", title: "Demo 1" },
-        { link: "https://placehold.co/600x400?text=Image+2", title: "Demo 2" }
+        { link: "https://placehold.co/600x400?text=Sika+Product", title: "Demo 1" },
+        { link: "https://placehold.co/600x400?text=Application", title: "Demo 2" },
+        { link: "https://placehold.co/600x400?text=Result", title: "Demo 3" }
     ];
 }
 
 /**
- * 6. חיפוש וידאו (YouTube API)
- * כרגע נחזיר מערך ריק או דמו
+ * 6. חיפוש וידאו
  */
 export async function searchVideos(query) {
     console.log(`Searching videos for: ${query}`);
