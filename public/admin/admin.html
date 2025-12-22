@@ -23,7 +23,7 @@
         .view-panel { display: none; height: 100%; flex-direction: column; }
         .view-panel.active { display: flex; }
 
-        /* Generic UI */
+        /* UI Components */
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-weight: 600; transition: all 0.2s; cursor: pointer; font-size: 14px; }
         .btn-primary { background: #2563eb; color: white; }
         .btn-primary:hover { background: #1d4ed8; }
@@ -32,7 +32,7 @@
         .input-std { width: 100%; border: 1px solid #cbd5e1; padding: 12px; border-radius: 10px; outline: none; background: #fff; font-size: 14px; }
         .input-std:focus { border-color: #2563eb; ring: 2px solid #bfdbfe; }
 
-        /* Product Editor Tabs */
+        /* Product Editor */
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
         .tab-link { padding: 12px 24px; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 2px solid transparent; }
@@ -46,21 +46,18 @@
         .gallery-item:hover .remove-btn { opacity: 1; }
         .main-badge { position: absolute; bottom: 4px; right: 4px; background: #2563eb; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
         
-        /* Academy Card Design */
+        /* Academy Card */
         .academy-card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; transition: all 0.3s ease; display: flex; flex-direction: column; position: relative; }
         .academy-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); border-color: #bfdbfe; }
         .vid-thumb { aspect-ratio: 16/9; background: #000; position: relative; overflow: hidden; }
         .vid-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: 0.3s; }
-        .academy-card:hover .vid-thumb img { opacity: 0.6; transform: scale(1.05); }
         .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; opacity: 0.8; transition: 0.3s; }
-        .academy-card:hover .play-icon { transform: translate(-50%, -50%) scale(1.2); opacity: 1; text-shadow: 0 0 20px rgba(255,255,255,0.5); }
+        .academy-card:hover .play-icon { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
         .card-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         .video-title { font-weight: 900; font-size: 18px; line-height: 1.3; margin-bottom: 8px; color: #1e293b; }
         .watch-btn { background: #E3000F; color: white; padding: 12px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 14px; transition: 0.2s; display: flex; items-center; justify-content: center; gap: 8px; margin-top: auto; }
-        .watch-btn:hover { background: #cc000d; shadow: 0 10px 20px rgba(227, 0, 15, 0.2); }
         .delete-vid { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; padding: 6px; border-radius: 8px; cursor: pointer; opacity: 0; transition: 0.2s; z-index: 10; }
         .academy-card:hover .delete-vid { opacity: 1; }
-        .delete-vid:hover { background: #ef4444; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.4s; z-index: 100; display: flex; gap: 10px; }
@@ -77,13 +74,11 @@
                 <p class="text-xs text-gray-400 font-bold tracking-widest uppercase">Admin Ultimate</p>
             </div>
         </div>
-        
         <nav class="flex-1 py-8 space-y-2">
             <div class="nav-item active" onclick="app.switchView('products')"><i data-lucide="package"></i> קטלוג מוצרים</div>
             <div class="nav-item" onclick="app.switchView('brands')"><i data-lucide="tag"></i> ניהול מותגים</div>
             <div class="nav-item" onclick="app.switchView('tutorials')"><i data-lucide="graduation-cap"></i> אקדמיה</div>
         </nav>
-
         <div class="p-6 border-t border-gray-100 bg-gray-50/50">
             <button onclick="app.runSeed()" class="w-full py-3 rounded-xl border border-gray-200 text-gray-500 font-bold hover:bg-white hover:text-red-500 hover:border-red-200 transition text-xs flex items-center justify-center gap-2">
                 <i data-lucide="refresh-cw" size="14"></i> איפוס נתונים
@@ -92,19 +87,16 @@
     </div>
 
     <div class="main-content">
-        
         <div id="view-products" class="view-panel active h-full">
             <header class="flex justify-between items-center mb-6">
                 <div><h2 class="text-3xl font-black text-gray-900">קטלוג מוצרים</h2><p class="text-gray-500 mt-1">ניהול מלאי, עריכה ו-AI</p></div>
                 <button onclick="app.createNewProduct()" class="btn btn-primary"><i data-lucide="plus"></i> מוצר חדש</button>
             </header>
-
             <div class="flex gap-6 h-full overflow-hidden">
                 <div class="w-1/3 bg-white rounded-3xl border border-gray-200 flex flex-col overflow-hidden shadow-sm">
                     <div class="p-4 border-b bg-gray-50"><input id="prodSearch" oninput="app.filterProducts()" class="input-std" placeholder="חיפוש..."></div>
                     <div id="productsList" class="flex-1 overflow-y-auto"></div>
                 </div>
-                
                 <div class="flex-1 bg-white rounded-3xl border border-gray-200 flex flex-col relative overflow-hidden shadow-sm">
                     <div class="p-4 border-b flex justify-between items-center bg-white sticky top-0 z-10">
                         <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold" id="productIdBadge">New</span>
@@ -113,70 +105,38 @@
                             <button onclick="app.saveCurrentProduct()" class="btn btn-primary py-2 px-6"><i data-lucide="save"></i> שמור</button>
                         </div>
                     </div>
-                    
                     <div class="p-8 overflow-y-auto flex-1">
                         <input type="hidden" id="editProdId">
-                        
                         <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-8 flex gap-3 items-end">
-                            <div class="flex-1">
-                                <label class="text-xs font-bold text-indigo-900 block mb-1">איתור נתונים אוטומטי (AI)</label>
-                                <input id="aiPrompt" class="input-std border-indigo-200" placeholder="הקלד שם מוצר (למשל Sika 107)...">
-                            </div>
+                            <div class="flex-1"><label class="text-xs font-bold text-indigo-900 block mb-1">איתור נתונים אוטומטי (AI)</label><input id="aiPrompt" class="input-std border-indigo-200" placeholder="הקלד שם מוצר..."></div>
                             <button onclick="app.runFullAI()" class="btn btn-ai h-[46px]"><i data-lucide="sparkles"></i> הפעל קסם</button>
                         </div>
-
                         <div class="flex border-b mb-6">
                             <div class="tab-link active" onclick="app.switchTab('general', this)">כללי</div>
                             <div class="tab-link" onclick="app.switchTab('media', this)">מדיה וגלריה</div>
                             <div class="tab-link" onclick="app.switchTab('tech', this)">טכני</div>
                         </div>
-
                         <div id="tab-general" class="tab-content active space-y-6">
                             <div class="grid grid-cols-2 gap-6">
                                 <div><label class="text-xs font-bold text-gray-500 mb-1 block">שם מוצר</label><input id="pName" class="input-std font-bold"></div>
                                 <div><label class="text-xs font-bold text-gray-500 mb-1 block">מותג</label><select id="pBrandSelect" class="input-std"><option>בחר...</option></select></div>
                             </div>
-                            <div><label class="text-xs font-bold text-gray-500 mb-1 block">קטגוריה</label>
-                                <select id="pCat" class="input-std">
-                                    <option value="sealing">איטום</option><option value="glues">דבקים</option><option value="concrete">בטון</option><option value="flooring">ריצוף</option>
-                                </select>
-                            </div>
+                            <div><label class="text-xs font-bold text-gray-500 mb-1 block">קטגוריה</label><select id="pCat" class="input-std"><option value="sealing">איטום</option><option value="glues">דבקים</option><option value="concrete">בטון</option><option value="flooring">ריצוף</option></select></div>
                             <div><label class="text-xs font-bold text-gray-500 mb-1 block">תיאור שיווקי</label><textarea id="pDesc" class="input-std h-32"></textarea></div>
                         </div>
-
                         <div id="tab-media" class="tab-content">
                              <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                <h4 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="link"></i> הוספה ידנית (הדבק קישורים)</h4>
+                                <h4 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="link"></i> הוספה ידנית</h4>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="text-xs text-gray-500 mb-1 block">קישורי תמונות (מופרדים בפסיק)</label>
-                                        <div class="flex gap-2">
-                                            <input id="manualImages" class="input-std text-xs" placeholder="https://...">
-                                            <button onclick="app.addManualImages()" class="btn bg-white border border-gray-300 text-xs px-3">הוסף</button>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="text-xs text-gray-500 mb-1 block">קישורי וידאו (מופרדים בפסיק)</label>
-                                        <div class="flex gap-2">
-                                            <input id="manualVideos" class="input-std text-xs" placeholder="https://...">
-                                            <button onclick="app.addManualVideos()" class="btn bg-white border border-gray-300 text-xs px-3">הוסף</button>
-                                        </div>
-                                    </div>
+                                    <div><label class="text-xs text-gray-500 mb-1 block">קישורי תמונות (מופרדים בפסיק)</label><div class="flex gap-2"><input id="manualImages" class="input-std text-xs"><button onclick="app.addManualImages()" class="btn bg-white border text-xs px-3">הוסף</button></div></div>
+                                    <div><label class="text-xs text-gray-500 mb-1 block">קישורי וידאו</label><div class="flex gap-2"><input id="manualVideos" class="input-std text-xs"><button onclick="app.addManualVideos()" class="btn bg-white border text-xs px-3">הוסף</button></div></div>
                                 </div>
                             </div>
-
                             <div class="flex gap-6">
-                                <div class="w-1/2">
-                                    <label class="text-xs font-bold text-green-600 mb-2 block">גלריית תמונות</label>
-                                    <div id="selectedImagesGrid" class="grid grid-cols-3 gap-2"></div>
-                                </div>
-                                <div class="w-1/2">
-                                    <label class="text-xs font-bold text-red-600 mb-2 block">גלריית וידאו</label>
-                                    <div id="selectedVideosGrid" class="grid grid-cols-3 gap-2"></div>
-                                </div>
+                                <div class="w-1/2"><label class="text-xs font-bold text-green-600 mb-2 block">גלריית תמונות</label><div id="selectedImagesGrid" class="grid grid-cols-3 gap-2"></div></div>
+                                <div class="w-1/2"><label class="text-xs font-bold text-red-600 mb-2 block">גלריית וידאו</label><div id="selectedVideosGrid" class="grid grid-cols-3 gap-2"></div></div>
                             </div>
                         </div>
-
                         <div id="tab-tech" class="tab-content">
                             <div class="grid grid-cols-3 gap-6">
                                 <div><label class="text-xs font-bold text-gray-500 mb-1 block">כיסוי</label><input id="tCov" class="input-std"></div>
@@ -192,10 +152,7 @@
         <div id="view-brands" class="view-panel">
             <h2 class="text-3xl font-black text-gray-900 mb-6">ניהול מותגים</h2>
             <div class="bg-white p-6 rounded-3xl border border-gray-200 mb-6 flex gap-4 items-end max-w-lg">
-                <div class="flex-1">
-                    <label class="text-xs font-bold text-gray-500 mb-1 block">שם מותג חדש</label>
-                    <input id="newBrandName" class="input-std" placeholder="למשל: Sika Floor">
-                </div>
+                <div class="flex-1"><label class="text-xs font-bold text-gray-500 mb-1 block">שם מותג חדש</label><input id="newBrandName" class="input-std"></div>
                 <button onclick="app.addBrand()" class="btn btn-primary">הוסף</button>
             </div>
             <div class="grid grid-cols-4 gap-4" id="brandsGrid"></div>
@@ -203,34 +160,21 @@
 
         <div id="view-tutorials" class="view-panel">
             <header class="flex justify-between items-end mb-8">
-                <div>
-                    <h2 class="text-4xl font-black text-[#0f172a] tracking-tight">Sika Academy <span class="text-[#E3000F]">.</span></h2>
-                    <p class="text-lg text-gray-500 mt-2 font-medium">מרכז הידע וההדרכה המקצועי</p>
-                </div>
-                <button onclick="document.getElementById('addTutorialModal').classList.remove('hidden')" class="btn bg-[#0f172a] text-white hover:bg-black px-6 py-3 shadow-xl">
-                    <i data-lucide="film"></i> העלאת שיעור חדש
-                </button>
+                <div><h2 class="text-4xl font-black text-[#0f172a] tracking-tight">Sika Academy <span class="text-[#E3000F]">.</span></h2><p class="text-lg text-gray-500 mt-2 font-medium">מרכז הידע וההדרכה המקצועי</p></div>
+                <button onclick="document.getElementById('addTutorialModal').classList.remove('hidden')" class="btn bg-[#0f172a] text-white hover:bg-black px-6 py-3 shadow-xl"><i data-lucide="film"></i> העלאת שיעור חדש</button>
             </header>
-
-            <div id="tutorialsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 overflow-y-auto pb-10">
-                </div>
+            <div id="tutorialsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 overflow-y-auto pb-10"></div>
         </div>
-
     </div>
 
     <div id="addTutorialModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center">
         <div class="bg-white rounded-2xl p-8 w-[500px] shadow-2xl animate-[fadeIn_0.2s]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-2xl">הוספת שיעור לאקדמיה</h3>
-                <button onclick="document.getElementById('addTutorialModal').classList.add('hidden')" class="text-gray-400 hover:text-black"><i data-lucide="x"></i></button>
-            </div>
+            <div class="flex justify-between items-center mb-6"><h3 class="font-bold text-2xl">הוספת שיעור</h3><button onclick="document.getElementById('addTutorialModal').classList.add('hidden')"><i data-lucide="x"></i></button></div>
             <div class="space-y-5">
-                <div><label class="block text-sm font-bold text-gray-700 mb-2">כותרת השיעור</label><input id="tutTitle" class="input-std" placeholder="למשל: יישום איטום..."></div>
-                <div><label class="block text-sm font-bold text-gray-700 mb-2">קישור YouTube</label><input id="tutUrl" class="input-std" placeholder="https://..."></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-2">כותרת</label><input id="tutTitle" class="input-std"></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-2">קישור YouTube</label><input id="tutUrl" class="input-std"></div>
             </div>
-            <div class="mt-8 pt-6 border-t flex justify-end">
-                <button onclick="app.saveTutorial()" class="btn btn-primary w-full text-lg py-3">פרסם באקדמיה</button>
-            </div>
+            <div class="mt-8 pt-6 border-t flex justify-end"><button onclick="app.saveTutorial()" class="btn btn-primary w-full text-lg py-3">פרסם</button></div>
         </div>
     </div>
 
@@ -238,6 +182,7 @@
 
     <script type="module">
         import { db } from '../js/firebase-config.js';
+        // תיקון: ייבוא תקין ללא סוגריים
         import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         import { askGeminiAdmin, extractTechnicalSpecs } from '../js/gemini-service.js';
 
@@ -254,12 +199,10 @@
                 app.loadTutorials();
             },
 
-            // Navigation
             switchView: (v) => {
                 document.querySelectorAll('.view-panel').forEach(e => e.classList.remove('active'));
                 document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
                 document.getElementById('view-'+v).classList.add('active');
-                
                 const idx = v === 'products' ? 0 : v === 'brands' ? 1 : 2;
                 document.querySelectorAll('.nav-item')[idx].classList.add('active');
             },
@@ -270,7 +213,6 @@
                 btn.classList.add('active');
             },
 
-            // --- PRODUCTS LOGIC ---
             loadProducts: () => {
                 const list = document.getElementById('productsList');
                 onSnapshot(collection(db, "products"), (snap) => {
@@ -280,11 +222,7 @@
                         const p = {id: d.id, ...d.data()};
                         app.allProducts.push(p);
                         const displayImg = p.images?.[0] || p.image || 'https://placehold.co/50';
-                        list.innerHTML += `
-                            <div class="flex items-center gap-3 p-3 border-b hover:bg-gray-50 cursor-pointer transition" onclick="app.editProduct('${p.id}')">
-                                <img src="${displayImg}" class="w-10 h-10 rounded border object-contain bg-white">
-                                <div><div class="font-bold text-sm text-gray-800">${p.name}</div><div class="text-xs text-gray-500">${p.brand||''}</div></div>
-                            </div>`;
+                        list.innerHTML += `<div class="flex items-center gap-3 p-3 border-b hover:bg-gray-50 cursor-pointer" onclick="app.editProduct('${p.id}')"><img src="${displayImg}" class="w-10 h-10 rounded border object-contain bg-white"><div><div class="font-bold text-sm text-gray-800">${p.name}</div><div class="text-xs text-gray-500">${p.brand||''}</div></div></div>`;
                     });
                 });
             },
@@ -294,19 +232,15 @@
                 if(!p) return;
                 document.getElementById('editProdId').value = id;
                 document.getElementById('productIdBadge').innerText = id.slice(0,6);
-                
                 document.getElementById('pName').value = p.name;
                 document.getElementById('pBrandSelect').value = p.brand || '';
                 document.getElementById('pCat').value = p.category || 'sealing';
                 document.getElementById('pDesc').value = p.marketingDesc || '';
-                
                 document.getElementById('tCov').value = p.tech?.coverage || '';
                 document.getElementById('tDry').value = p.tech?.drying || '';
                 document.getElementById('tThick').value = p.tech?.thickness || '';
-
                 app.currentImages = p.images || (p.image ? [p.image] : []);
                 app.currentVideos = p.videos || (p.videoUrl ? [{url: p.videoUrl, thumbnail: 'https://placehold.co/100?text=Video'}] : []);
-                
                 app.renderGallery();
             },
 
@@ -329,33 +263,20 @@
                     videos: app.currentVideos,
                     image: app.currentImages[0] || '',
                     videoUrl: app.currentVideos[0]?.url || '',
-                    tech: {
-                        coverage: document.getElementById('tCov').value,
-                        drying: document.getElementById('tDry').value,
-                        thickness: document.getElementById('tThick').value
-                    },
+                    tech: { coverage: document.getElementById('tCov').value, drying: document.getElementById('tDry').value, thickness: document.getElementById('tThick').value },
                     updatedAt: Date.now()
                 };
-
                 if(!data.name) return alert("חובה שם מוצר");
                 if(id) await updateDoc(doc(db, "products", id), data);
-                else {
-                    data.createdAt = Date.now();
-                    await addDoc(collection(db, "products"), data);
-                    app.createNewProduct();
-                }
+                else { data.createdAt = Date.now(); await addDoc(collection(db, "products"), data); app.createNewProduct(); }
                 app.showToast("נשמר בהצלחה");
             },
 
             deleteCurrentProduct: async () => {
                 const id = document.getElementById('editProdId').value;
-                if(id && confirm("למחוק?")) {
-                    await deleteDoc(doc(db, "products", id));
-                    app.createNewProduct();
-                }
+                if(id && confirm("למחוק?")) { await deleteDoc(doc(db, "products", id)); app.createNewProduct(); }
             },
 
-            // --- GALLERY LOGIC ---
             addManualImages: () => {
                 const input = document.getElementById('manualImages');
                 const urls = input.value.split(',').map(u => u.trim()).filter(u => u);
@@ -375,29 +296,17 @@
 
             renderGallery: () => {
                 const imgContainer = document.getElementById('selectedImagesGrid');
-                imgContainer.innerHTML = app.currentImages.map((url, i) => `
-                    <div class="gallery-item group">
-                        <img src="${url}">
-                        ${i===0 ? '<div class="main-badge">ראשית</div>' : ''}
-                        <button onclick="app.removeImage(${i})" class="remove-btn"><i data-lucide="trash" size="12"></i></button>
-                    </div>`).join('');
-                
+                imgContainer.innerHTML = app.currentImages.map((url, i) => `<div class="gallery-item group"><img src="${url}">${i===0 ? '<div class="main-badge">ראשית</div>' : ''}<button onclick="app.removeImage(${i})" class="remove-btn"><i data-lucide="trash" size="12"></i></button></div>`).join('');
                 const vidContainer = document.getElementById('selectedVideosGrid');
-                vidContainer.innerHTML = app.currentVideos.map((v, i) => `
-                    <div class="gallery-item group bg-black">
-                        <img src="${v.thumbnail}" class="opacity-70">
-                        <button onclick="app.removeVideo(${i})" class="remove-btn"><i data-lucide="trash" size="12"></i></button>
-                    </div>`).join('');
+                vidContainer.innerHTML = app.currentVideos.map((v, i) => `<div class="gallery-item group bg-black"><img src="${v.thumbnail}" class="opacity-70"><button onclick="app.removeVideo(${i})" class="remove-btn"><i data-lucide="trash" size="12"></i></button></div>`).join('');
                 lucide.createIcons();
             },
 
-            // --- AI LOGIC ---
             runFullAI: async () => {
                 const query = document.getElementById('aiPrompt').value;
                 if(!query) return alert("הזן שם מוצר");
                 const btn = document.querySelector('.btn-ai');
                 btn.innerHTML = '⏳...';
-                
                 const mData = await askGeminiAdmin(query);
                 if(mData) {
                     document.getElementById('pName').value = mData.name;
@@ -407,12 +316,10 @@
                 document.getElementById('tCov').value = tData.coverage;
                 document.getElementById('tDry').value = tData.drying;
                 document.getElementById('tThick').value = tData.thickness;
-                
                 btn.innerHTML = '<i data-lucide="sparkles"></i> הפעל קסם';
                 lucide.createIcons();
             },
 
-            // --- BRANDS LOGIC ---
             loadBrands: () => {
                 onSnapshot(collection(db, "brands"), (snap) => {
                     const grid = document.getElementById('brandsGrid');
@@ -421,14 +328,7 @@
                     sel.innerHTML = '<option>בחר...</option>';
                     snap.forEach(docSnap => {
                         const b = {id: docSnap.id, ...docSnap.data()};
-                        // Add to Grid
-                        grid.innerHTML += `
-                            <div class="bg-white p-4 rounded-xl border border-gray-200 flex justify-between items-center shadow-sm">
-                                <span class="font-bold text-gray-700">${b.name}</span>
-                                <button onclick="app.deleteBrand('${b.id}')" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" size="16"></i></button>
-                            </div>
-                        `;
-                        // Add to Select
+                        grid.innerHTML += `<div class="bg-white p-4 rounded-xl border border-gray-200 flex justify-between items-center shadow-sm"><span class="font-bold text-gray-700">${b.name}</span><button onclick="app.deleteBrand('${b.id}')" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" size="16"></i></button></div>`;
                         const opt = document.createElement('option');
                         opt.value = b.name;
                         opt.innerText = b.name;
@@ -443,11 +343,8 @@
                 await addDoc(collection(db, "brands"), { name, createdAt: Date.now() });
                 document.getElementById('newBrandName').value = "";
             },
-            deleteBrand: async (id) => {
-                if(confirm("למחוק מותג?")) await deleteDoc(doc(db, "brands", id));
-            },
+            deleteBrand: async (id) => { if(confirm("למחוק?")) await deleteDoc(doc(db, "brands", id)); },
 
-            // --- ACADEMY LOGIC ---
             loadTutorials: () => {
                 onSnapshot(collection(db, "tutorials"), (snap) => {
                     const grid = document.getElementById('tutorialsGrid');
@@ -457,25 +354,7 @@
                         let vidId = "";
                         try { vidId = t.url.split('v=')[1].split('&')[0]; } catch(e){}
                         const thumb = `https://img.youtube.com/vi/${vidId}/mqdefault.jpg`;
-
-                        grid.innerHTML += `
-                            <div class="academy-card group">
-                                <div class="delete-vid" onclick="app.deleteTutorial('${t.id}')"><i data-lucide="trash-2" size="16"></i></div>
-                                <div class="vid-thumb">
-                                    <img src="${thumb}" onerror="this.src='https://placehold.co/600x400?text=Video'">
-                                    <div class="play-icon"><i data-lucide="play-circle" size="48"></i></div>
-                                </div>
-                                <div class="card-content">
-                                    <div class="video-meta">
-                                        <span class="bg-gray-100 px-2 py-1 rounded text-[10px] font-bold text-gray-500 uppercase">הדרכה טכנית</span>
-                                    </div>
-                                    <h3 class="video-title">${t.title}</h3>
-                                    <a href="${t.url}" target="_blank" class="watch-btn">
-                                        <i data-lucide="play" size="16" fill="currentColor"></i> נגן שיעור
-                                    </a>
-                                </div>
-                            </div>
-                        `;
+                        grid.innerHTML += `<div class="academy-card group"><div class="delete-vid" onclick="app.deleteTutorial('${t.id}')"><i data-lucide="trash-2" size="16"></i></div><div class="vid-thumb"><img src="${thumb}" onerror="this.src='https://placehold.co/600x400?text=Video'"><div class="play-icon"><i data-lucide="play-circle" size="48"></i></div></div><div class="card-content"><div class="video-meta"><span class="bg-gray-100 px-2 py-1 rounded text-[10px] font-bold text-gray-500 uppercase">הדרכה טכנית</span></div><h3 class="video-title">${t.title}</h3><a href="${t.url}" target="_blank" class="watch-btn"><i data-lucide="play" size="16" fill="currentColor"></i> נגן שיעור</a></div></div>`;
                     });
                     lucide.createIcons();
                 });
@@ -487,29 +366,11 @@
                 await addDoc(collection(db, "tutorials"), { title, url, createdAt: Date.now() });
                 document.getElementById('addTutorialModal').classList.add('hidden');
             },
-            deleteTutorial: async (id) => {
-                if(confirm("למחוק?")) await deleteDoc(doc(db, "tutorials", id));
-            },
+            deleteTutorial: async (id) => { if(confirm("למחוק?")) await deleteDoc(doc(db, "tutorials", id)); },
 
-            // --- UTILS ---
-            runSeed: async () => {
-                if(confirm("לאתחל נתונים?")) {
-                    const { seedRealData } = await import('../js/seed-data.js');
-                    seedRealData(); // Assuming this function exists and handles everything
-                }
-            },
-            showToast: (msg) => {
-                const t = document.getElementById('toast');
-                document.getElementById('toastMsg').innerText = msg;
-                t.classList.add('show');
-                setTimeout(() => t.classList.remove('show'), 3000);
-            },
-            filterProducts: () => {
-                const t = document.getElementById('prodSearch').value.toLowerCase();
-                Array.from(document.getElementById('productsList').children).forEach(el => {
-                    el.style.display = el.innerText.toLowerCase().includes(t) ? 'flex' : 'none';
-                });
-            }
+            runSeed: async () => { if(confirm("לאתחל נתונים?")) { const { seedRealData } = await import('../js/seed-data.js'); seedRealData(); } },
+            showToast: (msg) => { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); },
+            filterProducts: () => { const t = document.getElementById('prodSearch').value.toLowerCase(); Array.from(document.getElementById('productsList').children).forEach(el => { el.style.display = el.innerText.toLowerCase().includes(t) ? 'flex' : 'none'; }); }
         };
 
         window.app = app;
