@@ -1,8 +1,8 @@
 // המפתח שלך
 const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug";
 
-// שיניתי למודל יציב יותר כדי למנוע שגיאות 429
-const MODEL_NAME = "gemini-1.5-flash"; 
+// שימוש במודל יציב ומעודכן
+const MODEL_NAME = "gemini-1.5-flash-latest";
 
 /**
  * 1. AI שיווקי: יצירת תיאור כללי ונתונים בסיסיים
@@ -37,20 +37,13 @@ export async function askGeminiAdmin(productName) {
         });
 
         if (!response.ok) {
-            console.warn(`Gemini API Error: ${response.status} (Too Many Requests?)`);
+            console.warn(`Gemini Marketing Error: ${response.status}`);
             return null;
         }
 
         const data = await response.json();
-        
-        if (!data.candidates || data.candidates.length === 0) {
-            console.warn("Gemini returned no candidates.");
-            return null;
-        }
-
         const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
         return JSON.parse(text);
-
     } catch (error) {
         console.error("Gemini Marketing Critical Error:", error);
         return null;
@@ -58,7 +51,7 @@ export async function askGeminiAdmin(productName) {
 }
 
 /**
- * 2. חילוץ מפרט טכני בלבד
+ * 2. חילוץ מפרט טכני בלבד (הפונקציה שהייתה חסרה!)
  */
 export async function extractTechnicalSpecs(productName) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
@@ -86,21 +79,17 @@ export async function extractTechnicalSpecs(productName) {
         if (!response.ok) throw new Error(`Status ${response.status}`);
 
         const data = await response.json();
-        
-        if (!data.candidates || !data.candidates[0]) throw new Error("No data");
-
         const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
         return JSON.parse(text);
 
     } catch (error) {
         console.error("Gemini Tech Specs Error:", error);
-        // מחזיר אובייקט ריק כדי שהתוכנה לא תקרוס
         return { coverage: "", drying: "", thickness: "" };
     }
 }
 
 /**
- * 3. שכתוב ושיפור טקסט
+ * 3. שכתוב ושיפור טקסט (AI Copywriter - הייתה חסרה)
  */
 export async function improveText(currentText, style) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
@@ -122,11 +111,9 @@ export async function improveText(currentText, style) {
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
-        if (!response.ok) return currentText; // Fallback to original
+        if (!response.ok) return currentText;
 
         const data = await response.json();
-        if (!data.candidates || !data.candidates[0]) return currentText;
-
         return data.candidates[0].content.parts[0].text.trim();
     } catch (error) {
         return currentText;
@@ -173,15 +160,14 @@ export async function askProductExpert(product, userQuestion, chatHistory = []) 
 }
 
 /**
- * 5. חיפוש תמונות (דמו - Google API דורש מפתח נפרד בתשלום)
+ * 5. חיפוש תמונות (דמו למניעת קריסה)
  */
 export async function searchImages(query) {
     console.log(`Searching images for: ${query}`);
-    // מחזיר תמונות דמו כדי למנוע קריסה
     return [
-        { link: "https://placehold.co/600x400?text=Sika+Product", title: "Demo 1" },
-        { link: "https://placehold.co/600x400?text=Application", title: "Demo 2" },
-        { link: "https://placehold.co/600x400?text=Result", title: "Demo 3" }
+        { link: "https://placehold.co/600x400?text=Product+Image", title: "תמונה 1" },
+        { link: "https://placehold.co/600x400?text=Application", title: "תמונה 2" },
+        { link: "https://placehold.co/600x400?text=Sika+Result", title: "תמונה 3" }
     ];
 }
 
