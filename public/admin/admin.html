@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sika Admin Suite - Pro</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <script src="[https://unpkg.com/lucide@latest](https://unpkg.com/lucide@latest)"></script>
+    <link href="[https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap](https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap)" rel="stylesheet">
     
     <style>
         body { font-family: 'Heebo', sans-serif; background-color: #f1f5f9; color: #0f172a; height: 100vh; display: flex; overflow: hidden; }
@@ -28,14 +28,10 @@
         .tab-link { padding: 12px 24px; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 2px solid transparent; }
         .tab-link.active { color: #2563eb; border-bottom-color: #2563eb; }
         
-        /* Media Gallery Styles */
         .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .media-select { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
-        .media-select img { width: 100%; height: 100%; object-fit: cover; }
-        .media-select:hover { transform: scale(1.02); border-color: #60a5fa; }
         .gallery-item { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9; border: 1px solid #e2e8f0; }
         .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
-        .remove-btn { position: absolute; top: 4px; left: 4px; background: rgba(220, 38, 38, 0.9); color: white; p-1; border-radius: 4px; padding: 4px; opacity: 0; transition: 0.2s; }
+        .remove-btn { position: absolute; top: 4px; left: 4px; background: rgba(220, 38, 38, 0.9); color: white; padding: 4px; border-radius: 4px; opacity: 0; transition: 0.2s; cursor: pointer; }
         .gallery-item:hover .remove-btn { opacity: 1; }
         .main-badge { position: absolute; bottom: 4px; right: 4px; background: #2563eb; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
 
@@ -83,7 +79,7 @@
                         
                         <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6 flex gap-3 items-end">
                             <div class="flex-1">
-                                <label class="text-xs font-bold text-indigo-900 block mb-1">איתור נתונים ומדיה (AI)</label>
+                                <label class="text-xs font-bold text-indigo-900 block mb-1">איתור נתונים אוטומטי (AI)</label>
                                 <input id="aiPrompt" class="input-std border-indigo-200" placeholder="הקלד שם מוצר (למשל Sika 107)...">
                             </div>
                             <button onclick="app.runFullAI()" class="btn btn-ai h-[46px]"><i data-lucide="sparkles"></i> הפעל קסם</button>
@@ -91,7 +87,7 @@
 
                         <div class="flex border-b mb-6">
                             <div class="tab-link active" onclick="app.switchTab('general', this)">כללי</div>
-                            <div class="tab-link" onclick="app.switchTab('media', this)">מדיה וגלריה (מרובה)</div>
+                            <div class="tab-link" onclick="app.switchTab('media', this)">מדיה (חדש)</div>
                             <div class="tab-link" onclick="app.switchTab('tech', this)">טכני</div>
                         </div>
 
@@ -109,26 +105,38 @@
                         </div>
 
                         <div id="tab-media" class="tab-content">
-                            <div class="flex gap-6 h-[400px]">
-                                <div class="w-1/2 flex flex-col border-l pl-4">
-                                    <div class="flex justify-between mb-2 items-center">
-                                        <label class="text-xs font-bold text-blue-600">1. תוצאות חיפוש (לחץ להוספה)</label>
-                                        <div class="flex gap-1">
-                                            <button onclick="app.refreshMedia('img')" class="text-[10px] bg-gray-100 px-2 py-1 rounded hover:bg-gray-200">תמונות</button>
-                                            <button onclick="app.refreshMedia('vid')" class="text-[10px] bg-gray-100 px-2 py-1 rounded hover:bg-gray-200">וידאו</button>
+                            
+                            <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <h4 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="link"></i> הוספה ידנית (הדבק קישורים)</h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs text-gray-500 mb-1 block">קישורי תמונות (מופרדים בפסיק)</label>
+                                        <div class="flex gap-2">
+                                            <input id="manualImages" class="input-std text-xs" placeholder="[https://img1.jpg](https://img1.jpg), [https://img2.jpg](https://img2.jpg)...">
+                                            <button onclick="app.addManualImages()" class="btn bg-white border border-gray-300 text-xs px-3">הוסף</button>
                                         </div>
                                     </div>
-                                    <div id="searchResultsGrid" class="media-grid overflow-y-auto content-start flex-1 pr-2">
-                                        <div class="col-span-3 text-center text-xs text-gray-400 py-10">הזן שם מוצר ולחץ "הפעל קסם" או רענן</div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 mb-1 block">קישורי וידאו (מופרדים בפסיק)</label>
+                                        <div class="flex gap-2">
+                                            <input id="manualVideos" class="input-std text-xs" placeholder="[https://youtube.com/](https://youtube.com/)..., https://...">
+                                            <button onclick="app.addManualVideos()" class="btn bg-white border border-gray-300 text-xs px-3">הוסף</button>
+                                        </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-100 mb-6">
+
+                            <div class="flex gap-6 h-[300px]">
+                                <div class="w-1/2 flex flex-col">
+                                    <label class="text-xs font-bold text-green-600 mb-2">גלריית תמונות (הראשונה היא הראשית)</label>
+                                    <div id="selectedImagesGrid" class="grid grid-cols-3 gap-2 overflow-y-auto content-start p-1"></div>
                                 </div>
 
                                 <div class="w-1/2 flex flex-col">
-                                    <label class="text-xs font-bold text-green-600 mb-2">2. הגלריה שנבחרה (הראשונה = ראשית)</label>
-                                    <div class="text-[10px] font-bold text-gray-400 mb-1">תמונות:</div>
-                                    <div id="selectedImagesGrid" class="grid grid-cols-3 gap-2 mb-4 overflow-y-auto max-h-[150px]"></div>
-                                    <div class="text-[10px] font-bold text-gray-400 mb-1">וידאו:</div>
-                                    <div id="selectedVideosGrid" class="grid grid-cols-3 gap-2 overflow-y-auto max-h-[150px]"></div>
+                                    <label class="text-xs font-bold text-red-600 mb-2">גלריית וידאו</label>
+                                    <div id="selectedVideosGrid" class="grid grid-cols-3 gap-2 overflow-y-auto content-start p-1"></div>
                                 </div>
                             </div>
                         </div>
@@ -153,8 +161,8 @@
 
     <script type="module">
         import { db } from '../js/firebase-config.js';
-        import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        import { askGeminiAdmin, extractTechnicalSpecs, searchImages, searchVideos } from '../js/gemini-service.js';
+        import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot } from "[https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js](https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js)";
+        import { askGeminiAdmin, extractTechnicalSpecs } from '../js/gemini-service.js';
 
         lucide.createIcons();
 
@@ -165,7 +173,7 @@
 
             init: () => {
                 app.loadProducts();
-                app.loadBrands(); // Add simplified load
+                app.loadBrands();
             },
 
             // Navigation
@@ -181,7 +189,7 @@
                 btn.classList.add('active');
             },
 
-            // Products
+            // Products Logic
             loadProducts: () => {
                 const list = document.getElementById('productsList');
                 onSnapshot(collection(db, "products"), (snap) => {
@@ -190,7 +198,7 @@
                     snap.forEach(d => {
                         const p = {id: d.id, ...d.data()};
                         app.allProducts.push(p);
-                        const displayImg = p.images?.[0] || p.image || 'https://placehold.co/50';
+                        const displayImg = p.images?.[0] || p.image || '[https://placehold.co/50](https://placehold.co/50)';
                         list.innerHTML += `
                             <div class="flex items-center gap-3 p-3 border-b hover:bg-gray-50 cursor-pointer transition" onclick="app.editProduct('${p.id}')">
                                 <img src="${displayImg}" class="w-10 h-10 rounded border object-contain bg-white">
@@ -215,9 +223,8 @@
                 document.getElementById('tDry').value = p.tech?.drying || '';
                 document.getElementById('tThick').value = p.tech?.thickness || '';
 
-                // Restore Gallery Arrays
                 app.currentImages = p.images || (p.image ? [p.image] : []);
-                app.currentVideos = p.videos || (p.videoUrl ? [{url: p.videoUrl, thumbnail: 'https://placehold.co/100?text=Video'}] : []);
+                app.currentVideos = p.videos || (p.videoUrl ? [{url: p.videoUrl, thumbnail: '[https://placehold.co/100?text=Video](https://placehold.co/100?text=Video)'}] : []);
                 
                 app.renderGallery();
             },
@@ -239,8 +246,8 @@
                     marketingDesc: document.getElementById('pDesc').value,
                     images: app.currentImages,
                     videos: app.currentVideos,
-                    image: app.currentImages[0] || '', // Backwards compat
-                    videoUrl: app.currentVideos[0]?.url || '', // Backwards compat
+                    image: app.currentImages[0] || '',
+                    videoUrl: app.currentVideos[0]?.url || '',
                     tech: {
                         coverage: document.getElementById('tCov').value,
                         drying: document.getElementById('tDry').value,
@@ -267,9 +274,25 @@
                 }
             },
 
-            // Gallery Logic
-            addImage: (url) => { if(!app.currentImages.includes(url)) app.currentImages.push(url); app.renderGallery(); },
-            addVideo: (url, thumb) => { app.currentVideos.push({url, thumbnail: thumb}); app.renderGallery(); },
+            // --- GALLERY LOGIC (Manual Add) ---
+            addManualImages: () => {
+                const input = document.getElementById('manualImages');
+                const urls = input.value.split(',').map(u => u.trim()).filter(u => u);
+                urls.forEach(url => { if(!app.currentImages.includes(url)) app.currentImages.push(url); });
+                input.value = "";
+                app.renderGallery();
+            },
+
+            addManualVideos: () => {
+                const input = document.getElementById('manualVideos');
+                const urls = input.value.split(',').map(u => u.trim()).filter(u => u);
+                urls.forEach(url => { 
+                    app.currentVideos.push({url: url, thumbnail: '[https://placehold.co/100?text=Video](https://placehold.co/100?text=Video)'}); 
+                });
+                input.value = "";
+                app.renderGallery();
+            },
+
             removeImage: (idx) => { app.currentImages.splice(idx, 1); app.renderGallery(); },
             removeVideo: (idx) => { app.currentVideos.splice(idx, 1); app.renderGallery(); },
 
@@ -291,28 +314,6 @@
                 lucide.createIcons();
             },
 
-            refreshMedia: async (type) => {
-                const query = document.getElementById('aiPrompt').value || document.getElementById('pName').value;
-                const grid = document.getElementById('searchResultsGrid');
-                grid.innerHTML = '<div class="col-span-3 text-center text-xs py-4">טוען...</div>';
-                
-                if(type === 'img') {
-                    const imgs = await searchImages(query);
-                    grid.innerHTML = imgs.map(img => `
-                        <div class="media-select" onclick="app.addImage('${img.link}')">
-                            <img src="${img.link}">
-                        </div>`).join('');
-                } else {
-                    const vids = await searchVideos(query);
-                    grid.innerHTML = vids.map(vid => `
-                        <div class="media-select bg-black" onclick="app.addVideo('${vid.embed}', '${vid.thumbnail}')">
-                            <img src="${vid.thumbnail}" class="opacity-70">
-                            <div class="absolute inset-0 flex items-center justify-center text-white"><i data-lucide="play-circle"></i></div>
-                        </div>`).join('');
-                }
-                lucide.createIcons();
-            },
-
             // AI
             runFullAI: async () => {
                 const query = document.getElementById('aiPrompt').value;
@@ -330,12 +331,11 @@
                 document.getElementById('tDry').value = tData.drying;
                 document.getElementById('tThick').value = tData.thickness;
                 
-                app.refreshMedia('img'); // Load images automatically
                 btn.innerHTML = '<i data-lucide="sparkles"></i> הפעל קסם';
                 lucide.createIcons();
             },
 
-            // Brands (Simplified)
+            // Brands
             loadBrands: () => {
                 onSnapshot(collection(db, "brands"), (snap) => {
                     const sel = document.getElementById('pBrandSelect');
@@ -352,9 +352,8 @@
             // Util
             runSeed: async () => {
                 if(confirm("לאתחל נתונים?")) {
-                    const { seedRealData } = await import('../js/seed-data.js'); // Dynamic import if needed or regular
-                    // Logic to clear and set basic products
-                    alert("פונקציית Seed תופעל מכאן");
+                    const { seedRealData } = await import('../js/seed-data.js');
+                    // seed logic
                 }
             },
             showToast: (msg) => {
