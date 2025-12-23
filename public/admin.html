@@ -76,19 +76,19 @@
 
     <script>
         window.safeApp = {
-            switchView: () => {}, newProd: () => {}, saveProd: () => {}, delProd: () => {}, askGemini: () => alert("המערכת טוענת משאבים... אנא וודא שאתה מריץ דרך שרת (Live Server)")
+            switchView: () => {}, newProd: () => {}, saveProd: () => {}, delProd: () => {}, askGemini: () => alert("המערכת טוענת משאבים... וודא שאתה מריץ דרך שרת (Live Server)")
         };
     </script>
 
     <script type="module">
-        // תיקון קריטי: הפנייה לתוך תיקיית public
+        // תיקון נתיבים: אנחנו כבר ב-public, אז ה-js נמצא ממש לידנו
         try {
-            console.log("Starting App from Root...");
+            console.log("Starting App from Public folder...");
             
-            // שינינו את הנתיב ל- ./public/js/...
-            const { db } = await import('./public/js/firebase-config.js');
+            // שימוש בנתיב יחסי פשוט (בלי ../ ובלי public/)
+            const { db } = await import('./js/firebase-config.js');
             const { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js");
-            const { askGeminiAdmin } = await import('./public/js/gemini-service.js');
+            const { askGeminiAdmin } = await import('./js/gemini-service.js');
             
             lucide.createIcons();
             
@@ -226,8 +226,9 @@
                             document.getElementById('tCov').value = data.tech?.coverage || '';
                             document.getElementById('tDry').value = data.tech?.drying || '';
                             document.getElementById('tThick').value = data.tech?.thickness || '';
+                            
                             const brandSelect = document.getElementById('pBrand');
-                            // נסיון להתאים מותג אוטומטית
+                            // נסיון להתאים מותג
                             for(let i=0; i<brandSelect.options.length; i++) {
                                 if(brandSelect.options[i].value.toLowerCase().includes(data.brand.toLowerCase())) {
                                     brandSelect.selectedIndex = i;
@@ -250,8 +251,8 @@
 
         } catch(e) {
             console.error("Critical Error:", e);
-            document.getElementById('status').innerText = "שגיאת נתיבים 🔴";
-            alert("שגיאה: לא מוצא את הקבצים ב-public/js.\nוודא שהתיקייה public קיימת ליד קובץ ה-html.");
+            document.getElementById('status').innerText = "שגיאת טעינה 🔴";
+            alert("שגיאה: וודא ש-admin.html נמצא בתוך תיקיית public (ליד תיקיית js)");
         }
     </script>
 </body>
