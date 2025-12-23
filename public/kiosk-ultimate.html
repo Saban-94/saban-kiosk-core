@@ -3,106 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sika Kiosk - Ultimate Final</title>
-    
+    <title>Sika Kiosk Stable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
-    
     <style>
-        /* --- Themes & Branding --- */
+        /* CSS RESET & VARS */
         :root { --brand-primary: #111; --brand-accent: #2563eb; --brand-bg: #f8fafc; }
-        
         body.theme-default { --brand-primary: #111; --brand-accent: #2563eb; --brand-bg: #f8fafc; }
         body.theme-sika { --brand-primary: #FFC500; --brand-accent: #E3000F; --brand-bg: #fffceb; }
         body.theme-thermokir { --brand-primary: #0057B8; --brand-accent: #F58220; --brand-bg: #f0f9ff; }
         body.theme-misterfix { --brand-primary: #E3000F; --brand-accent: #333333; --brand-bg: #fff1f2; }
         body.theme-nirlat { --brand-primary: #8BC53F; --brand-accent: #009640; --brand-bg: #f0fff4; }
         body.theme-tambour { --brand-primary: #E31E24; --brand-accent: #E31E24; --brand-bg: #fff5f5; }
-
+        
         body { font-family: 'Heebo', sans-serif; background-color: var(--brand-bg); transition: 0.6s ease; overflow: hidden; user-select: none; }
 
-        /* --- Sidebar & Nav --- */
-        .sidebar-btn { 
-            width: 100%; aspect-ratio: 1; margin-bottom: 12px; border-radius: 16px; 
-            display: flex; flex-direction: column; items-center; justify-content: center; 
-            color: #94a3b8; background: white; border: 2px solid transparent; transition: 0.3s; cursor: pointer;
-        }
-        .sidebar-btn.active { 
-            background: var(--brand-primary); color: white; transform: scale(1.1); 
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); border: none; 
-        }
-        /* תיקון טקסט שחור על רקע צהוב לסיקה */
+        /* UI ELEMENTS */
+        .sidebar-btn { width: 100%; aspect-ratio: 1; margin-bottom: 15px; border-radius: 20px; display: flex; flex-direction: column; items-center; justify-content: center; color: #94a3b8; background: white; border: 2px solid transparent; transition: 0.3s; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .sidebar-btn:hover { transform: translateY(-2px); color: var(--brand-primary); }
+        .sidebar-btn.active { background: var(--brand-primary); color: white; transform: scale(1.1); box-shadow: 0 15px 30px -5px rgba(0,0,0,0.2); border: none; }
         body.theme-sika .sidebar-btn.active { color: black; }
 
-        /* --- Cards & Grid --- */
-        .brand-pill { 
-            background: white; padding: 5px 20px; border-radius: 50px; cursor: pointer; 
-            border: 2px solid transparent; transition: 0.3s; opacity: 0.7; filter: grayscale(100%); 
-            min-width: 110px; display: flex; justify-content: center; align-items: center; 
-            height: 60px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
+        .brand-pill { background: white; padding: 5px 20px; border-radius: 50px; cursor: pointer; border: 2px solid transparent; transition: 0.3s; opacity: 0.7; filter: grayscale(100%); min-width: 120px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .brand-pill.active { opacity: 1; border-color: var(--brand-accent); transform: scale(1.05); filter: grayscale(0%); }
         .brand-pill img { height: 35px; object-fit: contain; }
 
-        .product-card { 
-            background: white; border-radius: 20px; overflow: hidden; position: relative; z-index: 10;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.03); transition: 0.3s; border: 2px solid transparent;
-            height: 360px; display: flex; flex-direction: column; cursor: pointer;
-        }
-        .product-card:hover { transform: translateY(-8px); border-color: var(--brand-accent); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .product-card { background: white; border-radius: 24px; overflow: hidden; position: relative; z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.03); transition: 0.3s; border: 3px solid transparent; height: 380px; display: flex; flex-direction: column; cursor: pointer; }
+        .product-card:hover { transform: translateY(-10px); border-color: var(--brand-accent); box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
 
-        /* --- Robot & Chat (Fixed Logic) --- */
+        /* ROBOT & CHAT */
         #sikaAiWrapper { position: fixed; z-index: 9999; transition: 0.8s; pointer-events: none; }
-        
-        /* מצב התחלתי: פינה */
-        .state-corner { bottom: -20px; right: -20px; width: 260px; height: 260px; pointer-events: auto; }
-        .state-corner .robot-character { width: 100%; height: 100%; }
-        .state-corner #aiWindow { display: none; }
-
-        /* מצב פעיל: מרכז */
+        .state-corner { bottom: -30px; right: -30px; width: 280px; height: 280px; pointer-events: auto; }
         .state-active { bottom: 50%; right: 50%; transform: translate(50%, 50%); width: 0; height: 0; }
         
-        /* הרובוט זז הצידה כשהצ'אט נפתח כדי לא להסתיר */
-        .state-active .robot-character { 
-            position: absolute; bottom: -300px; right: 320px; /* זז ימינה/שמאלה מהחלון */
-            width: 250px; opacity: 1; pointer-events: none; transform: scale(1.1); 
-            transition: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        #aiWindow {
-            position: absolute; background: rgba(255,255,255,0.98); border-radius: 30px;
-            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.6); border: 4px solid var(--brand-accent);
-            overflow: hidden; display: flex; flex-direction: column; backdrop-filter: blur(25px);
-            /* Centering Logic */
-            width: 600px; height: 750px; max-width: 90vw; max-height: 85vh; 
-            top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            pointer-events: auto; opacity: 0; transition: opacity 0.3s;
-        }
-        .state-active #aiWindow { opacity: 1; }
-
-        .robot-character { object-fit: contain; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.3)); animation: floaty 4s ease-in-out infinite; cursor: pointer; }
+        .robot-character { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.3)); animation: floaty 4s ease-in-out infinite; cursor: pointer; transition: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .state-active .robot-character { position: absolute; bottom: -250px; right: 350px; width: 250px; opacity: 1; pointer-events: none; transform: scale(1.1); }
         @keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        /* --- Smart Keyboard --- */
-        .virtual-keyboard { 
-            display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; padding: 10px; 
-            background: #f1f5f9; border-top: 1px solid #e2e8f0; 
-            transition: all 0.3s ease; height: auto;
-        }
-        .virtual-keyboard.hidden { display: none; } /* מסתיר כשלא בשימוש */
-        
-        .key-btn { background: white; border-radius: 8px; padding: 12px 0; font-weight: bold; font-size: 18px; cursor: pointer; text-align: center; box-shadow: 0 2px 0 #cbd5e1; transition: 0.1s; }
+        #aiWindow { position: absolute; background: rgba(255,255,255,0.98); border-radius: 30px; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.6); border: 4px solid var(--brand-accent); overflow: hidden; display: flex; flex-direction: column; backdrop-filter: blur(25px); opacity: 0; transform: scale(0.8) translate(-50%, -50%); pointer-events: auto; transition: 0.5s; width: 600px; height: 750px; max-width: 90vw; max-height: 85vh; top: 50%; left: 50%; }
+        .state-active #aiWindow { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+        /* KEYBOARD */
+        .virtual-keyboard { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; padding: 10px; background: #f1f5f9; border-top: 1px solid #e2e8f0; transition: all 0.3s; }
+        .virtual-keyboard.hidden { display: none; }
+        .key-btn { background: white; border-radius: 8px; padding: 12px 0; font-weight: bold; font-size: 18px; cursor: pointer; text-align: center; box-shadow: 0 2px 0 #cbd5e1; transition: 0.1s; user-select: none; }
         .key-btn:active { transform: translateY(2px); box-shadow: none; }
-        .key-btn.wide { grid-column: span 2; }
-        .key-btn.space { grid-column: span 6; }
-        .key-btn.action { background: var(--brand-accent); color: white; box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+        .key-btn.action { background: var(--brand-accent); color: white; }
 
         .modal-overlay { @apply fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-md; }
         .modal-overlay.open { @apply flex animate-fade-in; }
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         .hidden-tab { display: none; }
-        ::-webkit-scrollbar { width: 0px; }
         .brand-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70vw; height: 70vh; opacity: 0.04; pointer-events: none; z-index: 0; background-repeat: no-repeat; background-position: center; background-size: contain; transition: 0.5s; filter: grayscale(100%); }
     </style>
 </head>
@@ -110,8 +62,8 @@
 
     <div id="bgWatermark" class="brand-watermark"></div>
 
-    <nav class="w-28 bg-white h-full flex flex-col items-center py-6 shadow-2xl z-40 relative border-l border-gray-100">
-        <div class="mb-8 w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-2 shadow-inner border border-gray-100">
+    <nav class="w-32 bg-white h-full flex flex-col items-center py-8 shadow-2xl z-40 relative border-l border-gray-100">
+        <div class="mb-10 w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-2 shadow-inner border border-gray-100">
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR1_PVzqyK74L9l5eC5grCsPGCsTinQnmHvw&s" class="w-full h-full object-contain">
         </div>
         <div onclick="switchTab('catalog')" id="btn-catalog" class="sidebar-btn active"><i data-lucide="layout-grid" size="32"></i><span class="text-[10px] font-bold mt-2">קטלוג</span></div>
@@ -122,14 +74,8 @@
 
     <main class="flex-1 flex flex-col h-full overflow-hidden p-8 z-10 relative">
         <header class="flex flex-col gap-6 mb-6">
-            <div class="flex gap-4 overflow-x-auto pb-4 pt-2 no-scrollbar items-center px-2">
-                <div onclick="setTheme('default')" class="brand-pill active" id="pill-default"><span class="font-black text-lg px-2 text-gray-800">H. ח.סבן</span></div>
-                <div onclick="setTheme('sika')" class="brand-pill" id="pill-sika"><img src="https://placehold.co/120x60/transparent/black?text=SIKA"></div>
-                <div onclick="setTheme('thermokir')" class="brand-pill" id="pill-thermokir"><img src="https://placehold.co/120x60/transparent/blue?text=THERMOKIR"></div>
-                <div onclick="setTheme('misterfix')" class="brand-pill" id="pill-misterfix"><img src="https://placehold.co/120x60/transparent/red?text=MISTER+FIX"></div>
-                <div onclick="setTheme('nirlat')" class="brand-pill" id="pill-nirlat"><img src="https://placehold.co/120x60/transparent/green?text=NIRLAT"></div>
-                <div onclick="setTheme('tambour')" class="brand-pill" id="pill-tambour"><img src="https://placehold.co/120x60/transparent/red?text=TAMBOUR"></div>
-            </div>
+            <div class="flex gap-4 overflow-x-auto pb-4 pt-2 no-scrollbar items-center px-2" id="brandListContainer">
+                </div>
             
             <div class="flex justify-between items-center bg-white/60 p-5 rounded-3xl backdrop-blur-sm shadow-sm border border-white">
                 <div><h1 class="text-5xl font-black text-[var(--brand-primary)] transition-colors" id="heroTitle">המרכז המקצועי</h1></div>
@@ -192,10 +138,12 @@
             </div>
 
             <div id="virtualKeyboard" class="virtual-keyboard hidden">
-                <div class="key-btn" onclick="typeKey('ק')">ק</div><div class="key-btn" onclick="typeKey('ר')">ר</div><div class="key-btn" onclick="typeKey('א')">א</div><div class="key-btn" onclick="typeKey('ט')">ט</div><div class="key-btn" onclick="typeKey('ו')">ו</div><div class="key-btn" onclick="typeKey('ן')">ן</div><div class="key-btn" onclick="typeKey('ם')">ם</div><div class="key-btn" onclick="typeKey('פ')">פ</div><div class="key-btn" onclick="typeKey('1')">1</div><div class="key-btn" onclick="typeKey('2')">2</div>
-                <div class="key-btn" onclick="typeKey('ש')">ש</div><div class="key-btn" onclick="typeKey('ד')">ד</div><div class="key-btn" onclick="typeKey('ג')">ג</div><div class="key-btn" onclick="typeKey('כ')">כ</div><div class="key-btn" onclick="typeKey('ע')">ע</div><div class="key-btn" onclick="typeKey('י')">י</div><div class="key-btn" onclick="typeKey('ח')">ח</div><div class="key-btn" onclick="typeKey('ל')">ל</div><div class="key-btn" onclick="typeKey('ך')">ך</div><div class="key-btn" onclick="typeKey('ף')">ף</div>
-                <div class="key-btn" onclick="typeKey('ז')">ז</div><div class="key-btn" onclick="typeKey('ס')">ס</div><div class="key-btn" onclick="typeKey('ב')">ב</div><div class="key-btn" onclick="typeKey('ה')">ה</div><div class="key-btn" onclick="typeKey('נ')">נ</div><div class="key-btn" onclick="typeKey('מ')">מ</div><div class="key-btn" onclick="typeKey('צ')">צ</div><div class="key-btn" onclick="typeKey('ת')">ת</div><div class="key-btn" onclick="typeKey('ץ')">ץ</div><div class="key-btn wide" onclick="backspace()">⌫</div>
-                <div class="key-btn" onclick="typeKey('😊')">😊</div><div class="key-btn" onclick="typeKey('👍')">👍</div><div class="key-btn space" onclick="typeKey(' ')">רווח</div><div class="key-btn action wide" onclick="sendMessage()">שלח 🚀</div>
+                <div class="grid grid-cols-10 gap-1">
+                    <div class="key-btn" onclick="typeKey('ק')">ק</div><div class="key-btn" onclick="typeKey('ר')">ר</div><div class="key-btn" onclick="typeKey('א')">א</div><div class="key-btn" onclick="typeKey('ט')">ט</div><div class="key-btn" onclick="typeKey('ו')">ו</div><div class="key-btn" onclick="typeKey('ן')">ן</div><div class="key-btn" onclick="typeKey('ם')">ם</div><div class="key-btn" onclick="typeKey('פ')">פ</div><div class="key-btn" onclick="typeKey('1')">1</div><div class="key-btn" onclick="typeKey('2')">2</div>
+                    <div class="key-btn" onclick="typeKey('ש')">ש</div><div class="key-btn" onclick="typeKey('ד')">ד</div><div class="key-btn" onclick="typeKey('ג')">ג</div><div class="key-btn" onclick="typeKey('כ')">כ</div><div class="key-btn" onclick="typeKey('ע')">ע</div><div class="key-btn" onclick="typeKey('י')">י</div><div class="key-btn" onclick="typeKey('ח')">ח</div><div class="key-btn" onclick="typeKey('ל')">ל</div><div class="key-btn" onclick="typeKey('ך')">ך</div><div class="key-btn" onclick="typeKey('ף')">ף</div>
+                    <div class="key-btn" onclick="typeKey('ז')">ז</div><div class="key-btn" onclick="typeKey('ס')">ס</div><div class="key-btn" onclick="typeKey('ב')">ב</div><div class="key-btn" onclick="typeKey('ה')">ה</div><div class="key-btn" onclick="typeKey('נ')">נ</div><div class="key-btn" onclick="typeKey('מ')">מ</div><div class="key-btn" onclick="typeKey('צ')">צ</div><div class="key-btn" onclick="typeKey('ת')">ת</div><div class="key-btn" onclick="typeKey('ץ')">ץ</div><div class="key-btn" onclick="backspace()">⌫</div>
+                    <div class="key-btn col-span-2" onclick="typeKey('😊')">😊</div><div class="key-btn col-span-6" onclick="typeKey(' ')">רווח</div><div class="key-btn col-span-2 action" onclick="sendMessage()">שלח</div>
+                </div>
             </div>
         </div>
     </div>
@@ -228,21 +176,27 @@
         import { collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         
         lucide.createIcons();
-        let allProducts = [];
-        let currentProducts = [];
-        let currentProduct = null;
+        let allProducts = [], currentProducts = [], currentProduct = null;
 
-        // FIXED: Stable Placeholders
+        // FIXED: Stable Mock Data with Placeholders (No 404s)
         const mockProducts = [
-            { id: "1", name: "Sika TopSeal 107", brand: "SIKA", category: "sealing", marketingDesc: "איטום צמנטי גמיש (דו רכיבי).", image: "https://placehold.co/400?text=Sika+107", tech: {coverage: "3-4", drying: "6h", thickness: "2mm"} },
-            { id: "2", name: "Thermokir 603", brand: "THERMOKIR", category: "concrete", marketingDesc: "טיח תרמי לבידוד.", image: "https://placehold.co/400?text=Thermo+603", tech: {coverage: "14", drying: "48h", thickness: "30mm"} },
-            { id: "3", name: "Mister Fix 109", brand: "MISTER FIX", category: "glues", marketingDesc: "דבק אקרילי.", image: "https://placehold.co/400?text=Fix+109", tech: {coverage: "5", drying: "24h", thickness: "5mm"} },
-            { id: "4", name: "Nirlat Super", brand: "NIRLAT", category: "flooring", marketingDesc: "צבע אקרילי.", image: "https://placehold.co/400?text=Nirlat", tech: {coverage: "9", drying: "2h", thickness: "-"} },
-            { id: "5", name: "BG Bond 10", brand: "BG BOND", category: "sealing", marketingDesc: "מסטיק.", image: "https://placehold.co/400?text=BG+10", tech: {coverage: "var", drying: "12h", thickness: "-"} }
+            { id: "1", name: "Sika TopSeal 107", brand: "Sika", category: "sealing", marketingDesc: "איטום צמנטי גמיש.", image: "https://placehold.co/400x400/ffffff/000000?text=Sika+107", tech: {coverage: "3kg", drying: "6h", thickness: "2mm"} },
+            { id: "2", name: "Thermokir 603", brand: "Thermokir", category: "concrete", marketingDesc: "טיח תרמי.", image: "https://placehold.co/400x400/ffffff/0057B8?text=Thermo+603", tech: {coverage: "14kg", drying: "48h", thickness: "30mm"} },
+            { id: "3", name: "Mister Fix 109", brand: "Mister Fix", category: "glues", marketingDesc: "דבק אקרילי.", image: "https://placehold.co/400x400/ffffff/E3000F?text=Fix+109", tech: {coverage: "5kg", drying: "24h", thickness: "5mm"} }
         ];
 
         window.init = async () => {
-            setTheme('default');
+            // Load Brands Dynamically
+            onSnapshot(collection(db, "brands"), (snap) => {
+                const list = document.getElementById('brandListContainer');
+                list.innerHTML = `<div onclick="setTheme('default')" class="brand-pill active" id="pill-default"><span class="font-black text-lg px-2 text-gray-800">H. ח.סבן</span></div>`;
+                snap.forEach(d => {
+                    const b = d.data();
+                    list.innerHTML += `<div onclick="setTheme('${b.themeColor || 'default'}', '${b.name}')" class="brand-pill" id="pill-${b.themeColor || 'default'}"><img src="${b.logo}"></div>`;
+                });
+            });
+
+            // Load Products
             try {
                 const snap = await getDocs(collection(db, "products"));
                 if(snap.empty) allProducts = mockProducts;
@@ -253,29 +207,22 @@
             loadTutorials();
         }
 
-        window.setTheme = (brand) => {
-            const map = { 'default': 'default', 'סיקה': 'sika', 'תרמוקיר': 'thermokir', 'כרמית מיסטר פיקס': 'misterfix', 'נירלט': 'nirlat', 'טמבור': 'tambour' };
-            const code = map[brand] || 'default';
+        window.setTheme = (code, name = "המרכז המקצועי") => {
             document.body.className = `theme-${code}`;
-            
             document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('active'));
-            // FIXED: Safe ID Selection
-            const activeId = `pill-${code === 'default' ? 'default' : code}`;
-            const activeEl = document.getElementById(activeId);
-            if(activeEl) activeEl.classList.add('active');
+            if(event && event.currentTarget) event.currentTarget.classList.add('active');
 
             const bg = document.getElementById('bgWatermark');
-            if(brand !== 'default' && activeEl) {
-                const img = activeEl.querySelector('img');
+            if(code !== 'default' && event && event.currentTarget) {
+                const img = event.currentTarget.querySelector('img');
                 if(img) { bg.style.backgroundImage = `url('${img.src}')`; bg.style.opacity = '0.05'; }
             } else { bg.style.backgroundImage = 'none'; }
 
-            document.getElementById('heroTitle').innerText = brand === 'default' ? "המרכז המקצועי" : `קטלוג ${brand}`;
+            document.getElementById('heroTitle').innerText = name;
 
             if(code === 'default') currentProducts = allProducts;
             else {
-                const search = code === 'misterfix' ? 'FIX' : (code === 'nirlat' ? 'NIRLAT' : code.toUpperCase());
-                currentProducts = allProducts.filter(p => (p.brand || "").toUpperCase().includes(search));
+                currentProducts = allProducts.filter(p => (p.brand || "").toLowerCase().includes(name.toLowerCase()));
             }
             renderGrid(currentProducts);
         }
@@ -307,54 +254,59 @@
 
         window.closeModal = () => document.getElementById('productModal').classList.remove('open');
 
-        // CHAT LOGIC (FIXED)
+        // FIXED CHAT
         window.triggerInteraction = (auto = false) => {
             document.getElementById('sikaAiWrapper').classList.remove('state-corner');
             document.getElementById('sikaAiWrapper').classList.add('state-active');
             if(auto && currentProduct) {
-                const h = document.getElementById('chatHistory');
-                h.innerHTML = `<div class="flex gap-3"><div class="w-10 h-10 bg-[var(--brand-primary)] rounded-full text-white flex items-center justify-center">🤖</div><div class="bg-gray-100 p-4 rounded-2xl rounded-tr-none">מתעניין ב-<b>${currentProduct.name}</b>? אני פה לשאלות.</div></div>`;
+                document.getElementById('chatHistory').innerHTML = `<div class="flex gap-3"><div class="w-10 h-10 bg-[var(--brand-primary)] rounded-full text-white flex items-center justify-center">🤖</div><div class="bg-gray-100 p-4 rounded-2xl rounded-tr-none">מתעניין ב-<b>${currentProduct.name}</b>? אני פה.</div></div>`;
             }
         }
         window.closeInteraction = () => {
             document.getElementById('sikaAiWrapper').classList.remove('state-active');
             document.getElementById('sikaAiWrapper').classList.add('state-corner');
-            window.showKeyboard(false); // Hide KB on close
+            window.showKeyboard(false);
         }
         window.startChatAboutProduct = () => { closeModal(); triggerInteraction(true); }
         
-        // KEYBOARD LOGIC (ON DEMAND)
         window.showKeyboard = (show = true) => {
             const kb = document.getElementById('virtualKeyboard');
             if(show) kb.classList.remove('hidden'); else kb.classList.add('hidden');
         }
-        window.typeKey = (key) => { document.getElementById('chatInput').value += key; }
-        window.backspace = () => { const i = document.getElementById('chatInput'); i.value = i.value.slice(0, -1); }
+        window.typeKey = (key) => document.getElementById('chatInput').value += key;
+        window.backspace = () => { const i = document.getElementById('chatInput'); i.value = i.value.slice(0,-1); }
 
         window.sendMessage = async () => {
             const input = document.getElementById('chatInput');
             if(!input.value) return;
             document.getElementById('chatHistory').innerHTML += `<div class="flex justify-end mb-2"><div class="bg-black text-white p-3 rounded-2xl rounded-br-none max-w-[80%]">${input.value}</div></div>`;
             input.value = "";
-            window.showKeyboard(false); // Hide KB after send
-            
+            window.showKeyboard(false);
             setTimeout(() => {
                 document.getElementById('chatHistory').innerHTML += `<div class="flex gap-3 mb-2"><div class="w-10 h-10 bg-[var(--brand-primary)] rounded-full text-white flex items-center justify-center flex-shrink-0">🤖</div><div class="bg-gray-100 p-3 rounded-2xl rounded-tr-none">בודק במפרט...</div></div>`;
             }, 800);
         }
 
+        // TABS - FIXED LOGIC
         window.switchTab = (t) => {
             document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-'+t).classList.add('active');
-            ['catalog', 'calculator', 'tutorials'].forEach(v => document.getElementById('view-'+v).style.display = 'none');
-            document.getElementById('view-'+t).style.display = t === 'tutorials' ? 'block' : 'flex';
-            if(t==='catalog') document.getElementById('view-catalog').style.display='block';
-            document.getElementById('catBar').style.display = t === 'catalog' ? 'flex' : 'none';
+            // Safe check for element existence
+            const btn = document.getElementById('btn-'+t);
+            if(btn) btn.classList.add('active');
+            
+            ['catalog', 'calculator', 'tutorials'].forEach(v => {
+                const el = document.getElementById('view-'+v);
+                if(el) el.style.display = 'none';
+            });
+            const view = document.getElementById('view-'+t);
+            if(view) view.style.display = t === 'tutorials' ? 'block' : 'flex';
+            if(t==='catalog' && view) view.style.display='block';
         }
 
         function loadTutorials() {
             onSnapshot(collection(db, "tutorials"), (snap) => {
-                const grid = document.getElementById('tutorialsGrid'); grid.innerHTML = "";
+                const grid = document.getElementById('tutorialsGrid'); if(!grid) return;
+                grid.innerHTML = "";
                 snap.forEach(d => {
                     const t = {id: d.id, ...d.data()};
                     grid.innerHTML += `<div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer hover:shadow-lg transition" onclick="window.open('${t.url}')"><img src="https://placehold.co/300x200?text=Video" class="w-full aspect-video object-cover"><div class="p-3 font-bold">${t.title}</div></div>`;
@@ -363,12 +315,6 @@
             });
         }
 
-        window.filterCat = (cat) => {
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            if(cat === 'all') renderGrid(currentProducts);
-            else renderGrid(currentProducts.filter(p => p.category === cat));
-        }
         window.filterProducts = () => {
             const t = document.getElementById('searchInput').value.toLowerCase();
             renderGrid(currentProducts.filter(p => p.name.toLowerCase().includes(t)));
