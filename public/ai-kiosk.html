@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sika AI - Kiosk Experience</title>
+    <title>Sika AI - Chameleon Kiosk</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -11,150 +11,202 @@
     
     <style>
         :root {
-            --brand-red: #E3000F;
+            /* משתנים דינאמיים - "אפקט הזיקית" */
+            --brand-color: #E3000F; /* ברירת מחדל: אדום סיקה */
             --brand-dark: #111;
-            --bg-grad: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --brand-bg: #ffffff;
         }
 
-        body { font-family: 'Heebo', sans-serif; background: var(--bg-grad); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        body { 
+            font-family: 'Heebo', sans-serif; 
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
+            height: 100vh; overflow: hidden; display: flex; 
+            transition: all 0.5s ease;
+        }
 
-        /* --- Sika AI Avatar (Floating Bubble) --- */
-        #ai-avatar-container {
+        /* --- 1. הרובוט המרחף (ללא רקע, גדול) --- */
+        #robot-container {
             position: fixed;
-            bottom: 40px;
-            left: 40px;
-            z-index: 100;
+            bottom: -20px; /* קצת חתוך למטה למראה ריאליסטי */
+            left: 20px;
+            z-index: 50;
+            pointer-events: none;
+            transition: all 0.5s ease;
+        }
+
+        .robot-img {
+            width: 450px; /* גדול ומרשים */
+            height: auto;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4)); /* צל ריאליסטי במקום עיגול */
+            animation: float 6s ease-in-out infinite;
+            transform-origin: bottom center;
+        }
+
+        /* אנימציות רובוט */
+        .state-thinking .robot-img { animation: pulse 1s infinite alternate; filter: drop-shadow(0 0 30px var(--brand-color)); }
+        .state-speaking .robot-img { animation: talk 0.2s infinite alternate; }
+
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-15px) rotate(1deg); } }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.02); } }
+        @keyframes talk { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+
+        /* --- 2. אזור ראשי (חיפוש ותשובה) --- */
+        .main-area {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            pointer-events: none; /* כדי לא להפריע ללחיצות */
+            justify-content: center;
+            padding: 40px;
+            transition: 0.5s;
+            z-index: 10;
         }
-
-        .ai-bubble {
-            width: 140px; height: 140px;
-            border-radius: 50%;
-            border: 6px solid white;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            overflow: hidden;
-            background: white;
-            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-            position: relative;
-            pointer-events: auto;
-            cursor: pointer;
-        }
-
-        .ai-bubble img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* אנימציות מצבים (States) */
-        /* 1. רגיל - מרחף */
-        .state-idle .ai-bubble { animation: float 4s ease-in-out infinite; border-color: white; }
         
-        /* 2. חושב - מסתובב וזוהר */
-        .state-thinking .ai-bubble { 
-            animation: pulse-red 1.5s infinite; 
-            border-color: var(--brand-red); 
-            transform: scale(1.1);
+        .main-area.sidebar-open {
+            margin-right: 400px; /* פינוי מקום לפאנל הימני */
+            align-items: flex-start; /* הזזה שמאלה */
+            padding-right: 60px;
         }
 
-        /* 3. מדבר/עונה - קופץ */
-        .state-speaking .ai-bubble { animation: bounce 0.5s ease; border-color: #22c55e; }
-
-        /* בועת טקסט קטנה מעל הרובוט (סטטוס) */
-        .status-badge {
-            background: #111; color: white; padding: 6px 16px;
-            border-radius: 20px; font-size: 12px; font-weight: bold;
-            margin-bottom: 12px; opacity: 0; transform: translateY(10px);
+        /* Search Hero */
+        .search-container {
+            width: 100%; max-width: 800px;
+            text-align: center;
+            transition: 0.5s;
+        }
+        
+        .logo-text {
+            font-size: 4rem; font-weight: 900; color: var(--brand-dark);
+            margin-bottom: 20px; letter-spacing: -2px;
             transition: 0.3s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        .state-thinking .status-badge { opacity: 1; transform: translateY(0); content: "חושב..."; }
-
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(227, 0, 15, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(227, 0, 15, 0); } 100% { box-shadow: 0 0 0 0 rgba(227, 0, 15, 0); } }
-        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-
-        /* --- Main UI --- */
-        .main-container {
-            max-width: 900px; margin: 60px auto; width: 100%; padding: 0 20px;
-            display: flex; flex-direction: column; align-items: center; z-index: 10;
-        }
+        .logo-text span { color: var(--brand-color); }
 
         .search-box {
-            width: 100%; background: white; padding: 10px; border-radius: 24px;
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); display: flex; align-items: center;
-            border: 2px solid transparent; transition: 0.3s;
+            position: relative;
+            background: white;
+            border-radius: 50px;
+            box-shadow: 0 15px 40px -10px rgba(0,0,0,0.15);
+            display: flex; align-items: center;
+            padding: 10px; border: 2px solid transparent;
+            transition: 0.3s;
         }
-        .search-box:focus-within { border-color: var(--brand-red); transform: translateY(-2px); }
-        .search-box input { flex: 1; padding: 12px 20px; font-size: 18px; outline: none; border: none; font-weight: 500; }
-        .search-btn { background: var(--brand-red); color: white; p-3; border-radius: 16px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-        .search-btn:hover { background: #b0000b; transform: scale(1.05); }
-
-        /* Results Area */
-        .results-area { width: 100%; margin-top: 40px; padding-bottom: 100px; display: flex; flex-direction: column; gap: 20px; opacity: 0; transition: 0.5s; transform: translateY(20px); }
-        .results-area.visible { opacity: 1; transform: translateY(0); }
+        .search-box:focus-within { 
+            border-color: var(--brand-color); 
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.2);
+            transform: scale(1.02);
+        }
+        
+        .search-input {
+            flex: 1; padding: 15px 25px; font-size: 20px; border: none; outline: none; background: transparent; font-weight: 500;
+        }
+        
+        .search-btn {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: var(--brand-color); color: white;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .search-btn:hover { transform: scale(1.1) rotate(-10deg); }
 
         /* AI Answer Bubble */
-        .ai-response {
-            background: white; padding: 30px; border-radius: 0 24px 24px 24px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05); position: relative;
-            border-left: 5px solid var(--brand-red); font-size: 18px; line-height: 1.6; color: #334155;
+        .ai-bubble {
+            margin-top: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 0 30px 30px 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            max-width: 800px;
+            width: 100%;
+            font-size: 20px;
+            line-height: 1.6;
+            color: #334155;
+            border-right: 6px solid var(--brand-color);
+            opacity: 0; transform: translateY(20px);
+            transition: 0.5s;
+            position: relative;
         }
-        .ai-response::before { content: "Sika Expert"; position: absolute; top: -12px; right: 0; background: var(--brand-red); color: white; font-size: 10px; font-weight: bold; padding: 4px 12px; border-radius: 12px; }
+        .ai-bubble.visible { opacity: 1; transform: translateY(0); }
+        .ai-bubble::before {
+            content: "AI Analysis";
+            position: absolute; top: -15px; right: 0;
+            background: var(--brand-color); color: white;
+            font-size: 12px; font-weight: bold; padding: 4px 12px; border-radius: 12px;
+        }
 
-        /* Product Cards (Injected) */
-        .injected-card {
-            background: white; border-radius: 20px; overflow: hidden; display: flex;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); transition: 0.3s; border: 1px solid #f1f5f9;
-            animation: slideUp 0.5s ease-out;
+        /* --- 3. פאנל צד ימין (תוצאות ויזואליות) --- */
+        #right-panel {
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: 400px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(0,0,0,0.05);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.05);
+            padding: 30px;
+            transform: translateX(110%); /* מוסתר בהתחלה */
+            transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 40;
+            overflow-y: auto;
+            display: flex; flex-direction: column; gap: 20px;
         }
-        .injected-card:hover { transform: translateY(-5px); border-color: var(--brand-red); }
-        .card-img { width: 180px; padding: 20px; background: #f8fafc; display: flex; align-items: center; justify-content: center; }
-        .card-img img { max-width: 100%; max-height: 100%; mix-blend-multiply; }
-        .card-info { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
-        .card-title { font-size: 20px; font-weight: 900; margin-bottom: 5px; }
-        .card-desc { font-size: 14px; color: #64748b; margin-bottom: 15px; }
-        .card-actions { display: flex; gap: 10px; }
+        #right-panel.open { transform: translateX(0); }
+
+        .panel-header { font-size: 14px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+
+        /* כרטיסי מוצר בפאנל */
+        .side-card {
+            background: white; border-radius: 20px; overflow: hidden;
+            border: 1px solid #f1f5f9; box-shadow: 0 10px 20px -5px rgba(0,0,0,0.08);
+            transition: 0.2s; cursor: pointer;
+        }
+        .side-card:hover { transform: translateY(-5px); border-color: var(--brand-color); }
         
-        .action-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .btn-primary { background: var(--brand-red); color: white; }
-        .btn-outline { border: 1px solid #cbd5e1; color: #475569; background: white; }
-        .btn-primary:hover { background: #b0000b; }
-        .btn-outline:hover { background: #f1f5f9; border-color: #94a3b8; }
+        .side-img { height: 180px; display: flex; align-items: center; justify-content: center; background: #f8fafc; padding: 20px; }
+        .side-img img { max-height: 100%; max-width: 100%; object-fit: contain; mix-blend-multiply; }
+        
+        .side-content { padding: 15px; }
+        .side-brand { font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
+        .side-title { font-size: 18px; font-weight: 900; color: #1e293b; line-height: 1.2; margin-bottom: 5px; }
+        
+        .action-chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 11px; font-weight: bold; color: white;
+            background: var(--brand-color); padding: 4px 10px; border-radius: 20px;
+            margin-top: 10px;
+        }
 
         /* Video Embed */
-        .video-wrapper { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 20px; overflow: hidden; margin-top: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideUp 0.6s ease-out; }
+        .video-embed { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 16px; overflow: hidden; margin-bottom: 10px; }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="state-idle" id="bodyState">
+<body id="app-body">
 
-    <div id="ai-avatar-container">
-        <div class="status-badge" id="statusText">אני מקשיב...</div>
-        <div class="ai-bubble" onclick="document.getElementById('mainInput').focus()">
-            <img src="https://saban-94.github.io/saban-kiosk-core/public/1000187746.jpg" alt="Sika AI">
-        </div>
+    <div id="robot-container">
+        <img src="https://saban-94.github.io/saban-kiosk-core/public/1000187746.jpg" class="robot-img" alt="Sika AI">
     </div>
 
-    <div class="main-container">
-        <div class="flex items-center gap-3 mb-8">
-            <div class="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center text-white font-black italic text-xl shadow-lg">S</div>
-            <h1 class="text-4xl font-black text-slate-800 tracking-tight">Sika AI Center</h1>
-        </div>
-
-        <div class="search-box">
-            <input type="text" id="mainInput" placeholder="שאל אותי על איטום, הדבקה או חפש מוצר..." onkeypress="if(event.key==='Enter') askSika()">
-            <div class="search-btn" onclick="askSika()"><i data-lucide="send"></i></div>
-        </div>
-
-        <div class="results-area" id="resultsArea">
-            <div class="ai-response" id="aiText">
-                </div>
+    <div class="main-area" id="mainArea">
+        
+        <div class="search-container">
+            <div class="logo-text">Sika<span>.Ai</span></div>
             
-            <div id="dynamicContent" class="flex flex-col gap-4 mt-6">
-                </div>
+            <div class="search-box">
+                <input type="text" id="mainInput" class="search-input" placeholder="מה מחפשים היום? (למשל: סרנפיל 520, איטום גג...)" autocomplete="off">
+                <div class="search-btn" onclick="handleSearch()"><i data-lucide="search" size="24"></i></div>
+            </div>
+
+            <div id="aiBubble" class="ai-bubble">
+                <span id="aiText"></span>
+                <span class="animate-pulse">|</span>
+            </div>
         </div>
+
     </div>
+
+    <div id="right-panel">
+        </div>
 
     <script type="module">
         import { db } from './js/firebase-config.js';
@@ -163,132 +215,171 @@
 
         lucide.createIcons();
 
-        // טעינת נתונים לזיכרון מקומי לחיפוש מהיר
-        let productsCache = [];
-        let tutorialsCache = [];
+        // Local Cache
+        let productsDB = [];
+        let videosDB = [];
 
-        async function loadData() {
+        // Init
+        async function init() {
             const pSnap = await getDocs(collection(db, "products"));
-            productsCache = pSnap.docs.map(d => ({id: d.id, ...d.data()}));
+            productsDB = pSnap.docs.map(d => ({id:d.id, ...d.data()}));
             
-            const tSnap = await getDocs(collection(db, "tutorials"));
-            tutorialsCache = tSnap.docs.map(d => ({id: d.id, ...d.data()}));
-            console.log("Data Loaded for Kiosk");
+            const vSnap = await getDocs(collection(db, "tutorials"));
+            videosDB = vSnap.docs.map(d => ({id:d.id, ...d.data()}));
+            
+            console.log("DB Loaded:", productsDB.length, "products");
         }
-        loadData();
+        init();
 
-        // --- פונקציית הליבה: שאל את סיקה ---
-        window.askSika = async () => {
+        // --- Core Functions ---
+
+        window.handleSearch = async () => {
             const input = document.getElementById('mainInput');
             const query = input.value.trim();
-            if (!query) return;
+            if(!query) return;
 
-            // 1. שינוי סטייט ל"חושב"
+            // 1. UI States
             setRobotState('thinking');
-            document.getElementById('resultsArea').classList.remove('visible');
-            document.getElementById('dynamicContent').innerHTML = ""; // ניקוי קודם
-            
+            document.getElementById('aiBubble').classList.remove('visible');
+            document.getElementById('right-panel').classList.remove('open');
+            document.getElementById('mainArea').classList.remove('sidebar-open');
+            document.getElementById('aiText').innerHTML = "";
+
             try {
-                // 2. שליחה למוח
+                // 2. Ask Brain
                 const response = await askBrain(query);
                 
-                // 3. הצגת תוצאות
-                document.getElementById('resultsArea').classList.add('visible');
+                // 3. Update UI
+                setRobotState('speaking');
+                document.getElementById('aiBubble').classList.add('visible');
                 
-                // הדפסת טקסט באפקט הקלדה
+                // Typewriter Effect
                 typeWriter(response.answer, 'aiText', () => {
-                    setRobotState('idle'); // סיום דיבור
-                    parseAndInject(response.answer); // הזרקת תוכן עשיר
+                    setRobotState('idle');
                 });
 
-            } catch (e) {
+                // 4. Populate Right Panel (Smart Sidebar)
+                populateSidebar(query, response);
+
+            } catch(e) {
                 console.error(e);
                 setRobotState('idle');
-                document.getElementById('aiText').innerText = "אופס, נתקלתי בבעיה בתקשורת. נסה שוב.";
             }
             
             input.value = "";
         };
 
-        // --- מנגנון הזרקת תוכן (Parser) ---
-        function parseAndInject(text) {
-            const container = document.getElementById('dynamicContent');
+        // --- Sidebar & Chameleon Logic ---
 
-            // 1. זיהוי והזרקת מוצרים: {{product:Name}}
-            const prodMatch = text.match(/{{product:(.*?)}}/g);
-            if (prodMatch) {
-                prodMatch.forEach(tag => {
-                    const pName = tag.replace('{{product:', '').replace('}}', '').trim();
-                    const product = productsCache.find(p => p.name.toLowerCase().includes(pName.toLowerCase()));
-                    
-                    if (product) {
-                        const card = document.createElement('div');
-                        card.className = 'injected-card';
-                        card.innerHTML = `
-                            <div class="card-img"><img src="${product.image || 'https://placehold.co/200'}" alt="${product.name}"></div>
-                            <div class="card-info">
-                                <div class="card-title">${product.name}</div>
-                                <div class="card-desc">${product.marketingDesc || 'מוצר מקצועי מבית סיקה'}</div>
-                                <div class="card-actions">
-                                    <button class="action-btn btn-primary" onclick="alert('פותח דף מוצר מלא...')">📄 מפרט טכני</button>
-                                    <button class="action-btn btn-outline">🛒 הוסף להזמנה</button>
-                                </div>
-                            </div>
-                        `;
-                        container.appendChild(card);
-                    }
-                });
+        function populateSidebar(query, brainResponse) {
+            const panel = document.getElementById('right-panel');
+            panel.innerHTML = ""; // Clear
+            
+            // 1. Find relevant products (from Brain OR keyword match)
+            let hits = [];
+            
+            // Priority: Brain products first
+            if(brainResponse.products && brainResponse.products.length > 0) {
+                hits = brainResponse.products;
+            } else {
+                // Fallback: Simple keyword match from cache
+                const lowerQ = query.toLowerCase();
+                hits = productsDB.filter(p => 
+                    p.name.toLowerCase().includes(lowerQ) || 
+                    (p.brand && p.brand.toLowerCase().includes(lowerQ))
+                );
             }
 
-            // 2. זיהוי והזרקת וידאו: {{video:Title}}
-            const vidMatch = text.match(/{{video:(.*?)}}/g);
-            if (vidMatch) {
-                vidMatch.forEach(tag => {
-                    const vTitle = tag.replace('{{video:', '').replace('}}', '').trim();
-                    const video = tutorialsCache.find(v => v.title.toLowerCase().includes(vTitle.toLowerCase()));
+            // 2. Chameleon Effect (Change colors based on first hit)
+            if(hits.length > 0) {
+                applyChameleonTheme(hits[0].brand);
+            } else {
+                applyChameleonTheme('Sika'); // Default
+            }
+
+            // 3. Render Cards
+            if(hits.length > 0) {
+                panel.innerHTML += `<div class="panel-header">מוצרים שנמצאו (${hits.length})</div>`;
+                
+                hits.forEach(p => {
+                    // Check for video
+                    const vid = videosDB.find(v => v.title.toLowerCase().includes(p.name.toLowerCase()));
                     
-                    if (video) {
-                        const vidId = video.url.split('v=')[1]?.split('&')[0];
-                        if (vidId) {
-                            const vidDiv = document.createElement('div');
-                            vidDiv.className = 'video-wrapper';
-                            vidDiv.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${vidId}" frameborder="0" allowfullscreen></iframe>`;
-                            container.appendChild(vidDiv);
+                    let html = `
+                    <div class="side-card" onclick="alert('פותח דף מוצר: ${p.name}')">
+                        <div class="side-img">
+                            <img src="${p.image || 'https://placehold.co/200'}" alt="${p.name}">
+                        </div>
+                        <div class="side-content">
+                            <div class="side-brand">${p.brand || 'General'}</div>
+                            <div class="side-title">${p.name}</div>
+                            
+                            <div class="flex gap-2 mt-2">
+                                <div class="action-chip"><i data-lucide="shopping-cart" size="10"></i> הזמן</div>
+                                ${vid ? `<div class="action-chip" style="background:#2563eb"><i data-lucide="play" size="10"></i> וידאו</div>` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+                    
+                    // If video exists, append player below card
+                    if(vid) {
+                        const vidId = vid.url.split('v=')[1]?.split('&')[0];
+                        if(vidId) {
+                            html += `
+                            <div class="video-embed mt-2">
+                                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${vidId}" frameborder="0" allowfullscreen></iframe>
+                            </div>`;
                         }
                     }
+
+                    panel.innerHTML += html;
                 });
+
+                // Open Sidebar
+                panel.classList.add('open');
+                document.getElementById('mainArea').classList.add('sidebar-open');
+                lucide.createIcons();
             }
-            
-            // הסרת הקודים מהטקסט המוצג למשתמש (Clean up)
-            const cleanText = document.getElementById('aiText').innerHTML
-                .replace(/{{product:.*?}}/g, '')
-                .replace(/{{video:.*?}}/g, '')
-                .replace(/{{typing}}/g, '');
-            document.getElementById('aiText').innerHTML = cleanText;
         }
 
-        // --- עזרים: אנימציות וסטייטים ---
+        function applyChameleonTheme(brandName) {
+            const root = document.documentElement;
+            brandName = (brandName || '').toLowerCase();
+
+            if(brandName.includes('sika')) {
+                root.style.setProperty('--brand-color', '#E3000F'); // Red
+                root.style.setProperty('--brand-dark', '#111');
+            } else if(brandName.includes('nir') || brandName.includes('נירלט')) {
+                root.style.setProperty('--brand-color', '#8bc34a'); // Greenish
+            } else if(brandName.includes('tambour') || brandName.includes('טמבור')) {
+                root.style.setProperty('--brand-color', '#ff5722'); // Orange
+            } else {
+                root.style.setProperty('--brand-color', '#2563eb'); // Generic Blue
+            }
+        }
+
+        // --- Animation Helpers ---
+
         function setRobotState(state) {
-            const body = document.getElementById('bodyState');
-            const status = document.getElementById('statusText');
-            
-            body.className = `state-${state}`;
-            
-            if (state === 'thinking') status.innerText = "חושב...";
-            else if (state === 'speaking') status.innerText = "עונה...";
-            else status.innerText = "אני מקשיב...";
+            const el = document.getElementById('robot-container');
+            // Reset classes
+            el.className = ""; 
+            el.classList.add(`state-${state}`);
         }
 
         function typeWriter(text, elementId, callback) {
-            setRobotState('speaking');
             const el = document.getElementById(elementId);
             el.innerHTML = "";
+            
+            // Clean AI codes for display
+            const cleanText = text.replace(/{{.*?}}/g, '').replace(/\[\[.*?\]\]/g, '');
+            
             let i = 0;
-            const speed = 20; // מהירות הקלדה
+            const speed = 25; 
 
             function type() {
-                if (i < text.length) {
-                    el.innerHTML += text.charAt(i);
+                if (i < cleanText.length) {
+                    el.innerHTML += cleanText.charAt(i);
                     i++;
                     setTimeout(type, speed);
                 } else {
@@ -297,6 +388,11 @@
             }
             type();
         }
+
+        // Handle Enter Key
+        document.getElementById('mainInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') handleSearch();
+        });
 
     </script>
 </body>
