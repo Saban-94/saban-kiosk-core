@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saban Pro Kiosk - Diamond Master</title>
+    <title>Saban Pro Kiosk - Ultimate AI Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        /* --- BRANDING VARIABLES --- */
+        /* --- מערכת צבעים וערכות נושא --- */
         :root {
             --brand-primary: #111111;
             --brand-secondary: #ffffff;
@@ -20,90 +20,184 @@
             --glass-bg: rgba(255, 255, 255, 0.95);
         }
 
-        body.theme-sika { --brand-primary: #FFC500; --brand-secondary: #000000; --brand-accent: #E3000F; --brand-bg: #fffceb; --brand-text: #000000; }
-        body.theme-thermokir { --brand-primary: #0057B8; --brand-secondary: #ffffff; --brand-accent: #8CC63F; --brand-bg: #f0f9ff; --brand-text: #0f172a; }
-        body.theme-misterfix { --brand-primary: #E3000F; --brand-secondary: #ffffff; --brand-accent: #333333; --brand-bg: #fff1f2; --brand-text: #0f172a; }
-        body.theme-bg { --brand-primary: #F37021; --brand-secondary: #ffffff; --brand-accent: #58595B; --brand-bg: #fff7f0; --brand-text: #333; }
-        body.theme-tambour { --brand-primary: #E31E24; --brand-secondary: #ffffff; --brand-accent: #E31E24; --brand-bg: #fff0f0; --brand-text: #333; }
-
-        body { font-family: 'Heebo', sans-serif; background: var(--brand-bg); color: var(--brand-text); transition: background 0.5s, color 0.5s; overflow: hidden; user-select: none; }
-
-        /* --- SIKA AI ROBOT WRAPPER --- */
-        #sikaAiWrapper { position: fixed; z-index: 9999; transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; }
-
-        .robot-character { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.4)); transition: all 0.5s; pointer-events: auto; cursor: pointer; }
-        .robot-character:hover { transform: scale(1.05) rotate(-5deg); }
+        /* 1. ח. סבן (ברירת מחדל) */
+        body.theme-default { --brand-primary: #111; --brand-secondary: #fff; --brand-accent: #2563eb; --brand-bg: #f8fafc; }
         
-        .breathing-effect { animation: breathe 4s ease-in-out infinite; }
-        @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        /* 2. סיקה */
+        body.theme-sika { --brand-primary: #FFC500; --brand-secondary: #000; --brand-accent: #E3000F; --brand-bg: #fffceb; }
+        
+        /* 3. תרמוקיר */
+        body.theme-thermokir { --brand-primary: #0057B8; --brand-secondary: #fff; --brand-accent: #F58220; --brand-bg: #f0f9ff; }
+        
+        /* 4. מיסטר פיקס */
+        body.theme-misterfix { --brand-primary: #E3000F; --brand-secondary: #fff; --brand-accent: #333; --brand-bg: #fff1f2; }
+        
+        /* 5. נירלט */
+        body.theme-nirlat { --brand-primary: #8BC53F; --brand-secondary: #fff; --brand-accent: #009640; --brand-bg: #f0fff4; }
+        
+        /* 6. טמבור */
+        body.theme-tambour { --brand-primary: #E31E24; --brand-secondary: #fff; --brand-accent: #E31E24; --brand-bg: #fff5f5; }
 
-        /* אנימציית חשיבה לרובוט (חדש!) */
-        .robot-thinking { animation: robot-pulse 0.8s infinite alternate; filter: drop-shadow(0 0 20px #FFC500); }
-        @keyframes robot-pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+        body { 
+            font-family: 'Heebo', sans-serif; 
+            background-color: var(--brand-bg); 
+            color: var(--brand-text); 
+            transition: all 0.6s ease; 
+            overflow: hidden; 
+            user-select: none; 
+        }
 
-        .state-corner { bottom: -20px; right: -20px; width: 280px; height: 280px; }
+        /* רקע לוגו ענק (Watermark) */
+        .brand-watermark {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw; height: 80vh;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.03; /* שקיפות עדינה */
+            pointer-events: none;
+            z-index: 0;
+            transition: all 0.8s ease;
+            filter: grayscale(100%);
+        }
+
+        /* --- רכיבי UI --- */
+        .product-card {
+            background: white; border-radius: 24px; overflow: hidden;
+            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05);
+            transition: all 0.3s; border: 3px solid transparent;
+            height: 380px; display: flex; flex-direction: column; position: relative; z-index: 10;
+        }
+        .product-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--brand-accent);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+        }
+        
+        .brand-pill {
+            background: white; padding: 5px 15px; border-radius: 50px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: 2px solid transparent;
+            transition: all 0.3s; opacity: 0.7; filter: grayscale(100%);
+            height: 60px; min-width: 100px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .brand-pill:hover, .brand-pill.active {
+            opacity: 1; border-color: var(--brand-accent);
+            transform: scale(1.1); filter: grayscale(0%);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .brand-pill img { height: 100%; width: auto; object-fit: contain; max-height: 40px; }
+
+        .cat-btn {
+            background: white; border: 1px solid #e2e8f0; padding: 10px 25px; rounded-full;
+            font-weight: 700; color: #64748b; transition: all 0.3s; display: flex; items-center; gap: 8px;
+        }
+        .cat-btn.active {
+            background: var(--brand-primary); color: var(--brand-secondary);
+            border-color: var(--brand-primary); transform: scale(1.05);
+        }
+
+        /* --- SIKA AI ROBOT & ANIMATIONS --- */
+        #sikaAiWrapper { position: fixed; z-index: 9999; transition: 0.8s; pointer-events: none; }
+        
+        .robot-container { position: relative; width: 100%; height: 100%; pointer-events: auto; cursor: pointer; }
+        
+        .robot-character {
+            width: 100%; height: 100%; object-fit: contain;
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.3));
+            transition: all 0.5s;
+            animation: floaty 4s ease-in-out infinite;
+        }
+        @keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        .robot-talking { animation: bounce 0.2s infinite alternate; }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+
+        /* מיקומים */
+        .state-corner { bottom: -20px; right: -20px; width: 260px; height: 260px; }
         .state-active { bottom: 50%; right: 50%; transform: translate(50%, 50%); width: 0; height: 0; }
-        .state-active .robot-character { position: absolute; bottom: -250px; right: 250px; width: 200px; opacity: 1; }
+        .state-active .robot-character { position: absolute; bottom: -280px; right: 280px; width: 220px; opacity: 1; }
 
-        #aiWindow { position: absolute; background: var(--glass-bg); border-radius: 30px; box-shadow: 0 40px 80px rgba(0,0,0,0.5); border: 4px solid var(--brand-accent); overflow: hidden; display: flex; flex-direction: column; backdrop-filter: blur(20px); opacity: 0; transform: scale(0) translate(-50%, -50%); pointer-events: auto; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        .state-active #aiWindow { width: 500px; height: 650px; max-width: 90vw; max-height: 80vh; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 1; }
-
-        /* --- UI COMPONENTS --- */
-        .brand-pill { background: white; padding: 8px 20px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 2px solid transparent; transition: all 0.3s; opacity: 0.7; filter: grayscale(100%); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .brand-pill:hover, .brand-pill.active { opacity: 1; border-color: var(--brand-accent); transform: scale(1.1); filter: grayscale(0%); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .brand-pill img { height: 35px; object-fit: contain; }
-
-        .sidebar-btn { @apply flex flex-col items-center justify-center p-4 text-gray-400 rounded-2xl transition-all duration-300 hover:bg-white hover:text-black hover:shadow-md mb-4 w-full; }
-        .sidebar-btn.active { background: var(--brand-primary); color: var(--brand-secondary); box-shadow: 0 10px 20px rgba(0,0,0,0.2); transform: scale(1.05); }
-        body.theme-sika .sidebar-btn.active { color: black; }
-
-        .product-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); transition: all 0.3s; border: 2px solid transparent; height: 380px; display: flex; flex-direction: column; position: relative; }
-        .product-card:hover { transform: translateY(-10px); border-color: var(--brand-accent); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2); }
-        .product-badge { position: absolute; top: 15px; left: 0; background: var(--brand-accent); color: white; padding: 5px 15px; font-weight: bold; font-size: 12px; border-radius: 0 10px 10px 0; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); z-index: 10; }
-
-        .cat-btn { background: white; border: 1px solid #e2e8f0; padding: 10px 25px; rounded-full font-bold text-gray-600 transition hover:border-[var(--brand-accent)] hover:text-[var(--brand-accent)]; display: flex; items-center; gap: 8px; }
-        .cat-btn.active { background: var(--brand-primary); color: var(--brand-secondary); border-color: var(--brand-primary); }
-        body.theme-sika .cat-btn.active { color: black; }
-
-        .modal-overlay { @apply fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-md transition-opacity duration-300; }
-        .modal-overlay.open { @apply flex animate-fade-in; }
+        /* בועת דיבור משוכללת */
+        #speechBubble {
+            position: absolute; top: -80px; right: 20px;
+            background: white; padding: 15px 25px;
+            border-radius: 20px; border-bottom-right-radius: 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 3px solid var(--brand-accent);
+            font-weight: bold; font-size: 16px; color: #333;
+            white-space: pre-wrap; width: 280px;
+            opacity: 0; transform: scale(0.8) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: auto; z-index: 100;
+        }
+        #speechBubble.show { opacity: 1; transform: scale(1) translateY(0); }
+        #speechBubble::after {
+            content: ''; position: absolute; bottom: -10px; right: 0;
+            width: 20px; height: 20px; background: white;
+            border-right: 3px solid var(--brand-accent);
+            border-bottom: 3px solid var(--brand-accent);
+            transform: rotate(45deg);
+        }
         
-        .tech-badge { @apply bg-gray-50 p-3 rounded-xl text-center border border-gray-100 flex flex-col items-center gap-1; }
-        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        /* סמן הקלדה */
+        .typing-cursor::after { content: '|'; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
 
+        /* מודלים */
+        .modal-overlay { @apply fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-md; }
+        .modal-overlay.open { @apply flex animate-fade-in; }
         .hidden-tab { display: none; }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        
         ::-webkit-scrollbar { width: 0px; }
     </style>
 </head>
 <body class="flex h-screen w-screen" onload="init()">
 
-    <nav class="w-32 bg-white h-full flex flex-col items-center py-8 shadow-2xl z-40 relative">
-        <div class="mb-8 w-24 h-24 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm border border-gray-100">
+    <div id="bgWatermark" class="brand-watermark"></div>
+
+    <nav class="w-32 bg-white h-full flex flex-col items-center py-8 shadow-2xl z-40 relative border-l border-gray-100">
+        <div class="mb-10 w-24 h-24 bg-white rounded-2xl flex items-center justify-center p-2 shadow-inner border border-gray-100">
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR1_PVzqyK74L9l5eC5grCsPGCsTinQnmHvw&s" class="w-full h-full object-contain">
         </div>
-        
-        <button onclick="switchTab('catalog')" id="btn-catalog" class="sidebar-btn active"><i data-lucide="layout-grid" size="32"></i><span class="text-xs font-bold mt-2">קטלוג</span></button>
-        <button onclick="switchTab('calculator')" id="btn-calculator" class="sidebar-btn"><i data-lucide="calculator" size="32"></i><span class="text-xs font-bold mt-2">מחשבון</span></button>
-        <div class="mt-auto opacity-40 hover:opacity-100 transition"><button class="sidebar-btn"><i data-lucide="settings" size="24"></i></button></div>
+        <button onclick="switchTab('catalog')" id="btn-catalog" class="w-full p-4 mb-4 text-gray-400 hover:text-black flex flex-col items-center transition"><i data-lucide="layout-grid" size="32"></i><span class="text-xs font-bold mt-2">קטלוג</span></button>
+        <button onclick="switchTab('calculator')" id="btn-calculator" class="w-full p-4 text-gray-400 hover:text-black flex flex-col items-center transition"><i data-lucide="calculator" size="32"></i><span class="text-xs font-bold mt-2">מחשבון</span></button>
     </nav>
 
-    <main class="flex-1 flex flex-col relative h-full overflow-hidden p-8">
+    <main class="flex-1 flex flex-col relative h-full overflow-hidden p-8 z-10">
         
-            <div class="flex gap-4 overflow-x-auto pb-4 pt-2 no-scrollbar px-2">
-                <div onclick="setTheme('default')" class="brand-pill active" id="pill-default"><span class="font-black text-lg">H. ח.סבן חומרי בנין</span></div>
-                <div onclick="setTheme('סיקה')" class="brand-pill" id="pill-sika"><img src="https://www.bonim.me/images/bniya/bdekot_beton/LOGO1.png"></div>
-                <div onclick="setTheme('תרמוקיר')" class="brand-pill" id="pill-thermokir"><img src="https://termokir.co.il/wp-content/uploads/2022/03/thermokir-logo-2.png"></div>
-                <div onclick="setTheme('כרמית מיסטר פיקס')" class="brand-pill" id="pill-misterfix"><img src="https://www.carmit-mrfix.com/wp-content/uploads/2023/05/cropped-mrfix_logo_Final_horizontal-600.png"></div>
-                <div onclick="setTheme('נירלט')" class="brand-pill" id="pill-bg"><img src="https://nirlat.com/wp-content/themes/nirlat/images/Logo_2021.jpg"></div>
-                <div onclick="setTheme('טמבור')" class="brand-pill" id="pill-tambour"><img src="https://upload.wikimedia.org/wikipedia/he/thumb/d/df/TambourHe.svg/250px-TambourHe.svg.png?20180806145144"></div>
+        <header class="flex flex-col gap-8 mb-8">
+            <div class="flex gap-4 overflow-x-auto pb-4 pt-2 no-scrollbar px-2 items-center">
+                <div onclick="setTheme('default')" class="brand-pill active" id="pill-default">
+                    <span class="font-black text-lg px-2 text-gray-800">H. ח.סבן</span>
+                </div>
+                <div onclick="setTheme('sika')" class="brand-pill" id="pill-sika">
+                    <img src="https://www.bonim.me/images/bniya/bdekot_beton/LOGO1.png">
+                </div>
+                <div onclick="setTheme('thermokir')" class="brand-pill" id="pill-thermokir">
+                    <img src="https://termokir.co.il/wp-content/uploads/2022/03/thermokir-logo-2.png">
+                </div>
+                <div onclick="setTheme('misterfix')" class="brand-pill" id="pill-misterfix">
+                    <img src="https://www.carmit-mrfix.com/wp-content/uploads/2023/05/cropped-mrfix_logo_Final_horizontal-600.png">
+                </div>
+                <div onclick="setTheme('nirlat')" class="brand-pill" id="pill-nirlat">
+                    <img src="https://nirlat.com/wp-content/themes/nirlat/images/Logo_2021.jpg">
+                </div>
+                <div onclick="setTheme('tambour')" class="brand-pill" id="pill-tambour">
+                    <img src="https://upload.wikimedia.org/wikipedia/he/thumb/d/df/TambourHe.svg/250px-TambourHe.svg.png?20180806145144">
+                </div>
             </div>
-            <div class="flex justify-between items-center">
+
+            <div class="flex justify-between items-center bg-white/50 p-6 rounded-3xl backdrop-blur-sm border border-white/50 shadow-sm">
                 <div>
-                    <h1 class="text-5xl font-black tracking-tight" id="heroTitle">המרכז המקצועי</h1>
-                    <p class="text-xl opacity-60 font-medium" id="heroSubtitle">בחר יצרן לצפייה במוצרים</p>
+                    <h1 class="text-6xl font-black tracking-tighter text-[var(--brand-primary)] transition-colors" id="heroTitle">המרכז המקצועי</h1>
+                    <p class="text-xl opacity-60 font-medium mt-1">קטלוג מוצרים חכם • ייעוץ מומחים</p>
                 </div>
                 <div class="relative w-[500px]">
-                    <input id="searchInput" oninput="filterProducts()" type="text" placeholder="חיפוש חכם (למשל: איטום גגות)..." class="w-full bg-white p-5 pr-14 rounded-2xl shadow-sm focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent)]/20 text-lg font-bold">
+                    <input id="searchInput" oninput="filterProducts()" type="text" placeholder="חיפוש חכם..." class="w-full bg-white p-5 pr-14 rounded-2xl shadow-sm outline-none text-lg font-bold border-2 border-transparent focus:border-[var(--brand-accent)]">
                     <i data-lucide="search" class="absolute right-5 top-5 text-gray-400" size="24"></i>
                 </div>
             </div>
@@ -118,278 +212,186 @@
         </div>
 
         <div id="view-catalog" class="flex-1 overflow-y-auto pb-32 pr-2">
-            <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+            <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 pb-10"></div>
         </div>
-
+        
         <div id="view-calculator" class="hidden-tab h-full flex items-center justify-center">
-            <div class="bg-white p-12 rounded-[40px] shadow-2xl w-full max-w-3xl text-center border-4 border-[var(--brand-accent)]">
-                <h2 class="text-5xl font-black mb-8 flex justify-center items-center gap-3"><i data-lucide="calculator" class="text-blue-600"></i> מחשבון כמויות</h2>
-                <div class="grid grid-cols-2 gap-8 mb-8">
-                    <input id="calcArea" type="number" placeholder="שטח (מ''ר)" class="bg-gray-50 border-2 border-gray-100 p-6 rounded-2xl text-2xl font-bold outline-none focus:border-[var(--brand-accent)]">
-                    <input id="calcConsumption" type="number" placeholder="צריכה (ק''ג למ''ר)" class="bg-gray-50 border-2 border-gray-100 p-6 rounded-2xl text-2xl font-bold outline-none focus:border-[var(--brand-accent)]">
-                </div>
-                <div class="bg-black text-white p-8 rounded-3xl mb-8">
-                    <div class="text-sm text-gray-400 uppercase font-bold tracking-widest mb-2">סה"כ חומר נדרש</div>
-                    <div class="text-6xl font-black" id="resKg">0 <span class="text-2xl text-gray-500">ק"ג</span></div>
-                </div>
-                <button onclick="calculate()" class="bg-[var(--brand-accent)] text-white w-full py-5 rounded-2xl text-2xl font-black hover:opacity-90 transition shadow-xl">בצע חישוב</button>
-            </div>
+            <h2 class="text-4xl">מחשבון בבנייה...</h2>
         </div>
     </main>
 
     <div id="sikaAiWrapper" class="state-corner">
-        <div class="robot-character breathing-effect" onclick="triggerInteraction()">
-            <img src="https://saban-kiosk-core.pages.dev/admin/sika-ai.png" class="w-full h-full object-contain">
-            <div id="ctaBubble" class="absolute -top-12 right-10 bg-white px-6 py-3 rounded-2xl shadow-xl border-2 border-[var(--brand-accent)] whitespace-nowrap animate-bounce z-50">
-                <span class="font-black text-lg">נתקעת? לחץ עלי!</span> 🤖
+        <div class="robot-container" onclick="triggerInteraction()">
+            <div id="speechBubble">
+                <span id="bubbleText" class="typing-cursor"></span>
             </div>
-        </div>
-
-        <div id="aiWindow">
-            <div class="bg-[#111] p-4 text-white flex justify-between items-center shrink-0">
-                <div class="flex items-center gap-2">
-                    <div class="w-10 h-10 bg-[#FFC500] rounded-full flex items-center justify-center text-black font-bold border-2 border-white text-lg">Ai</div>
-                    <div class="leading-tight">
-                        <div class="font-bold text-lg">Sika Expert</div>
-                        <div class="text-[10px] text-gray-400">מופעל ע"י ג'מיני</div>
-                    </div>
-                </div>
-                <button onclick="event.stopPropagation(); closeInteraction()" class="hover:text-red-500 bg-white/10 p-2 rounded-full"><i data-lucide="x"></i></button>
-            </div>
-
-            <div class="flex-1 p-8 overflow-y-auto relative flex flex-col bg-white">
-                <div id="leadForm" class="flex flex-col h-full justify-center text-center">
-                    <h3 class="text-3xl font-black mb-2">בוא נתחיל! 🚀</h3>
-                    <p class="text-gray-500 mb-8 text-lg">אני "סיקה-Ai". תן לי שם וטלפון ואשלח לך <span class="text-[var(--brand-accent)] font-bold">מידע זהב</span> ישר לווצאף.</p>
-                    <input type="text" id="leadName" placeholder="איך קוראים לך?" class="w-full bg-gray-50 border-2 border-gray-100 p-4 rounded-xl mb-3 font-bold text-lg focus:border-[var(--brand-accent)] outline-none">
-                    <input type="tel" id="leadPhone" placeholder="מספר נייד..." class="w-full bg-gray-50 border-2 border-gray-100 p-4 rounded-xl mb-4 font-bold text-lg focus:border-[var(--brand-accent)] outline-none">
-                    <button onclick="submitLead()" class="bg-[var(--brand-accent)] text-white w-full py-4 rounded-xl font-bold text-xl shadow-xl hover:opacity-90 transition">כנס לשיחה <i data-lucide="arrow-left" class="inline"></i></button>
-                </div>
-
-                <div id="chatInterface" class="hidden h-full flex flex-col">
-                    <div id="chatHistory" class="flex-1 space-y-4 overflow-y-auto pb-4 pr-2"></div>
-                    <div class="mt-auto pt-4 border-t flex gap-3">
-                        <input id="chatInput" type="text" placeholder="כתוב הודעה..." class="flex-1 bg-gray-50 border-2 border-gray-200 p-4 rounded-2xl outline-none focus:border-[var(--brand-accent)] text-lg">
-                        <button onclick="sendMessage()" class="bg-[var(--brand-primary)] text-[var(--brand-secondary)] p-4 rounded-2xl shadow-lg"><i data-lucide="send" size="24"></i></button>
-                    </div>
-                </div>
-            </div>
+            
+            <img src="https://saban-kiosk-core.pages.dev/admin/sika-ai.png" class="robot-character">
         </div>
     </div>
 
     <div id="productModal" class="modal-overlay">
-        <div class="modal-content relative flex">
-            <button onclick="closeModal()" class="absolute top-6 left-6 z-20 bg-gray-100 p-3 rounded-full hover:bg-gray-200 shadow-md"><i data-lucide="x" size="24"></i></button>
-            <div class="w-[40%] bg-gray-50 p-10 flex flex-col items-center justify-center border-l border-gray-100 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-64 h-64 bg-[var(--brand-accent)] opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                <img id="mImage" src="" class="max-h-[500px] max-w-full object-contain mix-blend-multiply transition duration-700 hover:scale-110 drop-shadow-xl z-10">
-            </div>
-            <div class="w-[60%] p-14 overflow-y-auto bg-white flex flex-col">
-                <div class="flex items-center gap-3 mb-4">
-                    <img id="mBrandLogo" src="" class="h-8 object-contain">
-                    <span class="text-sm font-bold text-gray-400 uppercase tracking-widest border-r pr-3 mr-3" id="mBrandText">BRAND</span>
+        <div class="bg-white rounded-[40px] shadow-2xl w-[90vw] h-[85vh] flex overflow-hidden relative animate-fade-in">
+            <button onclick="closeModal()" class="absolute top-8 left-8 z-20 bg-white/80 p-4 rounded-full hover:bg-white shadow-lg"><i data-lucide="x" size="28"></i></button>
+            <div class="w-[45%] bg-gray-50 p-12 flex items-center justify-center"><img id="mImage" class="max-h-full object-contain mix-blend-multiply"></div>
+            <div class="w-[55%] p-16 overflow-y-auto bg-white flex flex-col">
+                <h2 class="text-7xl font-black mb-8" id="mName">שם</h2>
+                <p id="mDesc" class="text-2xl text-gray-600 mb-8"></p>
+                <div class="grid grid-cols-3 gap-6 mb-12 text-center">
+                    <div class="bg-gray-50 p-4 rounded-2xl"><span class="block text-sm text-gray-500 font-bold">כיסוי</span><span class="text-xl font-black" id="mCov">-</span></div>
+                    <div class="bg-gray-50 p-4 rounded-2xl"><span class="block text-sm text-gray-500 font-bold">ייבוש</span><span class="text-xl font-black" id="mDry">-</span></div>
+                    <div class="bg-gray-50 p-4 rounded-2xl"><span class="block text-sm text-gray-500 font-bold">עובי</span><span class="text-xl font-black" id="mThick">-</span></div>
                 </div>
-                <h2 class="text-6xl font-black mb-6 text-gray-900 leading-tight tracking-tight" id="mName">שם מוצר</h2>
-                <div class="bg-[var(--brand-bg)] p-8 rounded-3xl border-r-8 border-[var(--brand-accent)] mb-10 shadow-sm">
-                    <p id="mDesc" class="text-2xl leading-relaxed text-gray-800 font-medium"></p>
-                </div>
-                <div class="grid grid-cols-3 gap-6 mb-10">
-                    <div class="tech-badge"><i data-lucide="maximize" class="text-[var(--brand-accent)] mb-2" size="28"></i><span class="tech-label">כיסוי</span><span class="tech-val text-xl" id="mCov">-</span></div>
-                    <div class="tech-badge"><i data-lucide="clock" class="text-[var(--brand-accent)] mb-2" size="28"></i><span class="tech-label">זמן ייבוש</span><span class="tech-val text-xl" id="mDry">-</span></div>
-                    <div class="tech-badge"><i data-lucide="layers" class="text-[var(--brand-accent)] mb-2" size="28"></i><span class="tech-label">עובי</span><span class="tech-val text-xl" id="mThick">-</span></div>
-                </div>
-                <div class="mt-auto pt-8 border-t flex gap-6">
-                    <button onclick="openSmartCalc()" class="flex-1 bg-white border-2 border-gray-200 text-gray-800 font-bold py-5 rounded-2xl hover:border-[var(--brand-accent)] transition text-xl flex items-center justify-center gap-2"><i data-lucide="calculator"></i> מחשבון כמויות</button>
-                    <button onclick="closeModal(); triggerInteraction()" class="flex-[1.5] bg-[var(--brand-primary)] text-[var(--brand-secondary)] font-bold py-5 rounded-2xl shadow-xl hover:scale-[1.02] transition text-xl flex items-center justify-center gap-3"><i data-lucide="bot"></i> התייעץ עם המומחה</button>
-                </div>
+                <button onclick="triggerInteraction()" class="mt-auto bg-[var(--brand-primary)] text-[var(--brand-secondary)] py-6 rounded-3xl font-black text-2xl shadow-xl hover:scale-[1.02] transition">שאל את המומחה</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { db } from './js/firebase-config.js';
-        import { collection, getDocs, onSnapshot, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        import { askProductExpert } from './js/gemini-service.js';
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         lucide.createIcons();
+        
         let allProducts = [];
         let currentProducts = [];
-        let currentProduct = null;
-        let chatHistory = [];
-        
-        const KIOSK_ID = "kiosk_main_01"; // Kiosk ID for remote commands
+        let typeInterval;
 
-        // --- INIT ---
-        async function init() {
+        // Mock Data למקרה שאין אינטרנט
+        const mockProducts = [
+            { id: "1", name: "Sika TopSeal 107", brand: "SIKA", category: "sealing", marketingDesc: "איטום צמנטי גמיש (דו רכיבי) - הסטנדרט העולמי.", image: "https://gilar.co.il/wp-content/uploads/2023/12/SikaTop-Seal-107-25-Kg.png", status: "recommended", tech: {coverage: "3-4 ק\"ג/מ\"ר", drying: "6 שעות", thickness: "2 מ\"מ"} },
+            { id: "2", name: "Thermokir 603", brand: "THERMOKIR", category: "concrete", marketingDesc: "טיח תרמי לבידוד מעולה.", image: "https://www.thermokir.co.il/wp-content/uploads/2019/06/603.png", status: "standard", tech: {coverage: "14 ק\"ג/מ\"ר", drying: "48 שעות", thickness: "30 מ\"מ"} },
+            { id: "3", name: "Mister Fix 109", brand: "MISTER FIX", category: "glues", marketingDesc: "דבק אקרילי C1TE.", image: "https://karmit-mrfix.com/wp-content/uploads/2020/07/109.png", status: "standard", tech: {coverage: "5 ק\"ג/מ\"ר", drying: "24 שעות", thickness: "5 מ\"מ"} },
+            { id: "4", name: "Nirlat Super", brand: "NIRLAT", category: "flooring", marketingDesc: "צבע אקרילי לקירות פנים.", image: "https://nirlat.com/wp-content/uploads/2018/06/nirocril_extra_white.png", status: "sale", tech: {coverage: "9 מ\"ר/ליטר", drying: "שעתיים", thickness: "-"} },
+            { id: "5", name: "Tambour Supercryl", brand: "TAMBOUR", category: "flooring", marketingDesc: "סופרקריל מט פלוס.", image: "https://tambour.co.il/wp-content/uploads/2020/05/Supercryl_Matt_White_Bucket_5L_Front.jpg", status: "best-seller", tech: {coverage: "10 מ\"ר/ליטר", drying: "שעתיים", thickness: "-"} }
+        ];
+
+        // INIT
+        window.init = async () => {
             setTheme('default');
             try {
                 const snap = await getDocs(collection(db, "products"));
-                allProducts = [];
-                snap.forEach(doc => allProducts.push({id: doc.id, ...doc.data()}));
-                currentProducts = allProducts;
-                renderGrid(allProducts);
-                listenToExpertCommands(); // Start listening for expert
-            } catch (e) { console.error(e); }
+                if (snap.empty) allProducts = mockProducts;
+                else {
+                    allProducts = [];
+                    snap.forEach(d => allProducts.push({id: d.id, ...d.data()}));
+                }
+            } catch (e) { allProducts = mockProducts; }
+            currentProducts = allProducts;
+            renderGrid(allProducts);
+            
+            // הודעת פתיחה
+            setTimeout(() => robotSpeak("אהלן! אני סיקה-Ai. תבחר מותג או מוצר ואני כאן לעזור לך אחי!"), 1000);
         }
 
-        // --- EXPERT REMOTE CONTROL ---
-        function listenToExpertCommands() {
-            console.log("📡 מאזין לפקודות מומחה...");
-            const q = query(collection(db, "chats"), where("chatId", "==", KIOSK_ID), orderBy("timestamp", "desc"), limit(1));
-            onSnapshot(q, (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === "added") {
-                        const data = change.doc.data();
-                        if (data.sender === 'expert' && data.type === 'product_push') {
-                            showNotification(`המומחה ממליץ על: ${data.productData.name}`);
-                            setTimeout(() => openProduct(data.productData.id), 1500);
-                        }
-                    }
-                });
-            });
-        }
-
-        function showNotification(text) {
-            const notif = document.createElement('div');
-            notif.className = "fixed top-10 left-1/2 -translate-x-1/2 bg-[#E3000F] text-white px-8 py-4 rounded-full shadow-2xl z-[9999] font-bold text-xl animate-bounce flex items-center gap-2";
-            notif.innerHTML = `<i data-lucide="zap"></i> ${text}`;
-            document.body.appendChild(notif);
-            lucide.createIcons();
-            setTimeout(() => notif.remove(), 5000);
-        }
-
-        // --- THEME & UI ---
-        window.setTheme = (brand) => {
-            document.body.className = `theme-${brand}`;
-            const titles = {
-                sika: "SIKA SWITZERLAND", thermokir: "תרמוקיר - בונים חכם", misterfix: "MISTER FIX - מקצוענות",
-                bg: "BG BOND - טכנולוגיה", tambour: "טמבור - הצבע של ישראל", default: "המרכז המקצועי"
+        // --- THEME & BRAND LOGIC ---
+        window.setTheme = (brandName) => {
+            // מיפוי שמות מותגים לקודים
+            const brandMap = {
+                'default': 'default',
+                'סיקה': 'sika',
+                'תרמוקיר': 'thermokir',
+                'כרמית מיסטר פיקס': 'misterfix',
+                'נירלט': 'nirlat',
+                'טמבור': 'tambour'
             };
-            document.getElementById('heroTitle').innerText = titles[brand] || titles.default;
+            
+            const themeCode = brandMap[brandName] || 'default';
+            
+            // עדכון מחלקת CSS
+            document.body.className = `theme-${themeCode}`;
+            
+            // עדכון כפתור פעיל
             document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('active'));
-            document.getElementById(`pill-${brand}`).classList.add('active');
+            const clickedPill = event.currentTarget; 
+            if(clickedPill) clickedPill.classList.add('active');
 
-            if(brand === 'default') currentProducts = allProducts;
-            else {
-                const searchStr = brand === 'misterfix' ? 'MISTER FIX' : (brand === 'bg' ? 'BG BOND' : brand.toUpperCase());
+            // עדכון סימן מים (רקע)
+            const watermark = document.getElementById('bgWatermark');
+            const logoUrl = clickedPill ? clickedPill.querySelector('img').src : '';
+            if(brandName !== 'default') {
+                watermark.style.backgroundImage = `url('${logoUrl}')`;
+                watermark.style.opacity = '0.05';
+            } else {
+                watermark.style.backgroundImage = 'none';
+            }
+
+            // סינון מוצרים
+            if (themeCode === 'default') {
+                currentProducts = allProducts;
+                robotSpeak("חזרנו לראשי אחי. מה לחפש לך?");
+            } else {
+                const searchStr = themeCode === 'misterfix' ? 'FIX' : (themeCode === 'nirlat' ? 'NIRLAT' : themeCode.toUpperCase());
                 currentProducts = allProducts.filter(p => (p.brand || "").toUpperCase().includes(searchStr));
+                
+                // הודעת רובוט חכמה
+                robotSpeak(`בחרת יצרן "${brandName}". תרצה לחפש מוצר מסוים של ${brandName}? תרשום לי, אני פה בשבילך.`);
             }
             renderGrid(currentProducts);
         }
 
-        // --- CATALOG ---
+        // --- ROBOT TYPING EFFECT ---
+        window.robotSpeak = (text) => {
+            const bubble = document.getElementById('speechBubble');
+            const textSpan = document.getElementById('bubbleText');
+            
+            // איפוס
+            bubble.classList.remove('show');
+            clearInterval(typeInterval);
+            textSpan.innerText = "";
+            
+            // הצגה והקלדה
+            setTimeout(() => {
+                bubble.classList.add('show');
+                let i = 0;
+                typeInterval = setInterval(() => {
+                    textSpan.innerText += text.charAt(i);
+                    i++;
+                    if (i > text.length) {
+                        clearInterval(typeInterval);
+                        // סגירה אוטומטית אחרי 5 שניות אם לא לוחצים
+                        setTimeout(() => bubble.classList.remove('show'), 8000);
+                    }
+                }, 40); // מהירות הקלדה
+            }, 300);
+        }
+
+        // --- PRODUCT & GRID ---
         function renderGrid(list) {
-            const grid = document.getElementById('productGrid');
-            if(!grid) return;
-            grid.innerHTML = list.map(p => `
+            document.getElementById('productGrid').innerHTML = list.map(p => `
                 <div onclick="openProduct('${p.id}')" class="product-card group cursor-pointer">
-                    ${p.status && p.status !== 'standard' ? `<div class="product-badge">${p.status}</div>` : ''}
-                    <div class="h-1/2 flex items-center justify-center p-6 bg-gray-50">
-                        <img src="${p.image || 'https://placehold.co/300'}" class="max-h-full max-w-full object-contain mix-blend-multiply group-hover:scale-110 transition duration-500">
+                    <div class="h-[60%] flex items-center justify-center p-8 bg-white group-hover:bg-gray-50 transition-colors">
+                        <img src="${p.image || 'https://placehold.co/200'}" class="max-h-full max-w-full object-contain mix-blend-multiply group-hover:scale-110 transition duration-500">
                     </div>
-                    <div class="p-6 flex-1 flex flex-col bg-white">
-                        <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">${p.brand || 'BRAND'}</div>
-                        <h3 class="text-xl font-black text-gray-900 leading-tight mb-2">${p.name}</h3>
-                        <div class="mt-auto"><div class="bg-gray-100 px-3 py-1 rounded text-xs font-bold text-gray-500 inline-block">${p.category || 'כללי'}</div></div>
+                    <div class="p-6 flex-1 flex flex-col bg-white border-t border-gray-100">
+                        <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">${p.brand || 'BRAND'}</div>
+                        <h3 class="text-2xl font-black text-gray-900 leading-tight mb-2 line-clamp-2">${p.name}</h3>
+                        <div class="mt-auto"><span class="bg-gray-100 px-3 py-1 rounded-lg text-xs font-bold text-gray-500">${p.category || 'כללי'}</span></div>
                     </div>
-                </div>`).join('');
-            lucide.createIcons();
+                </div>
+            `).join('');
         }
 
         window.openProduct = (id) => {
             const p = allProducts.find(x => x.id === id);
             if(!p) return;
-            currentProduct = p;
+            
             document.getElementById('mName').innerText = p.name;
             document.getElementById('mDesc').innerText = p.marketingDesc || "אין תיאור";
-            document.getElementById('mImage').src = p.image || 'https://placehold.co/600';
-            document.getElementById('mBrandText').innerText = p.brand || "BRAND";
-            document.getElementById('mBrandLogo').src = p.brandLogo || "";
-            
-            document.getElementById('mCov').innerText = p.tech?.coverage || "-";
-            document.getElementById('mDry').innerText = p.tech?.drying || "-";
-            document.getElementById('mThick').innerText = p.tech?.thickness || "-";
+            document.getElementById('mImage').src = p.image || '';
+            document.getElementById('mCov').innerText = p.tech?.coverage || '-';
+            document.getElementById('mDry').innerText = p.tech?.drying || '-';
+            document.getElementById('mThick').innerText = p.tech?.thickness || '-';
             
             document.getElementById('productModal').classList.add('open');
+            
+            // הודעת רובוט
+            robotSpeak(`בחרת ${p.name} של ${p.brand || "היצרן"}. תרצה פרטים? אני פה אחי לכל שאלה על המוצר.`);
         }
 
         window.closeModal = () => document.getElementById('productModal').classList.remove('open');
-
-        // --- FILTERS ---
-        window.filterProducts = () => {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            renderGrid(currentProducts.filter(p => p.name.toLowerCase().includes(term)));
-        }
-        window.filterCat = (cat) => {
-            if(cat === 'all') renderGrid(currentProducts);
-            else renderGrid(currentProducts.filter(p => p.category === cat));
-        }
-
-        // --- INTERACTION ---
-        window.triggerInteraction = () => {
-            document.getElementById('sikaAiWrapper').classList.remove('state-corner');
-            document.getElementById('sikaAiWrapper').classList.add('state-active');
-            document.getElementById('ctaBubble').style.opacity = '0';
-        }
-        window.closeInteraction = () => {
-            document.getElementById('sikaAiWrapper').classList.remove('state-active');
-            document.getElementById('sikaAiWrapper').classList.add('state-corner');
-            setTimeout(() => document.getElementById('ctaBubble').style.opacity = '1', 1000);
-        }
         
-        window.submitLead = () => {
-            const name = document.getElementById('leadName').value;
-            if(!name) return alert("הכנס שם");
-            document.getElementById('leadForm').classList.add('hidden');
-            document.getElementById('chatInterface').classList.remove('hidden');
-            document.getElementById('chatHistory').innerHTML = `
-                <div class="flex gap-3 animate-fade-in">
-                    <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">🤖</div>
-                    <div class="bg-gray-100 p-4 rounded-2xl rounded-tr-none text-gray-800 text-lg shadow-sm">
-                        היי ${name}! במה אוכל לעזור?
-                    </div>
-                </div>`;
-        }
-
-        window.sendMessage = async () => {
-            const input = document.getElementById('chatInput');
-            const text = input.value;
-            if(!text) return;
-            const hist = document.getElementById('chatHistory');
-            hist.innerHTML += `<div class="flex justify-end animate-fade-in"><div class="bg-black text-white p-4 rounded-2xl rounded-br-none max-w-[80%] text-lg shadow-md">${text}</div></div>`;
-            input.value = "";
-            hist.scrollTop = hist.scrollHeight;
-            
-            // AI Thinking Animation
-            const bot = document.querySelector('.robot-character');
-            bot.classList.add('robot-thinking');
-            
-            const reply = await askProductExpert(currentProduct || {name:'כללי'}, text, chatHistory);
-            
-            bot.classList.remove('robot-thinking');
-            hist.innerHTML += `<div class="flex gap-3 animate-fade-in"><div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">🤖</div><div class="bg-gray-100 p-4 rounded-2xl rounded-tr-none text-gray-800 text-lg shadow-sm max-w-[80%]">${reply}</div></div>`;
-            hist.scrollTop = hist.scrollHeight;
-        }
-
-        // --- TABS ---
-        window.switchTab = (tab) => {
-            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-'+tab).classList.add('active');
-            if(tab === 'catalog') {
-                document.getElementById('view-catalog').classList.remove('hidden-tab');
-                document.getElementById('view-calculator').classList.add('hidden-tab');
-            } else {
-                document.getElementById('view-catalog').classList.add('hidden-tab');
-                document.getElementById('view-calculator').classList.remove('hidden-tab');
-            }
-        }
-
-        window.openSmartCalc = () => { closeModal(); switchTab('calculator'); }
-        window.calculate = () => {
-            const area = document.getElementById('calcArea').value;
-            const cons = document.getElementById('calcConsumption').value;
-            if(area && cons) document.getElementById('resKg').innerHTML = (area * cons).toFixed(1) + ' <span class="text-2xl text-gray-500">ק"ג</span>';
-        }
+        window.triggerInteraction = () => alert("כאן יפתח הצ'אט המלא עם אלי וה-AI (כפי שמימשנו בקבצים הקודמים)");
 
         window.init = init;
     </script>
