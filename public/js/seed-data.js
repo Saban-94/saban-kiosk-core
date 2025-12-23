@@ -1,14 +1,44 @@
 import { db } from './firebase-config.js';
 import { collection, getDocs, writeBatch, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// נתונים יציבים עם תמונות שעובדות תמיד
+// נתונים יציבים עם הגדרות עיצוב (צבעים ולוגו)
 const brandsData = [
-    { name: "Sika", logo: "https://placehold.co/200x100/FFC500/000?text=Sika", slogan: "בונים אמון", themeColor: "sika" },
-    { name: "Thermokir", logo: "https://placehold.co/200x100/0057B8/fff?text=Thermokir", slogan: "פתרונות מתקדמים", themeColor: "thermokir" },
-    { name: "Mister Fix", logo: "https://placehold.co/200x100/E3000F/fff?text=Fix", slogan: "מקצוענות בבניה", themeColor: "misterfix" },
-    { name: "Nirlat", logo: "https://placehold.co/200x100/8BC53F/fff?text=Nirlat", slogan: "הצבע של ישראל", themeColor: "nirlat" },
-    { name: "Tambour", logo: "https://placehold.co/200x100/E31E24/fff?text=Tambour", slogan: "תראו מה שצבע יכול לעשות", themeColor: "tambour" },
-    { name: "BG Bond", logo: "https://placehold.co/200x100/F37021/fff?text=BG", slogan: "טכנולוגיה בבניה", themeColor: "bg" }
+    { 
+        name: "Sika", 
+        logo: "https://placehold.co/200x100/FFC500/000?text=Sika", 
+        slogan: "בונים אמון", 
+        colors: { primary: "#FFC500", accent: "#E3000F", bg: "#fffceb", text: "#000000" } 
+    },
+    { 
+        name: "Thermokir", 
+        logo: "https://placehold.co/200x100/0057B8/fff?text=Thermokir", 
+        slogan: "פתרונות מתקדמים", 
+        colors: { primary: "#0057B8", accent: "#F58220", bg: "#f0f9ff", text: "#0f172a" } 
+    },
+    { 
+        name: "Mister Fix", 
+        logo: "https://placehold.co/200x100/E3000F/fff?text=Fix", 
+        slogan: "מקצוענות בבניה", 
+        colors: { primary: "#E3000F", accent: "#333333", bg: "#fff1f2", text: "#0f172a" } 
+    },
+    { 
+        name: "Nirlat", 
+        logo: "https://placehold.co/200x100/8BC53F/fff?text=Nirlat", 
+        slogan: "הצבע של ישראל", 
+        colors: { primary: "#8BC53F", accent: "#009640", bg: "#f0fff4", text: "#0f172a" } 
+    },
+    { 
+        name: "Tambour", 
+        logo: "https://placehold.co/200x100/E31E24/fff?text=Tambour", 
+        slogan: "תראו מה שצבע יכול לעשות", 
+        colors: { primary: "#E31E24", accent: "#E31E24", bg: "#fff5f5", text: "#333333" } 
+    },
+    { 
+        name: "BG Bond", 
+        logo: "https://placehold.co/200x100/F37021/fff?text=BG", 
+        slogan: "טכנולוגיה בבניה", 
+        colors: { primary: "#F37021", accent: "#000000", bg: "#fff7f0", text: "#333333" } 
+    }
 ];
 
 const productsData = [
@@ -20,16 +50,16 @@ const productsData = [
 ];
 
 export async function seedRealData() {
-    console.log("Starting Seed...");
+    console.log("Starting Seed Process...");
     const batch = writeBatch(db);
 
-    // ניקוי
+    // מחיקת נתונים ישנים
     const bSnap = await getDocs(collection(db, "brands"));
     bSnap.forEach(d => batch.delete(d.ref));
     const pSnap = await getDocs(collection(db, "products"));
     pSnap.forEach(d => batch.delete(d.ref));
 
-    // טעינה
+    // טעינת נתונים חדשים
     brandsData.forEach(b => batch.set(doc(collection(db, "brands")), { ...b, createdAt: Date.now() }));
     productsData.forEach(p => batch.set(doc(collection(db, "products")), { ...p, createdAt: Date.now() }));
 
