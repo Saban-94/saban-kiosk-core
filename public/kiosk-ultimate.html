@@ -10,20 +10,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        /* --- משתני מיתוג --- */
-        :root { --brand-primary: #111; --brand-accent: #2563eb; --brand-bg: #f8fafc; }
+        /* --- BRANDING VARIABLES --- */
+        :root { --brand-primary: #111; --brand-secondary: #fff; --brand-accent: #2563eb; --brand-bg: #f8fafc; }
 
         /* ערכות נושא לפי מותג */
-        body.theme-default { --brand-primary: #111; --brand-accent: #2563eb; --brand-bg: #f8fafc; }
-        body.theme-sika { --brand-primary: #FFC500; --brand-accent: #E3000F; --brand-bg: #fffceb; }
-        body.theme-thermokir { --brand-primary: #0057B8; --brand-accent: #F58220; --brand-bg: #f0f9ff; }
-        body.theme-misterfix { --brand-primary: #E3000F; --brand-accent: #333333; --brand-bg: #fff1f2; }
-        body.theme-nirlat { --brand-primary: #8BC53F; --brand-accent: #009640; --brand-bg: #f0fff4; }
-        body.theme-tambour { --brand-primary: #E31E24; --brand-accent: #E31E24; --brand-bg: #fff5f5; }
+        body.theme-default { --brand-primary: #111; --brand-secondary: #fff; --brand-accent: #2563eb; --brand-bg: #f8fafc; }
+        body.theme-sika { --brand-primary: #FFC500; --brand-secondary: #000; --brand-accent: #E3000F; --brand-bg: #fffceb; }
+        body.theme-thermokir { --brand-primary: #0057B8; --brand-secondary: #fff; --brand-accent: #F58220; --brand-bg: #f0f9ff; }
+        body.theme-misterfix { --brand-primary: #E3000F; --brand-secondary: #fff; --brand-accent: #333; --brand-bg: #fff1f2; }
+        body.theme-nirlat { --brand-primary: #8BC53F; --brand-secondary: #fff; --brand-accent: #009640; --brand-bg: #f0fff4; }
+        body.theme-tambour { --brand-primary: #E31E24; --brand-secondary: #fff; --brand-accent: #E31E24; --brand-bg: #fff5f5; }
 
         body { font-family: 'Heebo', sans-serif; background-color: var(--brand-bg); transition: 0.6s ease; overflow: hidden; user-select: none; }
 
-        /* סימן מים לוגו */
+        /* רקע לוגו ענק */
         .brand-watermark {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 70vw; height: 70vh; opacity: 0.04; pointer-events: none; z-index: 0;
@@ -31,7 +31,7 @@
             transition: 0.5s; filter: grayscale(100%);
         }
 
-        /* כפתורי מותג (Pills) */
+        /* כפתורי מותג */
         .brand-pill {
             background: white; padding: 5px 20px; border-radius: 50px;
             display: flex; align-items: center; justify-content: center;
@@ -50,7 +50,7 @@
         }
         .product-card:hover { transform: translateY(-8px); border-color: var(--brand-accent); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
         
-        /* בועת הדיבור של הרובוט */
+        /* רובוט ובועת דיבור */
         #speechBubble {
             position: absolute; top: -100px; right: 20px;
             background: white; padding: 15px 25px; border-radius: 20px; border-bottom-right-radius: 0;
@@ -62,10 +62,8 @@
         .typing-cursor::after { content: '|'; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* רובוט */
         #sikaAiWrapper { position: fixed; z-index: 9999; transition: 0.8s; pointer-events: none; }
         .state-corner { bottom: -20px; right: -20px; width: 260px; height: 260px; pointer-events: auto; }
-        .state-active { bottom: 50%; right: 50%; transform: translate(50%, 50%); width: 0; height: 0; }
         
         .robot-character {
             width: 100%; height: 100%; object-fit: contain;
@@ -75,17 +73,14 @@
         .robot-character:active { transform: scale(0.9); }
         @keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        /* מודל ותפריט */
         .modal-overlay { @apply fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-md; }
         .modal-overlay.open { @apply flex animate-fade-in; }
         .sidebar-btn { @apply w-full p-4 mb-3 text-gray-400 hover:text-black flex flex-col items-center transition rounded-xl; }
         .sidebar-btn.active { background: var(--brand-primary); color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         body.theme-sika .sidebar-btn.active { color: black; }
-        
         .cat-btn { background: white; border: 1px solid #e2e8f0; padding: 8px 20px; rounded-full; font-weight: 700; color: #64748b; transition: 0.2s; }
         .cat-btn.active { background: var(--brand-primary); color: white; border-color: var(--brand-primary); }
         body.theme-sika .cat-btn.active { color: black; }
-
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         .hidden-tab { display: none; }
     </style>
@@ -185,14 +180,13 @@
         let currentProducts = [];
         let typeInterval;
 
-        // Mock Data (אם אין אינטרנט או דאטה)
         const mockProducts = [
-            { id: "1", name: "Sika TopSeal 107", brand: "SIKA", category: "sealing", marketingDesc: "איטום צמנטי גמיש (דו רכיבי) - הסטנדרט העולמי לאיטום מקלחות.", image: "https://gilar.co.il/wp-content/uploads/2023/12/SikaTop-Seal-107-25-Kg.png", status: "recommended", tech: {coverage: "3-4 ק\"ג/מ\"ר", drying: "6 שעות", thickness: "2 מ\"מ"} },
-            { id: "2", name: "Sikaflex 11FC+", brand: "SIKA", category: "glues", marketingDesc: "דבק ואיטום פוליאוריטני רב תכליתי. מדביק הכל להכל.", image: "https://gilar.co.il/wp-content/uploads/2020/12/Sikaflex-11-FC.jpg", status: "sale", tech: {coverage: "משתנה", drying: "24 שעות", thickness: "-"} },
-            { id: "3", name: "Thermokir 603", brand: "THERMOKIR", category: "concrete", marketingDesc: "טיח תרמי לבידוד מעולה וחיסכון באנרגיה.", image: "https://www.thermokir.co.il/wp-content/uploads/2019/06/603.png", status: "standard", tech: {coverage: "14 ק\"ג/מ\"ר", drying: "48 שעות", thickness: "30 מ\"מ"} },
-            { id: "4", name: "Mister Fix 109", brand: "MISTER FIX", category: "glues", marketingDesc: "דבק אקרילי C1TE להדבקת אריחי קרמיקה.", image: "https://karmit-mrfix.com/wp-content/uploads/2020/07/109.png", status: "standard", tech: {coverage: "5 ק\"ג/מ\"ר", drying: "24 שעות", thickness: "5 מ\"מ"} },
-            { id: "5", name: "Nirlat Super", brand: "NIRLAT", category: "flooring", marketingDesc: "צבע אקרילי לקירות פנים.", image: "https://nirlat.com/wp-content/uploads/2018/06/nirocril_extra_white.png", status: "sale", tech: {coverage: "9 מ\"ר/ליטר", drying: "שעתיים", thickness: "-"} },
-            { id: "6", name: "Tambour Supercryl", brand: "TAMBOUR", category: "flooring", marketingDesc: "סופרקריל מט פלוס.", image: "https://tambour.co.il/wp-content/uploads/2020/05/Supercryl_Matt_White_Bucket_5L_Front.jpg", status: "best-seller", tech: {coverage: "10 מ\"ר/ליטר", drying: "שעתיים", thickness: "-"} }
+            { id: "1", name: "Sika TopSeal 107", brand: "SIKA", category: "sealing", marketingDesc: "איטום צמנטי גמיש (דו רכיבי).", image: "https://gilar.co.il/wp-content/uploads/2023/12/SikaTop-Seal-107-25-Kg.png", status: "recommended", tech: {coverage: "3-4", drying: "6h", thickness: "2mm"} },
+            { id: "2", name: "Sikaflex 11FC+", brand: "SIKA", category: "glues", marketingDesc: "דבק ואיטום פוליאוריטני.", image: "https://gilar.co.il/wp-content/uploads/2020/12/Sikaflex-11-FC.jpg", status: "sale", tech: {coverage: "-", drying: "24h", thickness: "-"} },
+            { id: "3", name: "Thermokir 603", brand: "THERMOKIR", category: "concrete", marketingDesc: "טיח תרמי לבידוד.", image: "https://www.thermokir.co.il/wp-content/uploads/2019/06/603.png", status: "standard", tech: {coverage: "14", drying: "48h", thickness: "30mm"} },
+            { id: "4", name: "Mister Fix 109", brand: "MISTER FIX", category: "glues", marketingDesc: "דבק אקרילי C1TE.", image: "https://karmit-mrfix.com/wp-content/uploads/2020/07/109.png", status: "standard", tech: {coverage: "5", drying: "24h", thickness: "5mm"} },
+            { id: "5", name: "Nirlat Super", brand: "NIRLAT", category: "flooring", marketingDesc: "צבע אקרילי.", image: "https://nirlat.com/wp-content/uploads/2018/06/nirocril_extra_white.png", status: "sale", tech: {coverage: "9", drying: "2h", thickness: "-"} },
+            { id: "6", name: "Tambour Supercryl", brand: "TAMBOUR", category: "flooring", marketingDesc: "סופרקריל מט פלוס.", image: "https://tambour.co.il/wp-content/uploads/2020/05/Supercryl_Matt_White_Bucket_5L_Front.jpg", status: "best-seller", tech: {coverage: "10", drying: "2h", thickness: "-"} }
         ];
 
         window.init = async () => {
@@ -208,25 +202,36 @@
         }
 
         window.setTheme = (brandName) => {
-            const map = { 'default': 'default', 'סיקה': 'sika', 'תרמוקיר': 'thermokir', 'כרמית מיסטר פיקס': 'misterfix', 'נירלט': 'nirlat', 'טמבור': 'tambour' };
-            const code = map[brandName] || 'default';
-            document.body.className = `theme-${code}`;
+            const brandMap = {
+                'default': 'default',
+                'סיקה': 'sika',
+                'תרמוקיר': 'thermokir',
+                'כרמית מיסטר פיקס': 'misterfix',
+                'נירלט': 'nirlat',
+                'טמבור': 'tambour'
+            };
             
+            const themeCode = brandMap[brandName] || 'default';
+            document.body.className = `theme-${themeCode}`;
+            
+            // Fix: Select by ID to avoid crash
             document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('active'));
-            if(event && event.currentTarget) event.currentTarget.classList.add('active');
+            const activeId = `pill-${themeCode === 'default' ? 'default' : themeCode}`;
+            const activeEl = document.getElementById(activeId);
+            if(activeEl) activeEl.classList.add('active');
 
             const bg = document.getElementById('bgWatermark');
-            if(brandName !== 'default') {
-                const imgUrl = event.currentTarget.querySelector('img').src;
+            if(brandName !== 'default' && activeEl) {
+                const imgUrl = activeEl.querySelector('img').src;
                 bg.style.backgroundImage = `url('${imgUrl}')`;
                 bg.style.opacity = '0.05';
             } else { bg.style.backgroundImage = 'none'; }
 
-            if (code === 'default') {
+            if (themeCode === 'default') {
                 currentProducts = allProducts;
                 robotSpeak("חזרנו לראשי אחי. מה לחפש לך?");
             } else {
-                const search = code === 'misterfix' ? 'FIX' : (code === 'nirlat' ? 'NIRLAT' : code.toUpperCase());
+                const search = themeCode === 'misterfix' ? 'FIX' : (themeCode === 'nirlat' ? 'NIRLAT' : themeCode.toUpperCase());
                 currentProducts = allProducts.filter(p => (p.brand || "").toUpperCase().includes(search));
                 robotSpeak(`בחרת יצרן "${brandName}". תרצה לחפש מוצר מסוים? תרשום לי, אני פה בשבילך.`);
             }
@@ -277,7 +282,7 @@
         }
 
         window.closeModal = () => document.getElementById('productModal').classList.remove('open');
-        window.triggerChat = () => alert("כאן נפתח הצ'אט המלא עם אלי וה-AI");
+        window.triggerChat = () => alert("כאן נפתח הצ'אט המלא");
         
         window.switchTab = (t) => {
             document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
