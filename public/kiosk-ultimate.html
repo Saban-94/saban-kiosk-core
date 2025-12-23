@@ -49,7 +49,7 @@
 
         /* VIRTUAL KEYBOARD */
         .virtual-keyboard { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; padding: 10px; background: #f1f5f9; border-top: 1px solid #e2e8f0; }
-        .key-btn { background: white; border-radius: 8px; padding: 10px 0; font-weight: bold; font-size: 16px; cursor: pointer; text-align: center; box-shadow: 0 2px 0 #cbd5e1; transition: 0.1s; user-select: none; }
+        .key-btn { background: white; border-radius: 8px; padding: 12px 0; font-weight: bold; font-size: 18px; cursor: pointer; text-align: center; box-shadow: 0 2px 0 #cbd5e1; transition: 0.1s; user-select: none; }
         .key-btn:active { transform: translateY(2px); box-shadow: none; }
         .key-btn.wide { grid-column: span 2; }
         .key-btn.space { grid-column: span 6; }
@@ -149,7 +149,7 @@
                     </div>
                 </div>
                 <div class="mt-auto pt-4 border-t flex gap-2">
-                    <input id="chatInput" class="flex-1 bg-gray-50 p-3 rounded-xl border outline-none font-bold focus:ring-2 focus:ring-[var(--brand-accent)]" placeholder="שאל שאלה..." readonly onclick="toggleKeyboard(true)">
+                    <input id="chatInput" class="flex-1 bg-gray-50 p-3 rounded-xl border outline-none font-bold focus:ring-2 focus:ring-[var(--brand-accent)]" placeholder="הקלד כאן..." readonly onclick="toggleKeyboard(true)">
                     <button onclick="sendMessage()" class="bg-[var(--brand-accent)] text-white p-3 rounded-xl"><i data-lucide="send"></i></button>
                 </div>
             </div>
@@ -200,10 +200,11 @@
         let currentProducts = [];
         let currentProduct = null;
 
-        // Mock Data Fallback
+        // Stable Mock Data with Working Images
         const mockProducts = [
-            { id: "1", name: "Sika TopSeal 107", brand: "SIKA", category: "sealing", marketingDesc: "איטום צמנטי גמיש.", image: "https://gilar.co.il/wp-content/uploads/2023/12/SikaTop-Seal-107-25-Kg.png", tech: {coverage: "3-4", drying: "6h", thickness: "2mm"} },
-            { id: "2", name: "Thermokir 603", brand: "THERMOKIR", category: "concrete", marketingDesc: "טיח תרמי לבידוד.", image: "https://www.thermokir.co.il/wp-content/uploads/2019/06/603.png", tech: {coverage: "14", drying: "48h", thickness: "30mm"} }
+            { id: "1", name: "Sika TopSeal 107", brand: "SIKA", category: "sealing", marketingDesc: "איטום צמנטי גמיש (דו רכיבי).", image: "https://placehold.co/400x400?text=Sika+107", tech: {coverage: "3-4", drying: "6h", thickness: "2mm"} },
+            { id: "2", name: "Thermokir 603", brand: "THERMOKIR", category: "concrete", marketingDesc: "טיח תרמי לבידוד.", image: "https://placehold.co/400x400?text=Thermokir+603", tech: {coverage: "14", drying: "48h", thickness: "30mm"} },
+            { id: "3", name: "Mister Fix 109", brand: "MISTER FIX", category: "glues", marketingDesc: "דבק אקרילי.", image: "https://placehold.co/400x400?text=Fix+109", tech: {coverage: "5", drying: "24h", thickness: "5mm"} }
         ];
 
         window.init = async () => {
@@ -339,7 +340,7 @@
                 snap.forEach(d => {
                     const t = {id: d.id, ...d.data()};
                     let vidId = ""; try { vidId = t.url.split('v=')[1].split('&')[0]; } catch(e){}
-                    grid.innerHTML += `<div class="video-card group" onclick="window.open('${t.url}')"><div class="vid-cover"><img src="https://img.youtube.com/vi/${vidId}/mqdefault.jpg"><div class="play-btn"><i data-lucide="play-circle" size="48"></i></div></div><div class="p-3 font-bold">${t.title}</div></div>`;
+                    grid.innerHTML += `<div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer hover:shadow-lg transition" onclick="window.open('${t.url}')"><img src="https://img.youtube.com/vi/${vidId}/mqdefault.jpg" class="w-full aspect-video object-cover"><div class="p-3 font-bold">${t.title}</div></div>`;
                 });
                 lucide.createIcons();
             });
