@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sika Studio - Platinum Admin</title>
+    <title>Sika Admin - Control Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
@@ -12,16 +12,15 @@
         .sidebar { width: 260px; background: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; z-index: 50; }
         .nav-item { display: flex; items-center; gap: 12px; padding: 16px 24px; color: #64748b; font-weight: 600; cursor: pointer; transition: 0.2s; border-right: 4px solid transparent; }
         .nav-item:hover { background: #f8fafc; color: #0f172a; }
-        .nav-item.active { background: #eff6ff; color: #2563eb; border-right-color: #2563eb; }
+        .nav-item.active { background: #fff0f0; color: #E3000F; border-right-color: #E3000F; }
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .view-section { display: none; height: 100%; flex-direction: column; padding: 24px; overflow-y: auto; }
         .view-section.active { display: flex; }
         .input-std { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; background: white; margin-bottom: 4px; }
-        .input-std:focus { border-color: #2563eb; ring: 2px solid #bfdbfe; }
+        .input-std:focus { border-color: #E3000F; ring: 2px solid #fecaca; }
         .btn { padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; display: inline-flex; items-center; gap: 8px; justify-content: center; }
-        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary { background: #E3000F; color: white; }
         .btn-danger { background: #fff0f0; color: #dc2626; border: 1px solid #fecaca; }
-        /* Gallery Styles */
         .gallery-item { position: relative; width: 60px; height: 60px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
         .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
         .gallery-item .del-btn { position: absolute; top: 0; right: 0; background: rgba(0,0,0,0.5); color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.2s; cursor: pointer; }
@@ -31,14 +30,11 @@
 <body>
     <div class="sidebar">
         <div class="p-6 border-b flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black italic shadow-lg">S</div>
-            <div>
-                <h1 class="text-lg font-black text-gray-900 leading-none">SIKA STUDIO</h1>
-                <span class="text-[10px] font-bold text-gray-400 tracking-wider">PLATINUM</span>
-            </div>
+            <div class="w-10 h-10 bg-[#E3000F] rounded-lg flex items-center justify-center text-white font-black italic shadow-lg">S</div>
+            <div><h1 class="text-lg font-black text-gray-900 leading-none">SIKA ADMIN</h1><span class="text-[10px] font-bold text-gray-400 tracking-wider">MANAGER</span></div>
         </div>
         <nav class="flex-1 py-4 space-y-1">
-            <div class="nav-item active" onclick="app.setView('products')"><i data-lucide="package"></i> ניהול מוצרים</div>
+            <div class="nav-item active" onclick="app.setView('products')"><i data-lucide="package"></i> מוצרים</div>
             <div class="nav-item" onclick="app.setView('brands')"><i data-lucide="award"></i> מותגים</div>
             <div class="nav-item" onclick="app.setView('tutorials')"><i data-lucide="youtube"></i> הדרכות</div>
             <div class="nav-item" onclick="app.setView('brain')"><i data-lucide="brain-circuit"></i> מוח (AI)</div>
@@ -49,8 +45,8 @@
     <div class="main-content">
         <div id="view-products" class="view-section active">
             <header class="flex justify-between items-center mb-6">
-                <h2 class="text-3xl font-black text-gray-900">קטלוג מוצרים</h2>
-                <button onclick="app.newProd()" class="btn btn-primary"><i data-lucide="plus"></i> מוצר חדש</button>
+                <h2 class="text-3xl font-black text-gray-900">ניהול קטלוג</h2>
+                <button onclick="app.newProd()" class="btn btn-primary"><i data-lucide="plus"></i> הוסף מוצר</button>
             </header>
             <div class="flex gap-6 h-full overflow-hidden">
                 <div class="w-80 bg-white border rounded-2xl flex flex-col shadow-sm">
@@ -59,8 +55,6 @@
                 </div>
                 <div class="flex-1 bg-white border rounded-2xl p-8 overflow-y-auto shadow-sm relative">
                     <input type="hidden" id="pId">
-                    <div class="absolute top-6 left-6"><button onclick="app.askAI()" class="btn bg-indigo-50 text-indigo-600 border border-indigo-100 text-xs py-2 px-3"><i data-lucide="sparkles" size="14"></i> מילוי אוטומטי (AI)</button></div>
-                    
                     <div class="max-w-3xl space-y-4">
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="text-xs font-bold block mb-1">שם מוצר</label><input id="pName" class="input-std font-bold"></div>
@@ -68,37 +62,21 @@
                         </div>
                         <div>
                             <label class="text-xs font-bold block mb-1">קטגוריה</label>
-                            <div class="grid grid-cols-4 gap-2">
-                                <button type="button" onclick="app.setCat('sealing')" class="cat-btn border p-2 rounded text-sm text-gray-500 hover:bg-gray-50">איטום</button>
-                                <button type="button" onclick="app.setCat('glues')" class="cat-btn border p-2 rounded text-sm text-gray-500 hover:bg-gray-50">דבקים</button>
-                                <button type="button" onclick="app.setCat('concrete')" class="cat-btn border p-2 rounded text-sm text-gray-500 hover:bg-gray-50">בטון</button>
-                                <button type="button" onclick="app.setCat('flooring')" class="cat-btn border p-2 rounded text-sm text-gray-500 hover:bg-gray-50">ריצוף</button>
-                            </div>
-                            <input type="hidden" id="pCat">
+                            <select id="pCat" class="input-std">
+                                <option value="general">כללי</option><option value="sealing">איטום</option><option value="glues">דבקים</option><option value="concrete">בטון</option><option value="flooring">ריצוף</option>
+                            </select>
                         </div>
                         <div><label class="text-xs font-bold block mb-1">תיאור שיווקי</label><textarea id="pDesc" class="input-std h-24 resize-none"></textarea></div>
 
                         <div class="bg-gray-50 p-4 rounded-xl border">
-                            <label class="text-xs font-bold block mb-2">תמונה ראשית (URL)</label>
-                            <div class="flex gap-2 mb-4">
-                                <input id="pImg" class="input-std" placeholder="https://...">
-                                <button onclick="window.open('https://www.google.com/search?tbm=isch&q='+document.getElementById('pName').value)" class="btn bg-white border h-[42px]"><i data-lucide="image"></i> גוגל</button>
-                            </div>
-                            
-                            <label class="text-xs font-bold block mb-2">גלריית תמונות נוספות</label>
+                            <label class="text-xs font-bold block mb-2">מדיה (תמונות ווידאו)</label>
+                            <input id="pImg" class="input-std mb-2" placeholder="תמונה ראשית (URL)">
                             <div class="flex gap-2 mb-2">
-                                <input id="pGalleryInput" class="input-std" placeholder="הדבק לינק לתמונה נוספת...">
+                                <input id="pGalleryInput" class="input-std" placeholder="תמונה נוספת לגלריה...">
                                 <button onclick="app.addToGallery()" class="btn btn-primary h-[42px]">+</button>
                             </div>
-                            <div id="pGalleryList" class="flex gap-2 flex-wrap"></div>
-                        </div>
-
-                        <div class="bg-gray-50 p-4 rounded-xl border">
-                            <label class="text-xs font-bold block mb-2">סרטון וידאו (YouTube Link)</label>
-                            <div class="flex gap-2">
-                                <input id="pVideo" class="input-std" placeholder="https://youtube.com/watch?v=...">
-                                <button onclick="window.open('https://www.youtube.com/results?search_query='+document.getElementById('pName').value)" class="btn bg-white border h-[42px]"><i data-lucide="youtube" class="text-red-500"></i> חפש</button>
-                            </div>
+                            <div id="pGalleryList" class="flex gap-2 flex-wrap mb-4"></div>
+                            <input id="pVideo" class="input-std" placeholder="לינק ל-YouTube (סרטון יישום)">
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl border">
@@ -108,66 +86,109 @@
                         </div>
 
                         <div class="flex gap-4 border-t pt-6">
-                            <button onclick="app.saveProd()" class="btn btn-primary w-40">שמור שינויים</button>
-                            <button onclick="app.delProd()" class="btn btn-danger">מחק מוצר</button>
+                            <button onclick="app.saveProd()" class="btn btn-primary w-40">שמור</button>
+                            <button onclick="app.delProd()" class="btn btn-danger">מחק</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div id="view-brands" class="view-section"><h2 class="text-2xl font-bold">ניהול מותגים (פעיל)</h2></div>
-        <div id="view-tutorials" class="view-section"><h2 class="text-2xl font-bold">הדרכות (פעיל)</h2></div>
-        <div id="view-brain" class="view-section"><h2 class="text-2xl font-bold">מוח AI (פעיל)</h2></div>
+        <div id="view-brain" class="view-section">
+            <h2 class="text-3xl font-black text-gray-900 mb-6">המוח של סיקה (AI Rules)</h2>
+            <div class="flex gap-8 h-full">
+                <div class="w-1/3 bg-white p-6 rounded-2xl border h-fit shadow-sm">
+                    <h3 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="brain-circuit" class="text-red-600"></i> למד את הרובוט</h3>
+                    <p class="text-xs text-gray-500 mb-4">כשהלקוח שואל משהו, מה לענות לו?</p>
+                    <label class="text-xs font-bold block mb-1">מילת מפתח (Trigger)</label>
+                    <input id="rTrig" class="input-std" placeholder="למשל: סדק, מחיר, טלפון...">
+                    <label class="text-xs font-bold block mb-1">תשובת הרובוט</label>
+                    <textarea id="rResp" class="input-std h-24" placeholder="התשובה שהרובוט יענה..."></textarea>
+                    <button onclick="app.saveRule()" class="btn btn-primary w-full mt-2">שמור חוק</button>
+                </div>
+                <div id="rulesList" class="flex-1 space-y-3 overflow-y-auto pr-2"></div>
+            </div>
+        </div>
+
+        <div id="view-brands" class="view-section">
+            <h2 class="text-2xl font-bold mb-4">ניהול מותגים</h2>
+            <div class="bg-white p-4 rounded-xl border w-fit mb-4 flex gap-2 items-end">
+                <div><label class="text-xs font-bold">שם מותג</label><input id="bName" class="input-std w-40"></div>
+                <div><label class="text-xs font-bold">לוגו URL</label><input id="bLogo" class="input-std w-60"></div>
+                <button onclick="app.saveBrand()" class="btn btn-primary">הוסף</button>
+            </div>
+            <div id="brandGrid" class="flex gap-4 flex-wrap"></div>
+        </div>
+        
+        <div id="view-tutorials" class="view-section">
+            <h2 class="text-2xl font-bold mb-4">ניהול הדרכות</h2>
+            <div class="bg-white p-4 rounded-xl border w-fit mb-4 flex gap-2 items-end">
+                <div><label class="text-xs font-bold">כותרת סרטון</label><input id="vTitle" class="input-std w-60"></div>
+                <div><label class="text-xs font-bold">לינק YouTube</label><input id="vUrl" class="input-std w-60"></div>
+                <button onclick="app.saveVid()" class="btn btn-primary">הוסף</button>
+            </div>
+            <div id="vidGrid" class="grid grid-cols-4 gap-4"></div>
+        </div>
     </div>
 
     <script type="module">
         import { db } from './js/firebase-config.js';
         import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        import { askGeminiAdmin } from './js/gemini-service.js';
         
         lucide.createIcons();
         const app = {
             data: { prods: [], currentGallery: [] },
             init: () => {
                 document.getElementById('status').innerHTML = "🟢 מחובר";
+                // Listeners
                 onSnapshot(collection(db, "products"), s => {
                     const l=document.getElementById('prodList'); l.innerHTML=""; app.data.prods=[];
                     s.forEach(d => {
                         const p={id:d.id, ...d.data()}; app.data.prods.push(p);
-                        l.innerHTML+=`<div onclick="app.loadP('${p.id}')" class="p-3 rounded hover:bg-gray-50 cursor-pointer border-b flex justify-between"><div><div class="font-bold text-sm">${p.name}</div><div class="text-xs text-gray-400">${p.brand}</div></div><i data-lucide="edit-2" size="14" class="text-gray-300"></i></div>`;
+                        l.innerHTML+=`<div onclick="app.loadP('${p.id}')" class="p-3 rounded hover:bg-gray-50 cursor-pointer border-b flex justify-between items-center"><div><div class="font-bold text-sm">${p.name}</div><div class="text-xs text-gray-400">${p.brand}</div></div><i data-lucide="chevron-left" size="16" class="text-gray-300"></i></div>`;
                     });
                     lucide.createIcons();
                 });
                 onSnapshot(collection(db, "brands"), s => {
-                    const sel=document.getElementById('pBrand'); sel.innerHTML="";
-                    s.forEach(d => sel.innerHTML+=`<option value="${d.data().name}">${d.data().name}</option>`);
+                    const sel=document.getElementById('pBrand'); const grid=document.getElementById('brandGrid');
+                    sel.innerHTML=""; grid.innerHTML="";
+                    s.forEach(d => {
+                        sel.innerHTML+=`<option value="${d.data().name}">${d.data().name}</option>`;
+                        grid.innerHTML+=`<div class="border p-2 rounded flex items-center gap-2 bg-white"><img src="${d.data().logo}" class="h-6"><span class="font-bold text-sm">${d.data().name}</span><button onclick="app.delBrand('${d.id}')" class="text-red-500 ml-2">x</button></div>`;
+                    });
+                });
+                onSnapshot(collection(db, "chat_rules"), s => {
+                    const l = document.getElementById('rulesList'); l.innerHTML = "";
+                    s.forEach(d => {
+                        const r = {id:d.id, ...d.data()};
+                        l.innerHTML += `<div class="bg-white border p-3 rounded-xl flex justify-between items-center"><div><span class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded text-xs">${r.trigger}</span> <span class="text-gray-600 text-sm mx-2">➞</span> <span class="text-gray-800 text-sm">${r.response}</span></div><button onclick="app.delRule('${r.id}')" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" size="16"></i></button></div>`;
+                    });
+                    lucide.createIcons();
+                });
+                onSnapshot(collection(db, "tutorials"), s => {
+                    const g = document.getElementById('vidGrid'); g.innerHTML = "";
+                    s.forEach(d => {
+                         const t = {id:d.id, ...d.data()};
+                         g.innerHTML += `<div class="bg-white border p-2 rounded relative group"><div class="font-bold text-xs truncate mb-1 pr-6">${t.title}</div><button onclick="app.delVid('${t.id}')" class="absolute top-1 right-1 text-red-500 hover:bg-red-50 rounded"><i data-lucide="trash-2" size="14"></i></button></div>`;
+                    });
+                    lucide.createIcons();
                 });
             },
             setView: (v) => {
                 document.querySelectorAll('.view-section').forEach(e=>e.classList.remove('active'));
                 document.getElementById('view-'+v).classList.add('active');
             },
-            
-            // --- Logic ---
+            // Logic
             addToGallery: () => {
                 const url = document.getElementById('pGalleryInput').value;
                 if(url) { app.data.currentGallery.push(url); app.renderGallery(); document.getElementById('pGalleryInput').value=""; }
             },
-            removeFromGallery: (idx) => {
-                app.data.currentGallery.splice(idx, 1);
-                app.renderGallery();
-            },
+            removeFromGallery: (idx) => { app.data.currentGallery.splice(idx, 1); app.renderGallery(); },
             renderGallery: () => {
                 const div = document.getElementById('pGalleryList');
-                div.innerHTML = app.data.currentGallery.map((url, i) => `
-                    <div class="gallery-item">
-                        <img src="${url}">
-                        <div class="del-btn" onclick="app.removeFromGallery(${i})"><i data-lucide="trash" size="14"></i></div>
-                    </div>`).join('');
+                div.innerHTML = app.data.currentGallery.map((url, i) => `<div class="gallery-item"><img src="${url}"><div class="del-btn" onclick="app.removeFromGallery(${i})"><i data-lucide="trash" size="14"></i></div></div>`).join('');
                 lucide.createIcons();
             },
-
             loadP: (id) => {
                 const p = app.data.prods.find(x => x.id === id);
                 document.getElementById('pId').value = id;
@@ -179,8 +200,7 @@
                 document.getElementById('tCov').value = p.tech?.coverage||'';
                 document.getElementById('tDry').value = p.tech?.drying||'';
                 document.getElementById('tThick').value = p.tech?.thickness||'';
-                app.setCat(p.category);
-                
+                document.getElementById('pCat').value = p.category || 'general';
                 app.data.currentGallery = p.gallery || [];
                 app.renderGallery();
             },
@@ -188,44 +208,26 @@
                 document.getElementById('pId').value = "";
                 document.querySelectorAll('input:not(.input-std), textarea').forEach(i=>i.value="");
                 app.data.currentGallery = []; app.renderGallery();
-                document.getElementById('pName').focus();
             },
             saveProd: async () => {
                 const id = document.getElementById('pId').value;
                 const d = {
                     name: document.getElementById('pName').value, brand: document.getElementById('pBrand').value, category: document.getElementById('pCat').value,
                     marketingDesc: document.getElementById('pDesc').value, image: document.getElementById('pImg').value,
-                    video: document.getElementById('pVideo').value,
-                    gallery: app.data.currentGallery,
+                    video: document.getElementById('pVideo').value, gallery: app.data.currentGallery,
                     tech: { coverage: document.getElementById('tCov').value, drying: document.getElementById('tDry').value, thickness: document.getElementById('tThick').value }
                 };
                 if(id) await updateDoc(doc(db, "products", id), d); else await addDoc(collection(db, "products"), d);
-                alert("נשמר בהצלחה!"); if(!id) app.newProd();
+                alert("נשמר!"); if(!id) app.newProd();
             },
             delProd: async () => { if(confirm("למחוק?")) await deleteDoc(doc(db, "products", document.getElementById('pId').value)); app.newProd(); },
-            setCat: (c) => {
-                document.getElementById('pCat').value = c;
-                document.querySelectorAll('.cat-btn').forEach(b => {
-                    b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
-                    if(b.innerText === (c==='sealing'?'איטום':c==='glues'?'דבקים':c==='concrete'?'בטון':'ריצוף')) 
-                        b.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
-                });
-            },
-            askAI: async () => {
-                const n = document.getElementById('pName').value;
-                if(!n) return alert("הזן שם מוצר");
-                const res = await askGeminiAdmin(n);
-                if(res) {
-                    document.getElementById('pDesc').value = res.marketingDesc;
-                    app.setCat(res.category);
-                    document.getElementById('tCov').value = res.tech?.coverage||'';
-                    document.getElementById('tDry').value = res.tech?.drying||'';
-                    document.getElementById('tThick').value = res.tech?.thickness||'';
-                }
-            },
-            filterProd: (t) => {
-                Array.from(document.getElementById('prodList').children).forEach(e=>e.style.display=e.innerText.toLowerCase().includes(t.toLowerCase())?'flex':'none');
-            }
+            saveBrand: async () => { await addDoc(collection(db, "brands"), { name: document.getElementById('bName').value, logo: document.getElementById('bLogo').value }); },
+            delBrand: async (id) => { if(confirm("למחוק?")) await deleteDoc(doc(db, "brands", id)); },
+            saveVid: async () => { await addDoc(collection(db, "tutorials"), { title: document.getElementById('vTitle').value, url: document.getElementById('vUrl').value }); },
+            delVid: async (id) => await deleteDoc(doc(db, "tutorials", id)),
+            saveRule: async () => { await addDoc(collection(db, "chat_rules"), { trigger: document.getElementById('rTrig').value, response: document.getElementById('rResp').value }); document.getElementById('rTrig').value=""; },
+            delRule: async (id) => await deleteDoc(doc(db, "chat_rules", id)),
+            filterProd: (t) => Array.from(document.getElementById('prodList').children).forEach(e=>e.style.display=e.innerText.toLowerCase().includes(t.toLowerCase())?'flex':'none')
         };
         window.app = app;
         app.init();
