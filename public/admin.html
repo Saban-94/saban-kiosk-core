@@ -3,218 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sika Studio - Live Simulator</title>
+    <title>Sika Studio - Pixel Perfect</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Heebo', sans-serif; background-color: #f0f4f8; height: 100vh; display: flex; overflow: hidden; }
-        
-        /* Layout */
-        .sidebar { width: 260px; background: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; z-index: 50; box-shadow: 4px 0 20px rgba(0,0,0,0.02); }
+        /* Admin Base Styles */
+        body { font-family: 'Heebo', sans-serif; background-color: #f8fafc; height: 100vh; display: flex; overflow: hidden; }
+        .sidebar { width: 280px; background: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; z-index: 50; }
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 32px; gap: 32px; }
-        .preview-pane { width: 380px; background: #fff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; background-color: #f8fafc; }
-
-        /* Navigation */
-        .nav-item { display: flex; items-center; gap: 12px; padding: 16px 24px; color: #64748b; font-weight: 600; cursor: pointer; transition: 0.2s; border-right: 4px solid transparent; }
-        .nav-item:hover { background: #f8fafc; color: #0f172a; }
-        .nav-item.active { background: #eff6ff; color: #E3000F; border-right-color: #E3000F; }
-
-        /* Views */
         .view-section { display: none; height: 100%; flex-direction: column; overflow-y: auto; padding-right: 10px; }
         .view-section.active { display: flex; }
+        
+        /* Inputs */
+        .input-std { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white; margin-bottom: 8px; }
+        .input-std:focus { border-color: #E3000F; outline: none; box-shadow: 0 0 0 3px rgba(227, 0, 15, 0.1); }
+        .btn { padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; display: inline-flex; items-center; gap: 6px; font-size: 13px; }
+        .btn-primary { background: #E3000F; color: white; }
+        .btn-danger { background: white; border: 1px solid #fee2e2; color: red; }
+        .btn-secondary { background: white; border: 1px solid #cbd5e1; color: #334155; }
 
-        /* UI Elements */
-        .input-std { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; outline: none; background: white; transition: 0.3s; margin-bottom: 8px; }
-        .input-std:focus { border-color: #E3000F; box-shadow: 0 0 0 3px rgba(227, 0, 15, 0.1); }
-        
-        .btn { padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; display: inline-flex; items-center; gap: 8px; justify-content: center; }
-        .btn-primary { background: #E3000F; color: white; box-shadow: 0 4px 12px rgba(227, 0, 15, 0.2); }
-        .btn-primary:hover { background: #c4000d; transform: translateY(-1px); }
-        
-        /* --- DEVICE SIMULATOR --- */
-        .device-mockup { 
-            width: 320px; height: 640px; background: white; border-radius: 40px; 
-            border: 8px solid #1e293b; position: relative; overflow: hidden; 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column;
+        /* --- KIOSK SIMULATION STYLES (Pixel Perfect) --- */
+        /* זה מעתיק בדיוק את העיצוב של הקיוסק לתוך הבועה של התצוגה המקדימה */
+        .kiosk-preview-wrapper {
+            background: #f8fafc; border-radius: 30px; border: 8px solid #1e293b; 
+            width: 360px; height: 680px; overflow: hidden; position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2); margin: 0 auto;
+            display: flex; flex-direction: column;
         }
-        .device-notch { 
-            position: absolute; top: 0; left: 50%; transform: translateX(-50%); 
-            width: 120px; height: 25px; background: #1e293b; 
-            border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; z-index: 50; 
+        
+        /* Kiosk Card CSS Replica */
+        .kiosk-card { 
+            background: white; border-radius: 24px; overflow: hidden; 
+            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1); 
+            border: 1px solid #f1f5f9; display: flex; flex-direction: column; 
+            height: 380px; width: 90%; margin: 40px auto; position: relative;
         }
-        .device-screen { flex: 1; overflow-y: auto; background: #f8fafc; position: relative; }
+        .kiosk-img-area { height: 55%; padding: 20px; display: flex; justify-content: center; align-items: center; position: relative; }
+        .kiosk-img-area img { max-height: 100%; max-width: 100%; object-fit: contain; mix-blend-multiply; }
         
-        /* Preview Components (Inside Device) */
-        .prev-card { background: white; border-radius: 20px; padding: 20px; margin: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
-        .prev-img { width: 100%; height: 150px; object-fit: contain; mix-blend-multiply; margin-bottom: 15px; }
-        .prev-video-btn { background: #E3000F; color: white; padding: 8px 16px; border-radius: 50px; font-size: 12px; font-weight: bold; display: inline-flex; items-center; gap: 6px; margin-top: 10px; box-shadow: 0 4px 10px rgba(227,0,15,0.3); }
+        .kiosk-content { padding: 20px; border-top: 1px solid #f1f5f9; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .kiosk-brand { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .kiosk-title { font-size: 20px; font-weight: 900; color: #111; line-height: 1.1; margin-top: 4px; }
+        .kiosk-cat-pill { font-size: 10px; font-weight: 800; background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 20px; width: fit-content; margin-top: 8px; }
         
-        .prev-chat-bubble { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 13px; margin-bottom: 8px; line-height: 1.4; position: relative; animation: popIn 0.3s; }
-        .prev-chat-bot { background: white; border: 1px solid #e2e8f0; border-top-right-radius: 4px; margin-right: auto; color: #334155; }
-        .prev-chat-user { background: #E3000F; color: white; border-top-left-radius: 4px; margin-left: auto; }
-        
-        @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Action Buttons Area in Preview */
+        .kiosk-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+        .kiosk-action-btn { 
+            font-size: 10px; font-weight: bold; padding: 6px 12px; border-radius: 8px; 
+            background: #111; color: white; display: flex; align-items: center; gap: 4px;
+        }
+        .kiosk-action-btn.calc { background: #E3000F; }
+        .kiosk-action-btn.video { background: #2563eb; }
+        .kiosk-action-btn.chat { background: #10b981; }
 
-        /* Brain Editor */
-        .brain-editor { background: white; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; height: 300px; }
-        .toolbar { background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
-        .tool-btn { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; background: white; border: 1px solid #cbd5e1; display: flex; items-center; gap: 4px; }
-        .tool-btn:hover { background: #e2e8f0; }
-        
-        .gallery-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; border: 1px solid #ddd; }
+        .preview-label { text-align: center; font-weight: bold; color: #64748b; font-size: 12px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="p-8 border-b border-gray-100 flex items-center gap-3">
+        <div class="p-8 border-b border-gray-100 flex items-center gap-4">
             <div class="w-10 h-10 bg-[#E3000F] rounded-xl flex items-center justify-center text-white font-black italic shadow-lg">S</div>
-            <div>
-                <h1 class="text-xl font-black text-gray-900 leading-none">SIKA STUDIO</h1>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Live Simulator</p>
-            </div>
+            <div><h1 class="text-xl font-black text-gray-900 tracking-tight">SIKA STUDIO</h1><p class="text-[10px] text-gray-400 font-bold">Manager</p></div>
         </div>
         <nav class="flex-1 py-6 space-y-1">
-            <div class="nav-item active" onclick="app.setView('products')"><i data-lucide="package"></i> קטלוג מוצרים</div>
-            <div class="nav-item" onclick="app.setView('brain')"><i data-lucide="brain-circuit"></i> המוח (AI)</div>
-            <div class="nav-item" onclick="app.setView('brands')"><i data-lucide="palette"></i> מותגים</div>
-            <div class="nav-item" onclick="app.setView('tutorials')"><i data-lucide="play-circle"></i> הדרכות</div>
+            <div class="nav-item p-4 hover:bg-gray-50 cursor-pointer font-bold text-gray-600 flex gap-2 active" onclick="app.view('products')"><i data-lucide="package"></i> ניהול מוצרים</div>
+            <div class="nav-item p-4 hover:bg-gray-50 cursor-pointer font-bold text-gray-600 flex gap-2" onclick="app.view('brain')"><i data-lucide="brain-circuit"></i> מוח (AI)</div>
         </nav>
-        <div class="p-4 text-center border-t text-xs text-gray-400 font-bold" id="status">● מחובר</div>
+        <div class="p-4 text-center text-xs text-gray-400 font-bold border-t">מחובר ●</div>
     </div>
 
     <div class="main-content">
-        
         <div id="view-products" class="view-section active">
-            <header class="flex justify-between items-center mb-6">
-                <h2 class="text-3xl font-black text-gray-900">עורך המוצרים</h2>
-                <button onclick="app.newProd()" class="btn btn-primary"><i data-lucide="plus"></i> חדש</button>
-            </header>
-            
-            <div class="flex gap-6 h-full">
-                <div class="w-72 bg-white rounded-2xl border flex flex-col overflow-hidden">
-                    <div class="p-3 border-b bg-gray-50"><input onkeyup="app.filterP(this.value)" class="input-std mb-0" placeholder="חיפוש..."></div>
-                    <div id="prodList" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
-                </div>
-
-                <div class="flex-1 bg-white rounded-2xl border p-8 overflow-y-auto">
-                    <input type="hidden" id="pId">
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div><label class="text-xs font-bold block mb-1">שם המוצר</label><input id="pName" class="input-std" oninput="sim.updateProduct()"></div>
-                        <div><label class="text-xs font-bold block mb-1">מותג</label><select id="pBrand" class="input-std" onchange="sim.updateProduct()"></select></div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="text-xs font-bold block mb-1">קטגוריה</label>
-                        <select id="pCat" class="input-std" onchange="sim.updateProduct()">
-                            <option value="sealing">איטום</option><option value="glues">דבקים</option>
-                            <option value="concrete">בטון</option><option value="flooring">ריצוף</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-4"><label class="text-xs font-bold block mb-1">תיאור</label><textarea id="pDesc" class="input-std h-24" oninput="sim.updateProduct()"></textarea></div>
-
-                    <div class="bg-gray-50 p-4 rounded-xl border mb-4">
-                        <label class="text-xs font-bold block mb-2">מדיה</label>
-                        <input id="pImg" class="input-std" placeholder="תמונה ראשית URL" oninput="sim.updateProduct()">
-                        <input id="pVideo" class="input-std" placeholder="YouTube Link" oninput="sim.updateProduct()">
-                        <div class="flex gap-2 items-center mt-2">
-                            <input id="pGalInput" class="input-std mb-0 flex-1" placeholder="הוסף תמונה לגלריה...">
-                            <button onclick="app.addGal()" class="btn btn-secondary">+</button>
-                        </div>
-                        <div id="pGalList" class="flex gap-2 mt-2 flex-wrap"></div>
-                    </div>
-
-                    <div class="flex gap-3">
-                        <button onclick="app.saveProd()" class="btn btn-primary w-40">שמור</button>
-                        <button onclick="app.delProd()" class="btn bg-white border text-red-500">מחק</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-brain" class="view-section">
-            <h2 class="text-3xl font-black text-gray-900 mb-6">Sika Brain Studio</h2>
-            
-            <div class="flex gap-6 h-full">
-                <div class="flex-1 flex flex-col gap-4">
-                    <div class="bg-white p-6 rounded-2xl border">
-                        <label class="text-xs font-bold block mb-2 text-blue-600">אם הלקוח שואל (Trigger):</label>
-                        <input id="rTrig" class="input-std font-bold text-lg" placeholder='לדוגמה: "סדק", "מחיר"...' oninput="sim.updateChat()">
-                    </div>
-
-                    <div class="brain-editor">
-                        <div class="toolbar">
-                            <button class="tool-btn" onclick="app.tag('bold')"><i data-lucide="bold" size="14"></i> מודגש</button>
-                            <button class="tool-btn text-blue-600" onclick="app.pick('prod')"><i data-lucide="package" size="14"></i> מוצר</button>
-                            <button class="tool-btn text-red-600" onclick="app.pick('vid')"><i data-lucide="youtube" size="14"></i> וידאו</button>
-                            <button class="tool-btn text-purple-600" onclick="app.tag('typing')"><i data-lucide="loader" size="14"></i> מקליד...</button>
-                            <button class="tool-btn text-green-600" onclick="app.tag('action')"><i data-lucide="mouse-pointer-2" size="14"></i> כפתור</button>
-                        </div>
-                        <textarea id="rResp" class="flex-1 p-4 outline-none resize-none font-sans text-sm leading-relaxed" placeholder="תשובת הרובוט..." oninput="sim.updateChat()"></textarea>
-                    </div>
-                    
-                    <button onclick="app.saveRule()" class="btn btn-primary self-end">שמור חוק</button>
-                </div>
+            <div class="flex gap-8 h-full">
                 
-                <div class="w-72 bg-white rounded-2xl border flex flex-col overflow-hidden">
-                    <div class="p-3 border-b bg-gray-50 font-bold text-xs text-gray-500">חוקים קיימים</div>
-                    <div id="rulesList" class="flex-1 overflow-y-auto p-2 space-y-2"></div>
+                <div class="flex-1 flex flex-col overflow-hidden">
+                    <header class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-black text-gray-900">עורך המוצרים</h2>
+                        <div class="flex gap-2">
+                            <button onclick="app.newProd()" class="btn btn-secondary"><i data-lucide="plus"></i> חדש</button>
+                            <button onclick="app.saveProd()" class="btn btn-primary"><i data-lucide="save"></i> שמור שינויים</button>
+                        </div>
+                    </header>
+
+                    <div class="bg-white rounded-2xl border p-8 overflow-y-auto shadow-sm flex-1">
+                        <input type="hidden" id="pId">
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div><label class="text-xs font-bold block mb-1">שם המוצר</label><input id="pName" class="input-std" oninput="app.renderPreview()"></div>
+                            <div><label class="text-xs font-bold block mb-1">מותג</label><select id="pBrand" class="input-std" onchange="app.renderPreview()"></select></div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div><label class="text-xs font-bold block mb-1">קטגוריה</label><select id="pCat" class="input-std" onchange="app.renderPreview()">
+                                <option value="sealing">איטום</option><option value="glues">דבקים</option><option value="concrete">בטון</option><option value="flooring">ריצוף</option>
+                            </select></div>
+                            <div><label class="text-xs font-bold block mb-1">תמונה URL</label><input id="pImg" class="input-std" oninput="app.renderPreview()"></div>
+                        </div>
+
+                        <div class="bg-gray-50 p-5 rounded-xl border mb-6">
+                            <h3 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="mouse-pointer-2" size="16"></i> כפתורי פעולה בכרטיס</h3>
+                            
+                            <div class="flex gap-2 mb-3">
+                                <input id="actLabel" class="input-std mb-0 flex-1" placeholder="טקסט לכפתור (למשל: מחשבון)">
+                                <select id="actType" class="input-std mb-0 w-40">
+                                    <option value="calc">מחשבון</option>
+                                    <option value="video">וידאו</option>
+                                    <option value="chat">שאל מומחה</option>
+                                    <option value="info">מידע טכני</option>
+                                </select>
+                                <button onclick="app.addAction()" class="btn btn-primary">הוסף</button>
+                            </div>
+                            
+                            <div id="actionsList" class="flex flex-wrap gap-2">
+                                </div>
+                        </div>
+
+                        <div class="mb-4"><label class="text-xs font-bold block mb-1">תיאור שיווקי</label><textarea id="pDesc" class="input-std h-20" oninput="app.renderPreview()"></textarea></div>
+                    </div>
                 </div>
+
+                <div class="w-[400px] flex flex-col items-center justify-center bg-gray-100 rounded-3xl p-6 border">
+                    <div class="preview-label"><i data-lucide="eye"></i> תצוגת קיוסק חיה (1:1)</div>
+                    
+                    <div class="kiosk-preview-wrapper">
+                        <div class="h-14 bg-white border-b flex items-center justify-between px-4">
+                            <div class="w-8 h-8 bg-gray-200 rounded-lg"></div>
+                            <div class="w-32 h-3 bg-gray-100 rounded"></div>
+                        </div>
+
+                        <div class="kiosk-card" id="prevCard">
+                            <div class="kiosk-img-area">
+                                <img id="prevImg" src="https://placehold.co/200" alt="Product">
+                            </div>
+                            <div class="kiosk-content">
+                                <div>
+                                    <div id="prevBrand" class="kiosk-brand">SIKA</div>
+                                    <div id="prevName" class="kiosk-title">שם המוצר</div>
+                                    <div id="prevCat" class="kiosk-cat-pill">קטגוריה</div>
+                                </div>
+                                
+                                <div id="prevActions" class="kiosk-actions">
+                                    </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto h-16 bg-white border-t flex justify-around items-center">
+                            <div class="w-8 h-8 rounded-full bg-blue-100"></div>
+                            <div class="w-8 h-8 rounded-full bg-gray-100"></div>
+                            <div class="w-8 h-8 rounded-full bg-gray-100"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-        </div>
-
-        <div id="view-brands" class="view-section"><h2 class="text-2xl font-bold">ניהול מותגים (פעיל)</h2></div>
-        <div id="view-tutorials" class="view-section"><h2 class="text-2xl font-bold">הדרכות (פעיל)</h2></div>
-
-    </div>
-
-    <div class="preview-pane">
-        <div class="mb-4 text-center">
-            <h3 class="font-black text-gray-900">Live Simulator</h3>
-            <p class="text-xs text-gray-400">תצוגה מקדימה חיה</p>
         </div>
         
-        <div class="device-mockup">
-            <div class="device-notch"></div>
-            
-            <div id="simScreen" class="device-screen p-4 pt-10">
-                
-                <div id="sim-product" class="hidden">
-                    <div class="prev-card">
-                        <img id="sim-p-img" src="https://placehold.co/200" class="prev-img">
-                        <div id="sim-p-brand" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">BRAND</div>
-                        <h3 id="sim-p-name" class="text-xl font-black text-gray-900 leading-tight mb-2">שם מוצר</h3>
-                        <p id="sim-p-desc" class="text-xs text-gray-500 line-clamp-3 mb-3">תיאור...</p>
-                        <div id="sim-p-vid-btn" class="hidden prev-video-btn"><i data-lucide="play-circle" size="14"></i> וידאו יישום</div>
-                    </div>
-                </div>
-
-                <div id="sim-chat" class="hidden flex flex-col justify-end h-full pb-4">
-                    <div class="prev-chat-bubble prev-chat-bot">שלום! אני Sika Expert. איך לעזור?</div>
-                    <div id="sim-chat-user" class="prev-chat-bubble prev-chat-user hidden">...</div>
-                    <div id="sim-chat-bot-reply" class="prev-chat-bubble prev-chat-bot hidden">...</div>
-                </div>
-
-            </div>
-            
-            <div class="h-12 bg-white border-t flex justify-around items-center text-gray-300">
-                <div class="w-8 h-8 rounded-full bg-gray-100"></div>
-                <div class="w-8 h-8 rounded-full bg-gray-100"></div>
-                <div class="w-8 h-8 rounded-full bg-gray-100"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="pickerModal" class="fixed inset-0 bg-black/50 z-[100] hidden items-center justify-center backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-96 p-6 shadow-2xl">
-            <h3 id="pickerTitle" class="font-bold text-lg mb-4">בחר</h3>
-            <div id="pickerList" class="max-h-60 overflow-y-auto space-y-2 mb-4"></div>
-            <button onclick="document.getElementById('pickerModal').classList.add('hidden')" class="btn w-full bg-gray-100">ביטול</button>
-        </div>
+        <div id="view-brain" class="view-section text-center p-10"><h2 class="text-2xl text-gray-400">מודול ה-AI בבנייה...</h2></div>
     </div>
 
     <script type="module">
@@ -223,184 +171,48 @@
         
         lucide.createIcons();
 
-        // Simulator Logic
-        window.sim = {
-            mode: 'product', // 'product' | 'chat'
-            
-            setMode: (m) => {
-                window.sim.mode = m;
-                document.getElementById('sim-product').classList.add('hidden');
-                document.getElementById('sim-chat').classList.add('hidden');
-                document.getElementById('sim-'+m).classList.remove('hidden');
-            },
-
-            updateProduct: () => {
-                sim.setMode('product');
-                const n = document.getElementById('pName').value || "שם המוצר";
-                const b = document.getElementById('pBrand').value || "מותג";
-                const d = document.getElementById('pDesc').value || "תיאור...";
-                const i = document.getElementById('pImg').value || "https://placehold.co/200";
-                const v = document.getElementById('pVideo').value;
-
-                document.getElementById('sim-p-name').innerText = n;
-                document.getElementById('sim-p-brand').innerText = b;
-                document.getElementById('sim-p-desc').innerText = d;
-                document.getElementById('sim-p-img').src = i;
-                
-                const vb = document.getElementById('sim-p-vid-btn');
-                if(v) vb.classList.remove('hidden'); else vb.classList.add('hidden');
-            },
-
-            updateChat: () => {
-                sim.setMode('chat');
-                const trig = document.getElementById('rTrig').value;
-                const resp = document.getElementById('rResp').value;
-
-                const userBubble = document.getElementById('sim-chat-user');
-                const botBubble = document.getElementById('sim-chat-bot-reply');
-
-                if(trig) {
-                    userBubble.innerText = trig;
-                    userBubble.classList.remove('hidden');
-                } else {
-                    userBubble.classList.add('hidden');
-                }
-
-                if(resp) {
-                    // Simple parse for preview
-                    let clean = resp.replace(/{{typing}}/g, '...').replace(/<b>/g, '').replace(/<\/b>/g, '');
-                    if(clean.includes('{{product')) clean = "[כרטיס מוצר]";
-                    if(clean.includes('{{video')) clean = "[נגן וידאו]";
-                    
-                    botBubble.innerText = clean;
-                    botBubble.classList.remove('hidden');
-                } else {
-                    botBubble.classList.add('hidden');
-                }
-            }
-        };
-
         const app = {
-            data: { prods: [], gallery: [] },
+            currentActions: [],
             
             init: () => {
-                app.listeners();
+                app.loadBrands();
+                app.newProd(); // Reset form
             },
 
-            setView: (v) => {
+            view: (v) => {
                 document.querySelectorAll('.view-section').forEach(e => e.classList.remove('active'));
-                document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
                 document.getElementById('view-'+v).classList.add('active');
-                // Active Nav Styling logic...
-                
-                // Set Simulator Mode based on view
-                if(v === 'products') sim.updateProduct();
-                if(v === 'brain') sim.updateChat();
             },
 
-            listeners: () => {
-                // Products
-                onSnapshot(collection(db, "products"), s => {
-                    const l = document.getElementById('prodList'); l.innerHTML = ""; app.data.prods = [];
-                    s.forEach(d => {
-                        const p = {id:d.id, ...d.data()}; app.data.prods.push(p);
-                        l.innerHTML += `<div onclick="app.loadP('${p.id}')" class="p-2 border-b hover:bg-gray-50 cursor-pointer flex justify-between text-sm"><span>${p.name}</span> <span class="text-gray-400 text-xs">${p.brand}</span></div>`;
-                    });
-                });
-                
-                // Brands Select Population
+            loadBrands: () => {
                 onSnapshot(collection(db, "brands"), s => {
                     const sel = document.getElementById('pBrand'); sel.innerHTML = "";
                     s.forEach(d => sel.innerHTML += `<option value="${d.data().name}">${d.data().name}</option>`);
                 });
-
-                // Rules
-                onSnapshot(collection(db, "chat_rules"), s => {
-                    const l = document.getElementById('rulesList'); l.innerHTML = "";
-                    s.forEach(d => {
-                        const r = {id:d.id, ...d.data()};
-                        l.innerHTML += `<div class="p-2 border rounded bg-white text-xs mb-1"><b>${r.trigger}</b><br><span class="text-gray-500 truncate block">${r.response}</span></div>`;
-                    });
-                });
             },
 
-            // --- Product Logic ---
-            loadP: (id) => {
-                const p = app.data.prods.find(x => x.id === id);
-                document.getElementById('pId').value = id;
-                document.getElementById('pName').value = p.name;
-                document.getElementById('pBrand').value = p.brand;
-                document.getElementById('pDesc').value = p.marketingDesc;
-                document.getElementById('pImg').value = p.image;
-                document.getElementById('pVideo').value = p.video || '';
-                document.getElementById('pCat').value = p.category || 'sealing';
-                app.data.gallery = p.gallery || [];
-                app.renderGal();
-                sim.updateProduct();
-            },
-            newProd: () => {
-                document.getElementById('pId').value = "";
-                document.querySelectorAll('#view-products input, #view-products textarea').forEach(i=>i.value="");
-                app.data.gallery = []; app.renderGal();
-                sim.updateProduct();
-            },
-            saveProd: async () => {
-                const id = document.getElementById('pId').value;
-                const d = {
-                    name: document.getElementById('pName').value, brand: document.getElementById('pBrand').value, category: document.getElementById('pCat').value,
-                    marketingDesc: document.getElementById('pDesc').value, image: document.getElementById('pImg').value, video: document.getElementById('pVideo').value,
-                    gallery: app.data.gallery
-                };
-                if(id) await updateDoc(doc(db, "products", id), d); else await addDoc(collection(db, "products"), d);
-                alert("נשמר");
-            },
-            delProd: async () => { if(confirm("למחוק?")) await deleteDoc(doc(db, "products", document.getElementById('pId').value)); app.newProd(); },
-            
-            // Gallery
-            addGal: () => {
-                const u = document.getElementById('pGalInput').value;
-                if(u) { app.data.gallery.push(u); app.renderGal(); document.getElementById('pGalInput').value=""; }
-            },
-            renderGal: () => {
-                const c = document.getElementById('pGalList'); c.innerHTML = "";
-                app.data.gallery.forEach((u,i) => c.innerHTML += `<img src="${u}" class="gallery-thumb" onclick="app.data.gallery.splice(${i},1); app.renderGal();">`);
-            },
-
-            // --- Brain Logic ---
-            tag: (t) => {
-                const area = document.getElementById('rResp');
-                if(t==='bold') area.value += "<b>טקסט</b>";
-                if(t==='typing') area.value += "{{typing}}";
-                if(t==='action') area.value += "[[כפתור|action]]";
-                sim.updateChat();
-            },
-            pick: (type) => {
-                const m = document.getElementById('pickerModal');
-                const l = document.getElementById('pickerList'); l.innerHTML = "";
-                m.classList.remove('hidden');
+            // --- Action Buttons Logic ---
+            addAction: () => {
+                const lbl = document.getElementById('actLabel').value;
+                const type = document.getElementById('actType').value;
+                if(!lbl) return;
                 
-                if(type === 'prod') {
-                    app.data.prods.forEach(p => {
-                        l.innerHTML += `<div class="p-2 border-b hover:bg-gray-50 cursor-pointer" onclick="app.insert('{{product:${p.name}}}')">${p.name}</div>`;
-                    });
-                }
-                // Add video logic similarly
+                app.currentActions.push({ label: lbl, type: type });
+                document.getElementById('actLabel').value = "";
+                app.renderActionsUI();
+                app.renderPreview();
             },
-            insert: (txt) => {
-                document.getElementById('rResp').value += " " + txt;
-                document.getElementById('pickerModal').classList.add('hidden');
-                sim.updateChat();
-            },
-            saveRule: async () => {
-                await addDoc(collection(db, "chat_rules"), { trigger: document.getElementById('rTrig').value, response: document.getElementById('rResp').value });
-                document.getElementById('rTrig').value=""; document.getElementById('rResp').value="";
-                sim.updateChat();
-            }
-        };
 
-        window.app = app;
-        window.sim = sim;
-        app.init();
-    </script>
-</body>
-</html>
+            removeAction: (idx) => {
+                app.currentActions.splice(idx, 1);
+                app.renderActionsUI();
+                app.renderPreview();
+            },
+
+            renderActionsUI: () => {
+                const list = document.getElementById('actionsList');
+                list.innerHTML = app.currentActions.map((a, i) => `
+                    <div class="bg-white border rounded px-3 py-1 text-xs font-bold flex items-center gap-2">
+                        <span class="${a.type==='calc'?'text-red-500':a.type==='video'?'text-blue-500':'text-green-500'}">●</span>
+                        ${a.label}
+                        <button onclick="app.removeAction(${i})" class="text-gray-400 hover:text-
