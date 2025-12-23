@@ -1,83 +1,29 @@
 import { db } from './firebase-config.js';
-import { collection, addDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { collection, getDocs, writeBatch, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// המאגר הראשוני שלנו - מוצרים לדוגמה
-const products = [
-    {
-        name: "SikaTop Seal 107",
-        brand: "sika",
-        category: "איטום",
-        description: "איטום צמנטי דו-רכיבי גמיש, מאושר למי שתייה.",
-        image_url: "https://via.placeholder.com/300x300?text=Sika+107",
-        price: 150,
-        tags: ["איטום", "מרתף", "בריכה", "בטון"]
-    },
-    {
-        name: "Sikaflex 11FC",
-        brand: "sika",
-        category: "דבקים",
-        description: "דבק איטום פוליאוריטני רב תכליתי.",
-        image_url: "https://via.placeholder.com/300x300?text=Sikaflex",
-        price: 45,
-        tags: ["דבק", "סדקים", "איטום"]
-    },
-    {
-        name: "סופר גמיש 105",
-        brand: "mr_fix",
-        category: "דבקים",
-        description: "דבק קרמיקה גמיש במיוחד C2TE.",
-        image_url: "https://via.placeholder.com/300x300?text=Super+Flexible",
-        price: 60,
-        tags: ["ריצוף", "קרמיקה", "דבק"]
-    },
-    {
-        name: "בגרימונד",
-        brand: "mr_fix",
-        category: "טיח",
-        description: "טיח גבס ליישום פנימי להחלקת קירות.",
-        image_url: "https://via.placeholder.com/300x300?text=Bagrimond",
-        price: 35,
-        tags: ["טיח", "גבס", "החלקה"]
-    },
-    {
-        name: "שפכטל אמריקאי",
-        brand: "tambour",
-        category: "צבע",
-        description: "ממרח להחלקת קירות לפני צביעה.",
-        image_url: "https://via.placeholder.com/300x300?text=Shepachtel",
-        price: 80,
-        tags: ["צבע", "הכנה", "קיר"]
-    }
+const realProducts = [
+    { name: "SikaTop Seal 107", brand: "SIKA", category: "sealing", marketingDesc: "איטום צמנטי גמיש (דו רכיבי) - הסטנדרט העולמי לאיטום מקלחות.", image: "https://gilar.co.il/wp-content/uploads/2023/12/SikaTop-Seal-107-25-Kg.png", status: "recommended", tech: {coverage: "3-4 ק\"ג/מ\"ר", drying: "6 שעות", thickness: "2 מ\"מ"} },
+    { name: "Sikaflex 11FC+", brand: "SIKA", category: "glues", marketingDesc: "דבק ואיטום פוליאוריטני רב תכליתי. מדביק הכל להכל, גמיש וחזק.", image: "https://gilar.co.il/wp-content/uploads/2020/12/Sikaflex-11-FC.jpg", status: "sale", tech: {coverage: "משתנה", drying: "24 שעות", thickness: "-"} },
+    { name: "Thermokir 603", brand: "THERMOKIR", category: "concrete", marketingDesc: "טיח תרמי לבידוד מעולה וחיסכון באנרגיה. מונע עיבוי.", image: "https://www.thermokir.co.il/wp-content/uploads/2019/06/603.png", status: "standard", tech: {coverage: "14 ק\"ג/מ\"ר", drying: "48 שעות", thickness: "30 מ\"מ"} },
+    { name: "Mister Fix 109", brand: "MISTER FIX", category: "glues", marketingDesc: "דבק אקרילי C1TE להדבקת אריחי קרמיקה ופורצלן.", image: "https://karmit-mrfix.com/wp-content/uploads/2020/07/109.png", status: "standard", tech: {coverage: "5 ק\"ג/מ\"ר", drying: "24 שעות", thickness: "5 מ\"מ"} },
+    { name: "BG Bond 10", brand: "BG BOND", category: "sealing", marketingDesc: "מסטיק ביטומני לאיטום ושיקום סדקים.", image: "https://bgbond.co.il/wp-content/uploads/2020/05/BG-10-new.png", status: "new", tech: {coverage: "משתנה", drying: "12 שעות", thickness: "מריחה"} },
+    { name: "Super Paint", brand: "TAMBOUR", category: "flooring", marketingDesc: "צבע אקרילי איכותי ועמיד במיוחד לקירות חוץ ופנים.", image: "https://tambour.co.il/wp-content/uploads/2020/05/Supercryl_Matt_White_Bucket_5L_Front.jpg", status: "standard", tech: {coverage: "1 ליטר/9 מ\"ר", drying: "שעתיים", thickness: "-"} }
 ];
 
-// פונקציה למחיקת כל המוצרים הקיימים והעלאה מחדש
-export async function seedDatabase() {
-    const statusDiv = document.getElementById('status');
-    statusDiv.innerHTML = "🔄 מתחיל תהליך מילוי נתונים...<br>";
-
-    try {
-        const batch = writeBatch(db);
-        const productsRef = collection(db, "products");
-
-        // 1. ניקוי המאגר הקיים
-        const snapshot = await getDocs(productsRef);
-        snapshot.forEach((doc) => {
-            batch.delete(doc.ref);
-        });
-        
-        await batch.commit();
-        statusDiv.innerHTML += "🗑️ נתונים ישנים נמחקו.<br>";
-
-        // 2. העלאת מוצרים חדשים (אחד אחד כדי לראות התקדמות)
-        for (const product of products) {
-            await addDoc(productsRef, product);
-            statusDiv.innerHTML += `📦 נוסף מוצר: ${product.name} (${product.brand})<br>`;
-        }
-
-        statusDiv.innerHTML += "<br>🎉 <b>תהליך הסתיים בהצלחה! המדפים מלאים.</b>";
-
-    } catch (error) {
-        console.error("Error seeding database:", error);
-        statusDiv.innerHTML += `❌ שגיאה: ${error.message}`;
-    }
+export async function seedRealData() {
+    console.log("Starting Seed Process...");
+    const batch = writeBatch(db);
+    
+    // 1. ניקוי נתונים קיימים
+    const snapshot = await getDocs(collection(db, "products"));
+    snapshot.forEach((doc) => batch.delete(doc.ref));
+    
+    // 2. הוספת מוצרים חדשים
+    realProducts.forEach((p) => {
+        const newRef = doc(collection(db, "products"));
+        batch.set(newRef, { ...p, createdAt: Date.now() });
+    });
+    
+    await batch.commit();
+    console.log("Seed Completed!");
 }
