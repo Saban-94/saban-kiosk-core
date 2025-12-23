@@ -3,42 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin</title>
+    <title>Sika Admin Suite - Ultimate</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: sans-serif; background: #f8fafc; }
-        .sidebar { width: 250px; background: white; height: 100vh; position: fixed; border-left: 1px solid #eee; padding: 20px; }
-        .content { margin-right: 250px; padding: 40px; }
-        .btn { padding: 10px 20px; background: #2563eb; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        body { font-family: 'Heebo', sans-serif; background-color: #f8fafc; color: #0f172a; height: 100vh; display: flex; overflow: hidden; }
+        
+        /* Layout & Sidebar */
+        .sidebar { width: 280px; background: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; z-index: 20; box-shadow: 4px 0 24px rgba(0,0,0,0.02); }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 32px; gap: 32px; }
+        .view-panel { display: none; height: 100%; flex-direction: column; }
+        .view-panel.active { display: flex; }
+
+        /* Navigation */
+        .nav-item { display: flex; items-center; gap: 12px; padding: 16px 24px; color: #64748b; font-weight: 500; cursor: pointer; transition: all 0.2s; border-right: 4px solid transparent; }
+        .nav-item:hover { background: #f1f5f9; color: #0f172a; }
+        .nav-item.active { background: #eff6ff; color: #2563eb; border-right-color: #2563eb; font-weight: 700; }
+
+        /* UI Elements */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-weight: 600; transition: 0.2s; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-danger { background: white; border: 1px solid #fee2e2; color: #dc2626; }
+        .btn-ai { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; }
+        
+        .input-std { width: 100%; border: 1px solid #cbd5e1; padding: 12px; border-radius: 10px; outline: none; background: #fff; font-size: 14px; transition: 0.2s; }
+        .input-std:focus { border-color: #2563eb; ring: 2px solid #bfdbfe; }
+
+        /* Tabs */
+        .tab-link { padding: 12px 24px; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 2px solid transparent; }
+        .tab-link.active { color: #2563eb; border-bottom-color: #2563eb; }
+        .tab-content { display: none; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+
+        /* Chat Logic Editor */
+        .chat-rule-item { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .chat-rule-item:hover { border-color: #bfdbfe; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.4s; z-index: 100; display: flex; gap: 10px; }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
+
     <div class="sidebar">
-        <h1 class="text-2xl font-bold mb-8">Admin</h1>
-        <button onclick="app.runSeed()" class="btn w-full bg-red-500 hover:bg-red-600">איפוס נתונים</button>
-        <div class="mt-4 text-xs text-gray-400">חובה לטעון נתונים פעם ראשונה</div>
+        <div class="p-8 border-b border-gray-100 flex items-center gap-4">
+            <div class="w-12 h-12 bg-[#E3000F] rounded-xl flex items-center justify-center text-white font-black italic text-2xl shadow-xl shadow-red-100">S</div>
+            <div><h1 class="text-2xl font-black text-gray-900 tracking-tight">SIKA</h1><p class="text-xs text-gray-400 font-bold tracking-widest uppercase">Admin Ultimate</p></div>
+        </div>
+        <nav class="flex-1 py-8 space-y-2">
+            <div class="nav-item active" onclick="app.switchView('products')"><i data-lucide="package"></i> קטלוג מוצרים</div>
+            <div class="nav-item" onclick="app.switchView('brands')"><i data-lucide="tag"></i> ניהול מותגים</div>
+            <div class="nav-item" onclick="app.switchView('tutorials')"><i data-lucide="graduation-cap"></i> אקדמיה</div>
+            <div class="nav-item" onclick="app.switchView('ai-logic')"><i data-lucide="bot"></i> המוח של סיקה</div>
+        </nav>
+        <div class="p-6 border-t border-gray-100 bg-gray-50/50">
+            <button onclick="app.runSeed()" class="w-full py-3 rounded-xl border border-gray-200 text-gray-500 font-bold hover:bg-white hover:text-red-500 hover:border-red-200 transition text-xs flex items-center justify-center gap-2">
+                <i data-lucide="refresh-cw" size="14"></i> איפוס נתונים
+            </button>
+        </div>
     </div>
-    <div class="content">
-        <h2 class="text-3xl font-bold mb-4">ברוך הבא למערכת הניהול</h2>
-        <p>השתמש בתפריט הצד כדי לטעון מוצרים ראשוניים למערכת (Seed).</p>
-        <p class="mt-4 text-gray-500">העיצוב המלא והמתקדם נמצא בקובץ admin-studio.html אם תרצה לחזור אליו.</p>
+
+    <div class="main-content">
+        
+        <div id="view-products" class="view-panel active h-full">
+            <header class="flex justify-between items-center mb-6">
+                <div><h2 class="text-3xl font-black text-gray-900">קטלוג מוצרים</h2><p class="text-gray-500 mt-1">ניהול מלאי, עריכה ו-AI</p></div>
+                <button onclick="app.createNewProduct()" class="btn btn-primary"><i data-lucide="plus"></i> מוצר חדש</button>
+            </header>
+            <div class="flex gap-6 h-full overflow-hidden">
+                <div class="w-1/3 bg-white rounded-3xl border border-gray-200 flex flex-col overflow-hidden shadow-sm">
+                    <div class="p-4 border-b bg-gray-50"><input id="prodSearch" oninput="app.filterProducts()" class="input-std" placeholder="חיפוש..."></div>
+                    <div id="productsList" class="flex-1 overflow-y-auto"></div>
+                </div>
+                <div class="flex-1 bg-white rounded-3xl border border-gray-200 flex flex-col relative overflow-hidden shadow-sm">
+                    <div class="p-4 border-b flex justify-between items-center bg-white sticky top-0 z-10">
+                        <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold" id="productIdBadge">New</span>
+                        <div class="flex gap-2">
+                            <button onclick="app.deleteCurrentProduct()" class="btn btn-danger py-2 px-3"><i data-lucide="trash-2"></i></button>
+                            <button onclick="app.saveCurrentProduct()" class="btn btn-primary py-2 px-6"><i data-lucide="save"></i> שמור</button>
+                        </div>
+                    </div>
+                    <div class="p-8 overflow-y-auto flex-1">
+                        <input type="hidden" id="editProdId">
+                        
+                        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-8 flex gap-3 items-end">
+                            <div class="flex-1"><label class="text-xs font-bold text-indigo-900 block mb-1">איתור נתונים (AI)</label><input id="aiPrompt" class="input-std border-indigo-200" placeholder="הקלד שם מוצר..."></div>
+                            <button onclick="app.runFullAI()" class="btn btn-ai h-[46px]"><i data-lucide="sparkles"></i> הפעל קסם</button>
+                        </div>
+
+                        <div class="flex border-b mb-6">
+                            <div class="tab-link active" onclick="app.switchTab('general', this)">כללי</div>
+                            <div class="tab-link" onclick="app.switchTab('media', this)">מדיה וגלריה</div>
+                            <div class="tab-link" onclick="app.switchTab('tech', this)">טכני</div>
+                        </div>
+
+                        <div id="tab-general" class="tab-content active space-y-6">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div><label class="text-xs font-bold text-gray-500 mb-1 block">שם מוצר</label><input id="pName" class="input-std font-bold"></div>
+                                <div><label class="text-xs font-bold text-gray-500 mb-1 block">מותג</label><select id="pBrandSelect" class="input-std"><option>בחר...</option></select></div>
+                            </div>
+                            <div><label class="text-xs font-bold text-gray-500 mb-1 block">קטגוריה</label><select id="pCat" class="input-std"><option value="sealing">איטום</option><option value="glues">דבקים</option><option value="concrete">בטון</option><option value="flooring">ריצוף</option></select></div>
+                            <div><label class="text-xs font-bold text-gray-500 mb-1 block">תיאור שיווקי</label><textarea id="pDesc" class="input-std h-32"></textarea></div>
+                        </div>
+
+                        <div id="tab-media" class="tab-content">
+                            <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <h4 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="link"></i> הוספה ידנית (הדבק קישורים)</h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="text-xs text-gray-500 mb-1 block">תמונות (פסיק מפריד)</label><div class="flex gap-2"><input id="manualImages" class="input-std text-xs"><button onclick="app.addManualImages()" class="btn bg-white border text-xs px-3">הוסף</button></div></div>
+                                    <div><label class="text-xs text-gray-500 mb-1 block">וידאו (פסיק מפריד)</label><div class="flex gap-2"><input id="manualVideos" class="input-std text-xs"><button onclick="app.addManualVideos()" class="btn bg-white border text-xs px-3">הוסף</button></div></div>
+                                </div>
+                            </div>
+                            <div class="flex gap-6">
+                                <div class="w-1/2"><label class="text-xs font-bold text-green-600 mb-2 block">גלריית תמונות</label><div id="selectedImagesGrid" class="grid grid-cols-3 gap-2"></div></div>
+                                <div class="w-1/2"><label class="text-xs font-bold text-red-600 mb-2 block">גלריית וידאו</label><div id="selectedVideosGrid" class="grid grid-cols-3 gap-2"></div></div>
+                            </div>
+                        </div>
+
+                        <div id="tab-tech" class="tab-content">
+                            <div class="grid grid-cols-3 gap-6">
+                                <div><label class="text-xs font-bold text-gray-500 mb-1 block">כיסוי</label><input id="tCov" class="input-std"></div>
+                                <div><label class="text-xs font-bold text-gray-500 mb-1 block">ייבוש</label><input id="tDry" class="input-std"></div>
+                                <div><label class="text-xs font-bold text-gray-500 mb-1 block">עובי</label><input id="tThick" class="input-std"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-brands" class="view-panel">
+            <h2 class="text-3xl font-black text-gray-900 mb-6">ניהול מותגים</h2>
+            <div class="bg-white p-6 rounded-3xl border border-gray-200 mb-6 flex gap-4 items-end max-w-lg">
+                <div class="flex-1"><label class="text-xs font-bold text-gray-500 mb-1 block">שם מותג חדש</label><input id="newBrandName" class="input-std"></div>
+                <button onclick="app.addBrand()" class="btn btn-primary">הוסף</button>
+            </div>
+            <div class="grid grid-cols-4 gap-4" id="brandsGrid"></div>
+        </div>
+
+        <div id="view-tutorials" class="view-panel">
+            <header class="flex justify-between items-end mb-8">
+                <div><h2 class="text-4xl font-black text-[#0f172a] tracking-tight">Sika Academy <span class="text-[#E3000F]">.</span></h2><p class="text-lg text-gray-500 mt-2 font-medium">מרכז הידע וההדרכה המקצועי</p></div>
+                <button onclick="document.getElementById('addTutorialModal').classList.remove('hidden')" class="btn bg-[#0f172a] text-white hover:bg-black px-6 py-3 shadow-xl"><i data-lucide="film"></i> העלאת שיעור חדש</button>
+            </header>
+            <div id="tutorialsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 overflow-y-auto pb-10"></div>
+        </div>
+
+        <div id="view-ai-logic" class="view-panel">
+            <h2 class="text-3xl font-black text-gray-900 mb-6">המוח של סיקה-Ai</h2>
+            <div class="flex gap-6 h-full">
+                <div class="w-1/3 bg-white p-6 rounded-3xl border border-gray-200 shadow-sm h-fit">
+                    <h3 class="font-bold text-lg mb-4">הוספת חוק שיחה</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 block mb-1">מילת מפתח (טריגר)</label>
+                            <input id="aiTrigger" class="input-std" placeholder="למשל: מחיר, סדק, תודה...">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 block mb-1">תשובת הרובוט</label>
+                            <textarea id="aiResponse" class="input-std h-32" placeholder="מה הרובוט יענה..."></textarea>
+                        </div>
+                        <button onclick="app.addChatRule()" class="btn btn-primary w-full">שמור חוק</button>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto pr-2" id="chatRulesList">
+                    <div class="text-center text-gray-400 mt-10">טוען חוקים...</div>
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <div id="addTutorialModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 w-[500px] shadow-2xl animate-[fadeIn_0.2s]">
+            <div class="flex justify-between items-center mb-6"><h3 class="font-bold text-2xl">הוספת שיעור</h3><button onclick="document.getElementById('addTutorialModal').classList.add('hidden')"><i data-lucide="x"></i></button></div>
+            <div class="space-y-5">
+                <div><label class="block text-sm font-bold text-gray-700 mb-2">כותרת</label><input id="tutTitle" class="input-std"></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-2">קישור YouTube</label><input id="tutUrl" class="input-std"></div>
+            </div>
+            <div class="mt-8 pt-6 border-t flex justify-end"><button onclick="app.saveTutorial()" class="btn btn-primary w-full text-lg py-3">פרסם</button></div>
+        </div>
+    </div>
+
+    <div id="toast"><i data-lucide="check-circle" class="text-green-400"></i> <span id="toastMsg">נשמר</span></div>
 
     <script type="module">
-        // תיקון הייבוא: ייבוא הפונקציה בצורה נכונה
+        import { db } from '../js/firebase-config.js';
+        import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { askGeminiAdmin, extractTechnicalSpecs } from '../js/gemini-service.js';
         import { seedRealData } from '../js/seed-data.js';
 
-        window.app = {
-            runSeed: async () => {
-                if(confirm("פעולה זו תמחק את כל הנתונים ותטען מחדש. להמשיך?")) {
-                    try {
-                        await seedRealData();
-                        alert("הנתונים נטענו בהצלחה!");
-                    } catch(e) { alert("שגיאה: " + e.message); }
-                }
-            }
+        lucide.createIcons();
+
+        const app = {
+            currentImages: [],
+            currentVideos: [],
+            allProducts: [],
+
+            init: () => {
+                app.loadProducts();
+                app.loadBrands();
+                app.loadTutorials();
+                app.loadChatRules();
+            },
+
+            // Navigation
+            switchView: (v) => {
+                document.querySelectorAll('.view-panel').forEach(e => e.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+                document.getElementById('view-'+v).classList.add('active');
+                
+                // Active link highlight logic
+                const map = {'products':0, 'brands':1, 'tutorials':2, 'ai-logic':3};
+                if(map[v] !== undefined) document.querySelectorAll('.nav-item')[map[v]].classList.add('active');
+            },
+            switchTab: (t, btn) => {
+                document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+                document.querySelectorAll('.tab-link').forEach(e => e.classList.remove('active'));
+                document.getElementById('tab-'+t).classList.add('active');
+                btn.classList.add('active');
+            },
+
+            // --- CHAT RULES LOGIC ---
+            loadChatRules: () => {
+                onSnapshot(collection(db, "chat_rules"), (snap) => {
+                    const list = document.getElementById('chatRulesList');
+                    list.innerHTML = "";
+                    snap.forEach(d => {
+                        const r = {id: d.id, ...d.data()};
+                        list.innerHTML += `
+                            <div class="chat-rule-item">
+                                <div>
+                                    <div class="font-bold text-gray-800 text-sm mb-1">מילת מפתח: <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">${r.trigger}</span></div>
+                                    <div class="text-gray-600 text-sm">${r.response}</div>
+                                </div>
+                                <button onclick="app.deleteChatRule('${r.id}')" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" size="16"></i></button>
+                            </div>`;
+                    });
+                    lucide.createIcons();
+                });
+            },
+            addChatRule: async () => {
+                const trigger = document.getElementById('aiTrigger').value;
+                const response = document.getElementById('aiResponse').value;
+                if(!trigger || !response) return alert("מלא את שני השדות");
+                await addDoc(collection(db, "chat_rules"), { trigger, response, createdAt: Date.now() });
+                document.getElementById('aiTrigger').value = "";
+                document.getElementById('aiResponse').value = "";
+                app.showToast("חוק שיחה נשמר");
+            },
+            deleteChatRule: async (id) => { if(confirm("למחוק חוק?")) await deleteDoc(doc(db, "chat_rules", id)); },
+
+            // --- PRODUCTS & OTHERS ---
+            loadProducts: () => { /* ... אותו קוד יציב מקודם ... */ 
+                const list = document.getElementById('productsList');
+                onSnapshot(collection(db, "products"), (snap) => {
+                    app.allProducts = []; list.innerHTML = "";
+                    snap.forEach(d => {
+                        const p = {id: d.id, ...d.data()}; app.allProducts.push(p);
+                        const img = p.images?.[0] || p.image || 'https://placehold.co/50';
+                        list.innerHTML += `<div class="flex items-center gap-3 p-3 border-b hover:bg-gray-50 cursor-pointer" onclick="app.editProduct('${p.id}')"><img src="${img}" class="w-10 h-10 rounded border object-contain bg-white"><div><div class="font-bold text-sm">${p.name}</div><div class="text-xs text-gray-500">${p.brand}</div></div></div>`;
+                    });
+                });
+            },
+            editProduct: (id) => {
+                const p = app.allProducts.find(x => x.id === id);
+                if(!p) return;
+                document.getElementById('editProdId').value = id;
+                document.getElementById('productIdBadge').innerText = id.slice(0,6);
+                document.getElementById('pName').value = p.name;
+                document.getElementById('pBrandSelect').value = p.brand || '';
+                document.getElementById('pCat').value = p.category || 'sealing';
+                document.getElementById('pDesc').value = p.marketingDesc || '';
+                document.getElementById('tCov').value = p.tech?.coverage || '';
+                document.getElementById('tDry').value = p.tech?.drying || '';
+                document.getElementById('tThick').value = p.tech?.thickness || '';
+                app.currentImages = p.images || (p.image ? [p.image] : []);
+                app.currentVideos = p.videos || (p.videoUrl ? [{url: p.videoUrl, thumbnail: 'https://placehold.co/100?text=Video'}] : []);
+                app.renderGallery();
+            },
+            createNewProduct: () => {
+                document.getElementById('editProdId').value = "";
+                document.querySelectorAll('input, textarea, select').forEach(e => e.value = "");
+                app.currentImages = []; app.currentVideos = []; app.renderGallery();
+            },
+            saveCurrentProduct: async () => {
+                const id = document.getElementById('editProdId').value;
+                const data = {
+                    name: document.getElementById('pName').value, brand: document.getElementById('pBrandSelect').value, category: document.getElementById('pCat').value, marketingDesc: document.getElementById('pDesc').value,
+                    images: app.currentImages, videos: app.currentVideos, image: app.currentImages[0]||'', videoUrl: app.currentVideos[0]?.url||'',
+                    tech: { coverage: document.getElementById('tCov').value, drying: document.getElementById('tDry').value, thickness: document.getElementById('tThick').value }, updatedAt: Date.now()
+                };
+                if(!data.name) return alert("חובה שם");
+                if(id) await updateDoc(doc(db, "products", id), data);
+                else { data.createdAt = Date.now(); await addDoc(collection(db, "products"), data); app.createNewProduct(); }
+                app.showToast("נשמר");
+            },
+            deleteCurrentProduct: async () => {
+                const id = document.getElementById('editProdId').value;
+                if(id && confirm("למחוק?")) { await deleteDoc(doc(db, "products", id)); app.createNewProduct(); }
+            },
+            addManualImages: () => {
+                const urls = document.getElementById('manualImages').value.split(',').map(u=>u.trim()).filter(u=>u);
+                urls.forEach(u => { if(!app.currentImages.includes(u)) app.currentImages.push(u); });
+                document.getElementById('manualImages').value=""; app.renderGallery();
+            },
+            addManualVideos: () => {
+                const urls = document.getElementById('manualVideos').value.split(',').map(u=>u.trim()).filter(u=>u);
+                urls.forEach(u => app.currentVideos.push({url:u, thumbnail:'https://placehold.co/100?text=Video'}));
+                document.getElementById('manualVideos').value=""; app.renderGallery();
+            },
+            removeImage: (i) => { app.currentImages.splice(i,1); app.renderGallery(); },
+            removeVideo: (i) => { app.currentVideos.splice(i,1); app.renderGallery(); },
+            renderGallery: () => {
+                document.getElementById('selectedImagesGrid').innerHTML = app.currentImages.map((u,i) => `<div class="gallery-item group"><img src="${u}"><button onclick="app.removeImage(${i})" class="remove-btn"><i data-lucide="trash" size="12"></i></button></div>`).join('');
+                document.getElementById('selectedVideosGrid').innerHTML = app.currentVideos.map((v,i) => `<div class="gallery-item bg-black group"><img src="${v.thumbnail}" class="opacity-70"><button onclick="app.removeVideo(${i})" class="remove-btn"><i data-lucide="trash" size="12"></i></button></div>`).join('');
+                lucide.createIcons();
+            },
+            runFullAI: async () => {
+                const q = document.getElementById('aiPrompt').value; if(!q) return;
+                const m = await askGeminiAdmin(q); if(m){ document.getElementById('pName').value=m.name; document.getElementById('pDesc').value=m.marketingDesc; }
+                const t = await extractTechnicalSpecs(q); document.getElementById('tCov').value=t.coverage; document.getElementById('tDry').value=t.drying; document.getElementById('tThick').value=t.thickness;
+            },
+            loadBrands: () => {
+                onSnapshot(collection(db, "brands"), (snap) => {
+                    const g = document.getElementById('brandsGrid'), s = document.getElementById('pBrandSelect');
+                    g.innerHTML=""; s.innerHTML='<option>בחר...</option>';
+                    snap.forEach(d => {
+                        const b = d.data();
+                        g.innerHTML+=`<div class="bg-white p-4 rounded-xl border flex justify-between shadow-sm"><span class="font-bold">${b.name}</span><button onclick="app.deleteBrand('${d.id}')" class="text-red-500"><i data-lucide="trash-2" size="16"></i></button></div>`;
+                        const o = document.createElement('option'); o.value=b.name; o.innerText=b.name; s.appendChild(o);
+                    });
+                    lucide.createIcons();
+                });
+            },
+            addBrand: async () => { const n = document.getElementById('newBrandName').value; if(n) { await addDoc(collection(db, "brands"), {name:n}); document.getElementById('newBrandName').value=""; } },
+            deleteBrand: async (id) => { if(confirm("למחוק?")) await deleteDoc(doc(db, "brands", id)); },
+            loadTutorials: () => {
+                onSnapshot(collection(db, "tutorials"), (snap) => {
+                    const g = document.getElementById('tutorialsGrid'); g.innerHTML="";
+                    snap.forEach(d => {
+                        const t = d.data(); let vidId = ""; try{ vidId = t.url.split('v=')[1].split('&')[0]; }catch(e){}
+                        const thumb = `https://img.youtube.com/vi/${vidId}/mqdefault.jpg`;
+                        g.innerHTML += `<div class="academy-card group"><div class="delete-vid" onclick="app.deleteTutorial('${d.id}')"><i data-lucide="trash-2" size="16"></i></div><div class="vid-thumb"><img src="${thumb}"><div class="play-icon"><i data-lucide="play-circle" size="48"></i></div></div><div class="card-content"><h3 class="video-title">${t.title}</h3></div></div>`;
+                    });
+                    lucide.createIcons();
+                });
+            },
+            saveTutorial: async () => {
+                const t = document.getElementById('tutTitle').value, u = document.getElementById('tutUrl').value;
+                if(t && u) { await addDoc(collection(db, "tutorials"), {title:t, url:u, createdAt: Date.now()}); document.getElementById('addTutorialModal').classList.add('hidden'); }
+            },
+            deleteTutorial: async (id) => { if(confirm("למחוק?")) await deleteDoc(doc(db, "tutorials", id)); },
+            runSeed: async () => { if(confirm("לאתחל נתונים?")) { try { await seedRealData(); app.showToast("הצלחה"); } catch(e){ alert(e); } } },
+            showToast: (m) => { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); },
+            filterProducts: () => { const t=document.getElementById('prodSearch').value.toLowerCase(); Array.from(document.getElementById('productsList').children).forEach(e=>{e.style.display=e.innerText.toLowerCase().includes(t)?'flex':'none'}); }
         };
+
+        window.app = app;
+        app.init();
     </script>
 </body>
 </html>
