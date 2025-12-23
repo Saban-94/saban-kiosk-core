@@ -11,38 +11,29 @@
     
     <style>
         body { font-family: 'Heebo', sans-serif; background-color: #f8fafc; color: #0f172a; height: 100vh; display: flex; overflow: hidden; }
-        
-        /* Layout & Sidebar */
         .sidebar { width: 280px; background: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; z-index: 20; box-shadow: 4px 0 24px rgba(0,0,0,0.02); }
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 32px; gap: 32px; }
         .view-panel { display: none; height: 100%; flex-direction: column; }
         .view-panel.active { display: flex; }
-
-        /* Navigation */
         .nav-item { display: flex; items-center; gap: 12px; padding: 16px 24px; color: #64748b; font-weight: 500; cursor: pointer; transition: all 0.2s; border-right: 4px solid transparent; }
         .nav-item:hover { background: #f1f5f9; color: #0f172a; }
         .nav-item.active { background: #eff6ff; color: #2563eb; border-right-color: #2563eb; font-weight: 700; }
-
-        /* UI Elements */
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-weight: 600; transition: 0.2s; cursor: pointer; font-size: 14px; }
         .btn-primary { background: #2563eb; color: white; }
-        .btn-primary:hover { background: #1d4ed8; }
         .btn-danger { background: white; border: 1px solid #fee2e2; color: #dc2626; }
         .btn-ai { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; }
-        
         .input-std { width: 100%; border: 1px solid #cbd5e1; padding: 12px; border-radius: 10px; outline: none; background: #fff; font-size: 14px; transition: 0.2s; }
         .input-std:focus { border-color: #2563eb; ring: 2px solid #bfdbfe; }
-
-        /* Tabs */
         .tab-link { padding: 12px 24px; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 2px solid transparent; }
         .tab-link.active { color: #2563eb; border-bottom-color: #2563eb; }
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
-
-        /* Chat Logic Editor */
+        .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .gallery-item { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9; border: 1px solid #e2e8f0; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+        .remove-btn { position: absolute; top: 4px; left: 4px; background: rgba(220, 38, 38, 0.9); color: white; padding: 4px; border-radius: 4px; opacity: 0; transition: 0.2s; cursor: pointer; }
+        .gallery-item:hover .remove-btn { opacity: 1; }
         .chat-rule-item { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .chat-rule-item:hover { border-color: #bfdbfe; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.4s; z-index: 100; display: flex; gap: 10px; }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -260,7 +251,7 @@
             deleteChatRule: async (id) => { if(confirm("למחוק חוק?")) await deleteDoc(doc(db, "chat_rules", id)); },
 
             // --- PRODUCTS & OTHERS ---
-            loadProducts: () => { /* ... אותו קוד יציב מקודם ... */ 
+            loadProducts: () => { 
                 const list = document.getElementById('productsList');
                 onSnapshot(collection(db, "products"), (snap) => {
                     app.allProducts = []; list.innerHTML = "";
