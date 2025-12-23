@@ -2,24 +2,27 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Admin</title>
+    <title>Admin Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>body{font-family:sans-serif;background:#f8fafc;display:flex;height:100vh}.sidebar{width:250px;background:white;padding:20px;border-left:1px solid #eee}.main{flex:1;padding:40px;overflow:auto}.btn{padding:10px;background:#2563eb;color:white;border-radius:8px;font-weight:bold;cursor:pointer}.nav-item{padding:10px;cursor:pointer;margin-bottom:5px}.nav-item.active{background:#eff6ff;color:#2563eb}</style>
+    <style>body{background:#f8fafc;padding:50px;font-family:sans-serif;text-align:center}</style>
 </head>
 <body>
-    <div class="sidebar">
-        <h1 class="text-2xl font-black mb-8">ADMIN</h1>
-        <div onclick="location.reload()" class="nav-item active">רענן מערכת</div>
-        <div class="mt-auto"><button onclick="app.seed()" class="btn w-full bg-gray-200 text-black">איפוס נתונים (SEED)</button></div>
+    <div class="max-w-md mx-auto bg-white p-10 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold mb-6">ניהול מערכת</h1>
+        <p class="mb-8 text-gray-600">לחץ כאן כדי לתקן את התמונות השבורות ולטעון נתונים תקינים לקיוסק.</p>
+        <button onclick="app.run()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-xl hover:bg-blue-700 transition">טען נתונים תקינים (Seed)</button>
     </div>
-    <div class="main">
-        <h2 class="text-3xl font-bold mb-4">ברוך הבא</h2>
-        <p>השתמש בכפתור למטה כדי לטעון נתונים ראשוניים תקינים למערכת.</p>
-    </div>
+
     <script type="module">
         import { seedRealData } from '../js/seed-data.js';
-        window.app = { seed: async () => { if(confirm("לאפס?")) await seedRealData(); alert("בוצע"); } };
+        window.app = { 
+            run: async () => {
+                if(confirm("פעולה זו תמחק נתונים קיימים ותטען נתונים תקינים. להמשיך?")) {
+                    await seedRealData();
+                    alert("הנתונים תוקנו! עכשיו רענן את דף הקיוסק.");
+                }
+            }
+        };
     </script>
 </body>
 </html>
