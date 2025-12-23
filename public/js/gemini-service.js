@@ -1,27 +1,24 @@
 // public/js/gemini-service.js
-
-// Updated API Key
-const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug";
+const GEMINI_API_KEY = "AIzaSyDn2bU0mnmNpj26UeBZYAirLnXf-FtPgCg"; // המפתח שלך
 
 export async function askGeminiAdmin(productName) {
-    // Switching to 'gemini-pro' which is more stable for general use
+    // שינוי למודל gemini-pro למניעת שגיאות 404
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
     
     try {
-        console.log("Asking Gemini about:", productName);
+        console.log("Asking Gemini (Pro) about:", productName);
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
                 contents: [{ 
                     parts: [{ 
-                        // Instruction for the AI
-                        text: `You are a construction expert. Create a valid JSON object for the product "${productName}" (in Hebrew). 
-                        Fields required: 
+                        text: `Act as a construction expert. Create a JSON object for the product "${productName}" (in Hebrew). 
+                        Fields: 
                         1. marketingDesc (persuasive, max 2 sentences)
-                        2. category (strictly one of: sealing, glues, concrete, flooring)
-                        3. tech (object with: coverage, drying, thickness - keep them short e.g. "2 kg/m2").
-                        Return ONLY the raw JSON string, no markdown formatting.` 
+                        2. category (one of: sealing, glues, concrete, flooring)
+                        3. tech (object with: coverage, drying, thickness - short text).
+                        Return ONLY valid JSON string, no markdown.` 
                     }] 
                 }] 
             })
@@ -31,17 +28,13 @@ export async function askGeminiAdmin(productName) {
             const data = await response.json();
             if (data.candidates && data.candidates.length > 0) {
                 let text = data.candidates[0].content.parts[0].text;
-                // Cleanup markdown if present
-                text = text.replace(/```json|```/g, '').trim();
+                text = text.replace(/```json|```/g, '').trim(); // ניקוי שאריות
                 return JSON.parse(text);
             }
-        } else {
-            console.error("Gemini API Error:", response.status);
-            alert("API Error: " + response.status);
         }
     } catch (e) {
-        console.error("Gemini Critical Error:", e);
-        alert("System Error: Check console for details.");
+        console.error("Gemini Error:", e);
+        // לא קופץ alert כדי לא להפריע למילוי הידני, רק לוג
     }
     return null;
 }
