@@ -6,6 +6,7 @@
     <title>Sika AI - מרכז העצבים</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <script type="module" src="./js/firebase-config.js"></script>
     <style>
         body { font-family: 'Heebo', sans-serif; background-color: #f3f4f6; }
         .tab-content { display: none; }
@@ -91,7 +92,7 @@
     </main>
 
     <script type="module">
-        import { db } from './js/firebase-config.js';
+        import { db, auth } from "./firebase-config.js";
         import { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // ניווט טאבים
