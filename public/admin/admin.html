@@ -3,180 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sika Admin - Full Control</title>
+    <title>Sika Admin Suite - Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Heebo', sans-serif; background: #f8fafc; height: 100vh; display: flex; overflow: hidden; }
-        .sidebar { width: 260px; background: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        .main { flex: 1; padding: 30px; overflow: hidden; display: flex; flex-direction: column; }
-        .nav-item { padding: 12px 20px; cursor: pointer; display: flex; gap: 10px; color: #64748b; font-weight: 500; border-right: 4px solid transparent; }
-        .nav-item.active { background: #eff6ff; color: #2563eb; border-right-color: #2563eb; font-weight: 700; }
+        body { font-family: 'Heebo', sans-serif; background-color: #f8fafc; color: #0f172a; height: 100vh; display: flex; overflow: hidden; }
+        .sidebar { width: 280px; background: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; z-index: 20; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 32px; gap: 32px; }
         .view-panel { display: none; height: 100%; flex-direction: column; }
         .view-panel.active { display: flex; }
-        .input-std { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; }
-        .btn { padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .nav-item { display: flex; items-center; gap: 12px; padding: 16px 24px; color: #64748b; font-weight: 500; cursor: pointer; transition: 0.2s; border-right: 4px solid transparent; }
+        .nav-item.active { background: #eff6ff; color: #2563eb; border-right-color: #2563eb; font-weight: 700; }
+        .btn { padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; }
         .btn-primary { background: #2563eb; color: white; }
-        .brand-card { background: white; border: 1px solid #eee; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; justify-content: space-between; }
-        .brand-logo { width: 60px; height: 40px; object-fit: contain; }
+        .input-std { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <div class="p-6 border-b"><h1 class="text-xl font-black">SIKA ADMIN</h1></div>
+        <div class="p-8 border-b"><h1 class="text-2xl font-black">SIKA ADMIN</h1></div>
         <nav class="flex-1 py-4">
-            <div class="nav-item active" onclick="app.nav('products')"><i data-lucide="package"></i> מוצרים</div>
-            <div class="nav-item" onclick="app.nav('brands')"><i data-lucide="tag"></i> ניהול יצרנים</div>
-            <div class="nav-item" onclick="app.nav('tutorials')"><i data-lucide="film"></i> אקדמיה</div>
-            <div class="nav-item" onclick="app.nav('ai')"><i data-lucide="bot"></i> המוח</div>
+            <div class="nav-item active" onclick="app.view('products')"><i data-lucide="package"></i> קטלוג</div>
+            <div class="nav-item" onclick="app.view('brands')"><i data-lucide="tag"></i> יצרנים</div>
         </nav>
-        <div class="p-4"><button onclick="app.seed()" class="btn w-full bg-gray-200">איפוס מערכת</button></div>
+        <div class="p-4"><button onclick="app.runSeed()" class="btn w-full bg-gray-200">איפוס נתונים</button></div>
     </div>
 
-    <div class="main">
+    <div class="main-content">
         <div id="v-products" class="view-panel active">
-            <div class="flex justify-between mb-4">
-                <h2 class="text-2xl font-bold">ניהול קטלוג</h2>
-                <button onclick="app.newProd()" class="btn btn-primary"><i data-lucide="plus"></i> מוצר חדש</button>
-            </div>
-            <div class="flex gap-6 h-full overflow-hidden">
-                <div class="w-1/3 bg-white rounded-xl border flex flex-col p-4">
-                    <input oninput="app.filterProd()" id="pSearch" class="input-std" placeholder="חיפוש...">
-                    <div id="pList" class="flex-1 overflow-y-auto mt-2 space-y-2"></div>
+            <h2 class="text-2xl font-bold mb-4">ניהול מוצרים</h2>
+            <div class="flex gap-4 h-full">
+                <div class="w-1/3 bg-white p-4 rounded-xl border flex flex-col">
+                    <input id="pSearch" oninput="app.filter()" class="input-std mb-2" placeholder="חיפוש...">
+                    <div id="pList" class="flex-1 overflow-y-auto space-y-2"></div>
                 </div>
-                <div class="flex-1 bg-white rounded-xl border p-6 overflow-y-auto">
+                <div class="flex-1 bg-white p-6 rounded-xl border overflow-y-auto">
                     <input type="hidden" id="pid">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="text-xs font-bold">שם מוצר</label><input id="pName" class="input-std"></div>
-                        <div><label class="text-xs font-bold">יצרן (מהרשימה)</label><select id="pBrand" class="input-std"></select></div>
+                    <div class="flex justify-between mb-4">
+                        <span id="pidLabel" class="text-gray-400 font-bold">New</span>
+                        <div class="flex gap-2">
+                            <button onclick="app.newProd()" class="btn bg-green-100 text-green-700">חדש</button>
+                            <button onclick="app.delProd()" class="btn bg-red-100 text-red-700">מחק</button>
+                            <button onclick="app.saveProd()" class="btn btn-primary">שמור</button>
+                        </div>
                     </div>
-                    <div><label class="text-xs font-bold">תיאור שיווקי</label><textarea id="pDesc" class="input-std h-24"></textarea></div>
-                    <div><label class="text-xs font-bold">תמונה (URL)</label><input id="pImg" class="input-std"></div>
-                    
-                    <div class="grid grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl mt-4">
-                        <div><label class="text-xs">כיסוי</label><input id="tCov" class="input-std"></div>
-                        <div><label class="text-xs">ייבוש</label><input id="tDry" class="input-std"></div>
-                        <div><label class="text-xs">עובי</label><input id="tThick" class="input-std"></div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <input id="pName" class="input-std" placeholder="שם מוצר">
+                        <input id="pBrand" class="input-std" placeholder="מותג">
                     </div>
-                    
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button onclick="app.delProd()" class="btn bg-red-100 text-red-600">מחק</button>
-                        <button onclick="app.saveProd()" class="btn btn-primary">שמור שינויים</button>
+                    <textarea id="pDesc" class="input-std h-32 mb-4" placeholder="תיאור..."></textarea>
+                    <input id="pImg" class="input-std mb-4" placeholder="תמונה URL">
+                    <div class="grid grid-cols-3 gap-4">
+                        <input id="tCov" class="input-std" placeholder="כיסוי">
+                        <input id="tDry" class="input-std" placeholder="ייבוש">
+                        <input id="tThick" class="input-std" placeholder="עובי">
                     </div>
                 </div>
             </div>
         </div>
 
         <div id="v-brands" class="view-panel">
-            <h2 class="text-2xl font-bold mb-4">ניהול יצרנים</h2>
-            <div class="flex gap-6 h-full">
-                <div class="w-1/3 bg-white p-6 rounded-xl border h-fit">
-                    <h3 class="font-bold mb-4">הוספת יצרן חדש</h3>
-                    <label class="text-xs font-bold">שם היצרן</label>
-                    <input id="bName" class="input-std" placeholder="למשל: נשר">
-                    <label class="text-xs font-bold">קישור ללוגו (URL)</label>
-                    <input id="bLogo" class="input-std" placeholder="https://...">
-                    <label class="text-xs font-bold">סלוגן / משפט מיתוג</label>
-                    <input id="bSlogan" class="input-std" placeholder="המלט של המדינה">
-                    <button onclick="app.saveBrand()" class="btn btn-primary w-full mt-2">הוסף למערכת</button>
-                </div>
-                <div id="bList" class="flex-1 overflow-y-auto grid grid-cols-2 gap-4 h-fit"></div>
-            </div>
-        </div>
-
-        <div id="v-tutorials" class="view-panel">
-            <div class="flex justify-between mb-4">
-                <h2 class="text-2xl font-bold">אקדמיה</h2>
-                <button onclick="document.getElementById('tutForm').classList.toggle('hidden')" class="btn btn-primary">הוסף סרטון</button>
-            </div>
-            <div id="tutForm" class="hidden bg-white p-4 mb-4 border rounded-xl">
-                <input id="vTitle" class="input-std" placeholder="כותרת">
-                <input id="vUrl" class="input-std" placeholder="Youtube URL">
-                <button onclick="app.saveVid()" class="btn btn-primary">שמור</button>
-            </div>
-            <div id="vList" class="grid grid-cols-4 gap-4"></div>
-        </div>
-
-        <div id="v-ai" class="view-panel">
-            <h2 class="text-2xl font-bold">המוח של סיקה</h2>
-            <div class="text-gray-500 mt-4">ניהול שאלות ותשובות (בקרוב...)</div>
+            <h2 class="text-2xl font-bold mb-4">יצרנים במערכת (נשלף בזמן אמת)</h2>
+            <div id="bList" class="grid grid-cols-4 gap-4"></div>
         </div>
     </div>
 
     <script type="module">
         import { db } from '../js/firebase-config.js';
         import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        import { seedRealData } from '../js/seed-data.js';
+        import { seedRealData } from '../js/seed-data.js'; // ייבוא נכון
+
         lucide.createIcons();
 
         const app = {
-            prods: [], brands: [],
-
+            prods: [],
+            
             init: () => {
-                app.loadBrands(); // טוען יצרנים דינאמית
                 app.loadProds();
-                app.loadVids();
+                app.loadBrands();
             },
 
-            nav: (v) => {
+            view: (v) => {
                 document.querySelectorAll('.view-panel').forEach(e => e.classList.remove('active'));
                 document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
                 document.getElementById('v-'+v).classList.add('active');
                 event.currentTarget.classList.add('active');
             },
 
-            // --- BRANDS LOGIC ---
-            loadBrands: () => {
-                onSnapshot(collection(db, "brands"), snap => {
-                    app.brands = [];
-                    const list = document.getElementById('bList');
-                    const select = document.getElementById('pBrand');
-                    list.innerHTML = ""; select.innerHTML = "";
-                    
-                    snap.forEach(d => {
-                        const b = {id: d.id, ...d.data()};
-                        app.brands.push(b);
-                        // רשימה בטאב יצרנים
-                        list.innerHTML += `
-                            <div class="brand-card">
-                                <div class="flex items-center gap-3">
-                                    <img src="${b.logo}" class="brand-logo">
-                                    <div><div class="font-bold">${b.name}</div><div class="text-xs text-gray-500">${b.slogan||''}</div></div>
-                                </div>
-                                <button onclick="app.delBrand('${b.id}')" class="text-red-500"><i data-lucide="trash-2"></i></button>
-                            </div>`;
-                        // סלקט בטאב מוצרים
-                        const opt = document.createElement('option');
-                        opt.value = b.name; opt.innerText = b.name;
-                        select.appendChild(opt);
-                    });
-                    lucide.createIcons();
-                });
-            },
-            saveBrand: async () => {
-                const name = document.getElementById('bName').value;
-                const logo = document.getElementById('bLogo').value;
-                const slogan = document.getElementById('bSlogan').value;
-                if(!name || !logo) return alert("חובה שם ולוגו");
-                await addDoc(collection(db, "brands"), { name, logo, slogan, createdAt: Date.now() });
-                document.querySelectorAll('#v-brands input').forEach(i => i.value = "");
-            },
-            delBrand: async (id) => { if(confirm("למחוק יצרן?")) await deleteDoc(doc(db, "brands", id)); },
-
-            // --- PRODUCTS LOGIC ---
+            // --- Products ---
             loadProds: () => {
                 onSnapshot(collection(db, "products"), snap => {
-                    app.prods = []; const l = document.getElementById('pList'); l.innerHTML = "";
+                    const l = document.getElementById('pList'); l.innerHTML = ""; app.prods = [];
                     snap.forEach(d => {
-                        const p = {id: d.id, ...d.data()}; app.prods.push(p);
-                        l.innerHTML += `<div onclick="app.editP('${p.id}')" class="p-3 border rounded hover:bg-gray-50 cursor-pointer flex gap-2 items-center"><img src="${p.image}" class="w-8 h-8 object-contain"><span>${p.name}</span></div>`;
+                        const p = {id:d.id, ...d.data()}; app.prods.push(p);
+                        l.innerHTML += `<div onclick="app.edit('${p.id}')" class="p-3 border rounded hover:bg-gray-50 cursor-pointer text-sm font-bold flex items-center gap-2"><img src="${p.image}" class="w-6 h-6 object-contain">${p.name}</div>`;
                     });
                 });
             },
-            editP: (id) => {
+            edit: (id) => {
                 const p = app.prods.find(x => x.id === id);
                 document.getElementById('pid').value = id;
+                document.getElementById('pidLabel').innerText = id;
                 document.getElementById('pName').value = p.name;
                 document.getElementById('pBrand').value = p.brand;
                 document.getElementById('pDesc').value = p.marketingDesc;
@@ -187,7 +115,7 @@
             },
             newProd: () => {
                 document.getElementById('pid').value = "";
-                document.querySelectorAll('#v-products input, #v-products textarea').forEach(i => i.value="");
+                document.querySelectorAll('input, textarea').forEach(i => i.value="");
             },
             saveProd: async () => {
                 const id = document.getElementById('pid').value;
@@ -200,32 +128,47 @@
                 };
                 if(id) await updateDoc(doc(db, "products", id), d);
                 else await addDoc(collection(db, "products"), d);
-                alert("נשמר");
+                alert("נשמר בהצלחה!");
             },
             delProd: async () => {
                 const id = document.getElementById('pid').value;
-                if(id && confirm("למחוק?")) await deleteDoc(doc(db, "products", id));
+                if(id && confirm("למחוק?")) { await deleteDoc(doc(db, "products", id)); app.newProd(); }
+            },
+            filter: () => {
+                const t = document.getElementById('pSearch').value.toLowerCase();
+                Array.from(document.getElementById('pList').children).forEach(e => {
+                    e.style.display = e.innerText.toLowerCase().includes(t) ? 'flex' : 'none';
+                });
             },
 
-            // --- TUTORIALS ---
-            loadVids: () => {
-                onSnapshot(collection(db, "tutorials"), snap => {
-                    const l = document.getElementById('vList'); l.innerHTML = "";
+            // --- Brands ---
+            loadBrands: () => {
+                onSnapshot(collection(db, "brands"), snap => {
+                    const l = document.getElementById('bList'); l.innerHTML = "";
                     snap.forEach(d => {
-                        const t = d.data();
-                        l.innerHTML += `<div class="bg-white p-2 rounded shadow text-center font-bold">${t.title}</div>`;
+                        const b = d.data();
+                        l.innerHTML += `
+                            <div class="bg-white p-4 rounded-xl border flex flex-col items-center gap-2">
+                                <img src="${b.logo}" class="h-8 object-contain">
+                                <span class="font-bold text-sm">${b.name}</span>
+                                <div class="flex gap-1">
+                                    <div class="w-3 h-3 rounded-full" style="background:${b.colors?.primary}"></div>
+                                    <div class="w-3 h-3 rounded-full" style="background:${b.colors?.accent}"></div>
+                                </div>
+                            </div>`;
                     });
                 });
             },
-            saveVid: async () => {
-                await addDoc(collection(db, "tutorials"), {
-                    title: document.getElementById('vTitle').value,
-                    url: document.getElementById('vUrl').value
-                });
-                document.getElementById('tutForm').classList.add('hidden');
-            },
 
-            seed: async () => { if(confirm("לאפס?")) await seedRealData(); }
+            // --- Seed ---
+            runSeed: async () => {
+                if(confirm("פעולה זו תמחק את כל הנתונים ותטען נתוני בסיס תקינים. להמשיך?")) {
+                    try {
+                        await seedRealData();
+                        alert("הנתונים אותחלו בהצלחה!");
+                    } catch(e) { alert("שגיאה: " + e.message); }
+                }
+            }
         };
 
         window.app = app;
