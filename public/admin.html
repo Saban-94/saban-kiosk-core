@@ -3,62 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sika Studio - Pixel Perfect</title>
+    <title>Sika Studio - Admin Ultimate</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        /* Admin Base Styles */
+        /* --- Admin Base Styles --- */
         body { font-family: 'Heebo', sans-serif; background-color: #f8fafc; height: 100vh; display: flex; overflow: hidden; }
         .sidebar { width: 280px; background: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; z-index: 50; }
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 32px; gap: 32px; }
         .view-section { display: none; height: 100%; flex-direction: column; overflow-y: auto; padding-right: 10px; }
         .view-section.active { display: flex; }
         
-        /* Inputs */
+        /* Inputs & Buttons */
         .input-std { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white; margin-bottom: 8px; }
         .input-std:focus { border-color: #E3000F; outline: none; box-shadow: 0 0 0 3px rgba(227, 0, 15, 0.1); }
         .btn { padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; display: inline-flex; items-center; gap: 6px; font-size: 13px; }
         .btn-primary { background: #E3000F; color: white; }
-        .btn-danger { background: white; border: 1px solid #fee2e2; color: red; }
         .btn-secondary { background: white; border: 1px solid #cbd5e1; color: #334155; }
+        .nav-item { padding: 12px 24px; cursor: pointer; color: #64748b; font-weight: 600; display: flex; items-center; gap: 10px; transition: 0.2s; border-right: 4px solid transparent; }
+        .nav-item:hover { background: #f8fafc; color: #0f172a; }
+        .nav-item.active { background: #eff6ff; color: #E3000F; border-right-color: #E3000F; }
 
-        /* --- KIOSK SIMULATION STYLES (Pixel Perfect) --- */
-        /* זה מעתיק בדיוק את העיצוב של הקיוסק לתוך הבועה של התצוגה המקדימה */
-        .kiosk-preview-wrapper {
-            background: #f8fafc; border-radius: 30px; border: 8px solid #1e293b; 
-            width: 360px; height: 680px; overflow: hidden; position: relative;
+        /* --- KIOSK SIMULATION (Pixel Perfect Replica) --- */
+        /* זהו העיצוב המדויק של הקיוסק שיושב בתוך הטלפון */
+        .preview-wrapper {
+            background: #f8fafc; border-radius: 30px; border: 10px solid #1e293b; 
+            width: 360px; height: 700px; overflow: hidden; position: relative;
             box-shadow: 0 20px 50px rgba(0,0,0,0.2); margin: 0 auto;
             display: flex; flex-direction: column;
         }
         
-        /* Kiosk Card CSS Replica */
         .kiosk-card { 
-            background: white; border-radius: 24px; overflow: hidden; 
-            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1); 
+            background: white; border-radius: 20px; overflow: hidden; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
             border: 1px solid #f1f5f9; display: flex; flex-direction: column; 
-            height: 380px; width: 90%; margin: 40px auto; position: relative;
+            height: 360px; width: 90%; margin: 60px auto 0; position: relative;
         }
         .kiosk-img-area { height: 55%; padding: 20px; display: flex; justify-content: center; align-items: center; position: relative; }
         .kiosk-img-area img { max-height: 100%; max-width: 100%; object-fit: contain; mix-blend-multiply; }
         
-        .kiosk-content { padding: 20px; border-top: 1px solid #f1f5f9; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .kiosk-content { padding: 16px; border-top: 1px solid #f1f5f9; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
         .kiosk-brand { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-        .kiosk-title { font-size: 20px; font-weight: 900; color: #111; line-height: 1.1; margin-top: 4px; }
-        .kiosk-cat-pill { font-size: 10px; font-weight: 800; background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 20px; width: fit-content; margin-top: 8px; }
+        .kiosk-title { font-size: 18px; font-weight: 900; color: #111; line-height: 1.1; margin-top: 2px; }
         
-        /* Action Buttons Area in Preview */
-        .kiosk-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-        .kiosk-action-btn { 
-            font-size: 10px; font-weight: bold; padding: 6px 12px; border-radius: 8px; 
-            background: #111; color: white; display: flex; align-items: center; gap: 4px;
+        /* Action Buttons in Preview */
+        .kiosk-actions { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+        .k-action-btn { 
+            font-size: 9px; font-weight: bold; padding: 4px 10px; border-radius: 6px; 
+            color: white; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .kiosk-action-btn.calc { background: #E3000F; }
-        .kiosk-action-btn.video { background: #2563eb; }
-        .kiosk-action-btn.chat { background: #10b981; }
-
+        
         .preview-label { text-align: center; font-weight: bold; color: #64748b; font-size: 12px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
@@ -70,10 +67,11 @@
             <div><h1 class="text-xl font-black text-gray-900 tracking-tight">SIKA STUDIO</h1><p class="text-[10px] text-gray-400 font-bold">Manager</p></div>
         </div>
         <nav class="flex-1 py-6 space-y-1">
-            <div class="nav-item p-4 hover:bg-gray-50 cursor-pointer font-bold text-gray-600 flex gap-2 active" onclick="app.view('products')"><i data-lucide="package"></i> ניהול מוצרים</div>
-            <div class="nav-item p-4 hover:bg-gray-50 cursor-pointer font-bold text-gray-600 flex gap-2" onclick="app.view('brain')"><i data-lucide="brain-circuit"></i> מוח (AI)</div>
+            <div class="nav-item active" onclick="safeApp.view('products')"><i data-lucide="package"></i> ניהול מוצרים</div>
+            <div class="nav-item" onclick="safeApp.view('brain')"><i data-lucide="brain-circuit"></i> מוח (AI)</div>
+            <div class="nav-item" onclick="safeApp.view('brands')"><i data-lucide="award"></i> מותגים</div>
         </nav>
-        <div class="p-4 text-center text-xs text-gray-400 font-bold border-t">מחובר ●</div>
+        <div id="status" class="p-4 text-center text-xs text-gray-400 font-bold border-t">טוען מערכת...</div>
     </div>
 
     <div class="main-content">
@@ -84,28 +82,38 @@
                     <header class="flex justify-between items-center mb-6">
                         <h2 class="text-3xl font-black text-gray-900">עורך המוצרים</h2>
                         <div class="flex gap-2">
-                            <button onclick="app.newProd()" class="btn btn-secondary"><i data-lucide="plus"></i> חדש</button>
-                            <button onclick="app.saveProd()" class="btn btn-primary"><i data-lucide="save"></i> שמור שינויים</button>
+                            <button onclick="safeApp.newProd()" class="btn btn-secondary"><i data-lucide="plus"></i> חדש</button>
+                            <button onclick="safeApp.saveProd()" class="btn btn-primary"><i data-lucide="save"></i> שמור שינויים</button>
                         </div>
                     </header>
 
                     <div class="bg-white rounded-2xl border p-8 overflow-y-auto shadow-sm flex-1">
                         <input type="hidden" id="pId">
                         
+                        <div class="mb-6 bg-gray-50 p-4 rounded-xl border">
+                            <label class="text-xs font-bold block mb-2">בחר מוצר לעריכה</label>
+                            <select id="pList" class="input-std" onchange="safeApp.loadProd(this.value)">
+                                <option value="">-- בחר מוצר --</option>
+                            </select>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div><label class="text-xs font-bold block mb-1">שם המוצר</label><input id="pName" class="input-std" oninput="app.renderPreview()"></div>
-                            <div><label class="text-xs font-bold block mb-1">מותג</label><select id="pBrand" class="input-std" onchange="app.renderPreview()"></select></div>
+                            <div><label class="text-xs font-bold block mb-1">שם המוצר</label><input id="pName" class="input-std" oninput="safeApp.renderPreview()"></div>
+                            <div><label class="text-xs font-bold block mb-1">מותג</label><select id="pBrand" class="input-std" onchange="safeApp.renderPreview()"></select></div>
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div><label class="text-xs font-bold block mb-1">קטגוריה</label><select id="pCat" class="input-std" onchange="app.renderPreview()">
-                                <option value="sealing">איטום</option><option value="glues">דבקים</option><option value="concrete">בטון</option><option value="flooring">ריצוף</option>
+                            <div><label class="text-xs font-bold block mb-1">קטגוריה</label><select id="pCat" class="input-std" onchange="safeApp.renderPreview()">
+                                <option value="sealing">איטום</option><option value="glues">דבקים</option>
+                                <option value="concrete">בטון</option><option value="flooring">ריצוף</option>
                             </select></div>
-                            <div><label class="text-xs font-bold block mb-1">תמונה URL</label><input id="pImg" class="input-std" oninput="app.renderPreview()"></div>
+                            <div><label class="text-xs font-bold block mb-1">תמונה URL</label><input id="pImg" class="input-std" oninput="safeApp.renderPreview()"></div>
                         </div>
 
-                        <div class="bg-gray-50 p-5 rounded-xl border mb-6">
-                            <h3 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="mouse-pointer-2" size="16"></i> כפתורי פעולה בכרטיס</h3>
+                        <div class="mb-4"><label class="text-xs font-bold block mb-1">תיאור שיווקי</label><textarea id="pDesc" class="input-std h-20" oninput="safeApp.renderPreview()"></textarea></div>
+
+                        <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 mb-6">
+                            <h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-blue-800"><i data-lucide="mouse-pointer-2" size="16"></i> כפתורי פעולה בכרטיס</h3>
                             
                             <div class="flex gap-2 mb-3">
                                 <input id="actLabel" class="input-std mb-0 flex-1" placeholder="טקסט לכפתור (למשל: מחשבון)">
@@ -113,29 +121,25 @@
                                     <option value="calc">מחשבון</option>
                                     <option value="video">וידאו</option>
                                     <option value="chat">שאל מומחה</option>
-                                    <option value="info">מידע טכני</option>
                                 </select>
-                                <button onclick="app.addAction()" class="btn btn-primary">הוסף</button>
+                                <button onclick="safeApp.addAction()" class="btn btn-primary">הוסף</button>
                             </div>
                             
-                            <div id="actionsList" class="flex flex-wrap gap-2">
-                                </div>
+                            <div id="actionsList" class="flex flex-wrap gap-2"></div>
                         </div>
-
-                        <div class="mb-4"><label class="text-xs font-bold block mb-1">תיאור שיווקי</label><textarea id="pDesc" class="input-std h-20" oninput="app.renderPreview()"></textarea></div>
                     </div>
                 </div>
 
                 <div class="w-[400px] flex flex-col items-center justify-center bg-gray-100 rounded-3xl p-6 border">
                     <div class="preview-label"><i data-lucide="eye"></i> תצוגת קיוסק חיה (1:1)</div>
                     
-                    <div class="kiosk-preview-wrapper">
-                        <div class="h-14 bg-white border-b flex items-center justify-between px-4">
+                    <div class="preview-wrapper">
+                        <div class="h-14 bg-white border-b flex items-center justify-between px-4 absolute top-0 w-full z-10">
                             <div class="w-8 h-8 bg-gray-200 rounded-lg"></div>
                             <div class="w-32 h-3 bg-gray-100 rounded"></div>
                         </div>
 
-                        <div class="kiosk-card" id="prevCard">
+                        <div class="kiosk-card">
                             <div class="kiosk-img-area">
                                 <img id="prevImg" src="https://placehold.co/200" alt="Product">
                             </div>
@@ -143,15 +147,13 @@
                                 <div>
                                     <div id="prevBrand" class="kiosk-brand">SIKA</div>
                                     <div id="prevName" class="kiosk-title">שם המוצר</div>
-                                    <div id="prevCat" class="kiosk-cat-pill">קטגוריה</div>
                                 </div>
                                 
-                                <div id="prevActions" class="kiosk-actions">
-                                    </div>
+                                <div id="prevActions" class="kiosk-actions"></div>
                             </div>
                         </div>
 
-                        <div class="mt-auto h-16 bg-white border-t flex justify-around items-center">
+                        <div class="mt-auto h-16 bg-white border-t flex justify-around items-center absolute bottom-0 w-full">
                             <div class="w-8 h-8 rounded-full bg-blue-100"></div>
                             <div class="w-8 h-8 rounded-full bg-gray-100"></div>
                             <div class="w-8 h-8 rounded-full bg-gray-100"></div>
@@ -163,24 +165,35 @@
         </div>
         
         <div id="view-brain" class="view-section text-center p-10"><h2 class="text-2xl text-gray-400">מודול ה-AI בבנייה...</h2></div>
+        <div id="view-brands" class="view-section text-center p-10"><h2 class="text-2xl text-gray-400">מודול מותגים בבנייה...</h2></div>
     </div>
+
+    <script>
+        window.safeApp = {
+            view: () => {}, newProd: () => {}, saveProd: () => {}, loadProd: () => {},
+            addAction: () => {}, removeAction: () => {}, renderPreview: () => console.log('Loading...')
+        };
+    </script>
 
     <script type="module">
         import { db } from './js/firebase-config.js';
         import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         
         lucide.createIcons();
+        document.getElementById('status').innerText = "🟢 מחובר";
 
         const app = {
+            products: [],
             currentActions: [],
             
             init: () => {
                 app.loadBrands();
-                app.newProd(); // Reset form
+                app.loadProds();
             },
 
             view: (v) => {
                 document.querySelectorAll('.view-section').forEach(e => e.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
                 document.getElementById('view-'+v).classList.add('active');
             },
 
@@ -191,12 +204,40 @@
                 });
             },
 
-            // --- Action Buttons Logic ---
+            loadProds: () => {
+                onSnapshot(collection(db, "products"), s => {
+                    const sel = document.getElementById('pList');
+                    sel.innerHTML = '<option value="">-- בחר מוצר לעריכה --</option>';
+                    app.products = [];
+                    s.forEach(d => {
+                        const p = {id: d.id, ...d.data()};
+                        app.products.push(p);
+                        sel.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+                    });
+                });
+            },
+
+            loadProd: (id) => {
+                const p = app.products.find(x => x.id === id);
+                if(!p) return;
+                
+                document.getElementById('pId').value = p.id;
+                document.getElementById('pName').value = p.name;
+                document.getElementById('pBrand').value = p.brand;
+                document.getElementById('pCat').value = p.category;
+                document.getElementById('pImg').value = p.image;
+                document.getElementById('pDesc').value = p.marketingDesc;
+                
+                app.currentActions = p.actions || [];
+                app.renderActionsUI();
+                app.renderPreview();
+            },
+
+            // --- Actions Logic ---
             addAction: () => {
                 const lbl = document.getElementById('actLabel').value;
                 const type = document.getElementById('actType').value;
                 if(!lbl) return;
-                
                 app.currentActions.push({ label: lbl, type: type });
                 document.getElementById('actLabel').value = "";
                 app.renderActionsUI();
@@ -212,7 +253,71 @@
             renderActionsUI: () => {
                 const list = document.getElementById('actionsList');
                 list.innerHTML = app.currentActions.map((a, i) => `
-                    <div class="bg-white border rounded px-3 py-1 text-xs font-bold flex items-center gap-2">
+                    <div class="bg-white border rounded px-3 py-1 text-xs font-bold flex items-center gap-2 shadow-sm">
                         <span class="${a.type==='calc'?'text-red-500':a.type==='video'?'text-blue-500':'text-green-500'}">●</span>
                         ${a.label}
-                        <button onclick="app.removeAction(${i})" class="text-gray-400 hover:text-
+                        <button onclick="safeApp.removeAction(${i})" class="text-gray-400 hover:text-red-500 ml-1">x</button>
+                    </div>
+                `).join('');
+            },
+
+            // --- Preview ---
+            renderPreview: () => {
+                // Texts
+                document.getElementById('prevName').innerText = document.getElementById('pName').value || "שם המוצר";
+                document.getElementById('prevBrand').innerText = document.getElementById('pBrand').value || "מותג";
+                
+                // Image
+                const img = document.getElementById('pImg').value;
+                document.getElementById('prevImg').src = img || "https://placehold.co/200";
+
+                // Buttons (Pixel Perfect Render)
+                const container = document.getElementById('prevActions');
+                container.innerHTML = app.currentActions.map(a => {
+                    let color = 'bg-black'; let icon = '';
+                    if(a.type==='calc') { color='bg-[#E3000F]'; icon='calculator'; }
+                    if(a.type==='video') { color='bg-blue-600'; icon='play-circle'; }
+                    if(a.type==='chat') { color='bg-green-600'; icon='message-circle'; }
+                    
+                    return `<div class="k-action-btn ${color}"><i data-lucide="${icon}" size="10"></i> ${a.label}</div>`;
+                }).join('');
+                
+                lucide.createIcons();
+            },
+
+            // --- Save ---
+            saveProd: async () => {
+                const id = document.getElementById('pId').value;
+                const d = {
+                    name: document.getElementById('pName').value,
+                    brand: document.getElementById('pBrand').value,
+                    category: document.getElementById('pCat').value,
+                    image: document.getElementById('pImg').value,
+                    marketingDesc: document.getElementById('pDesc').value,
+                    actions: app.currentActions
+                };
+                
+                if(id) await updateDoc(doc(db, "products", id), d);
+                else await addDoc(collection(db, "products"), d);
+                
+                alert("נשמר!");
+                app.newProd();
+            },
+
+            newProd: () => {
+                document.getElementById('pId').value = "";
+                document.getElementById('pName').value = "";
+                document.getElementById('pImg').value = "";
+                document.getElementById('pDesc').value = "";
+                app.currentActions = [];
+                app.renderActionsUI();
+                app.renderPreview();
+            }
+        };
+
+        // חיבור האובייקט הגלובלי הבטוח לאפליקציה האמיתית
+        window.safeApp = app;
+        app.init();
+    </script>
+</body>
+</html>
