@@ -2,220 +2,501 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Sika Kiosk Platinum</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sika Kiosk - Desktop Edition</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        /* (אותו עיצוב כמו קודם + תוספות לגלריה) */
         :root { --brand-primary: #111; --brand-accent: #2563eb; --brand-bg: #f8fafc; }
-        body { font-family: 'Heebo', sans-serif; background-color: var(--brand-bg); overflow: hidden; user-select: none; }
         
-        .product-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.03); transition: 0.3s; height: 360px; display: flex; flex-direction: column; cursor: pointer; }
-        .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        
-        .modal-overlay { @apply fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-md; }
-        .modal-overlay.open { @apply flex animate-fade-in; }
-        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        body { 
+            font-family: 'Heebo', sans-serif; 
+            background-color: var(--brand-bg); 
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex;
+            user-select: none; /* מניעת סימון טקסט */
+        }
 
-        /* Gallery Thumbnails */
-        .thumb { width: 60px; height: 60px; border-radius: 12px; border: 2px solid transparent; cursor: pointer; opacity: 0.6; transition: 0.2s; object-fit: cover; background: white; }
-        .thumb.active { border-color: var(--brand-accent); opacity: 1; transform: scale(1.1); }
-        .thumb:hover { opacity: 1; }
+        /* --- Sidebar --- */
+        nav { 
+            width: 100px; 
+            background: white; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px 0; 
+            box-shadow: 4px 0 15px rgba(0,0,0,0.05); 
+            z-index: 50; 
+        }
+        .sidebar-btn { 
+            width: 70px; height: 70px; 
+            border-radius: 16px; 
+            margin-bottom: 16px; 
+            display: flex; flex-direction: column; items-center; justify-content: center; 
+            color: #94a3b8; cursor: pointer; transition: 0.2s; 
+            border: 2px solid transparent;
+        }
+        .sidebar-btn:hover { background: #f1f5f9; color: var(--brand-accent); }
+        .sidebar-btn.active { 
+            background: var(--brand-primary); 
+            color: white; 
+            box-shadow: 0 8px 20px -5px rgba(0,0,0,0.3); 
+            transform: scale(1.05);
+        }
+        .sidebar-btn span { font-size: 10px; font-weight: bold; margin-top: 4px; }
 
-        /* Video Modal */
-        #videoModal { position: fixed; inset: 0; z-index: 100; background: black; display: none; align-items: center; justify-content: center; }
-        #videoModal.open { display: flex; }
+        /* --- Main Content --- */
+        main { flex: 1; padding: 30px; overflow: hidden; display: flex; flex-direction: column; position: relative; z-index: 10; }
+
+        /* Header & Search */
+        .top-bar { display: flex; justify-content: space-between; items-center; margin-bottom: 20px; }
+        .search-box { 
+            position: relative; width: 400px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 16px; 
+        }
+        .search-box input { 
+            width: 100%; padding: 12px 20px; padding-left: 45px; 
+            border-radius: 16px; border: 1px solid #e2e8f0; outline: none; 
+            font-weight: bold; font-size: 16px; 
+        }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+
+        /* Brand Pills */
+        .brands-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; }
+        .brand-pill { 
+            background: white; border: 1px solid #e2e8f0; 
+            padding: 8px 20px; border-radius: 50px; cursor: pointer; 
+            transition: 0.2s; white-space: nowrap; height: 45px; 
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0.7; filter: grayscale(100%);
+        }
+        .brand-pill.active { border-color: var(--brand-accent); opacity: 1; filter: grayscale(0%); transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .brand-pill img { height: 25px; object-fit: contain; }
+
+        /* Grid Layouts */
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 20px; 
+            padding-bottom: 100px; 
+            overflow-y: auto; 
+            padding-right: 5px; /* For scrollbar space */
+        }
         
-        /* Sidebar & General UI (מועתק ומשומר) */
-        .sidebar-btn { width: 100%; aspect-ratio: 1; margin-bottom: 12px; border-radius: 16px; display: flex; flex-direction: column; items-center; justify-content: center; color: #94a3b8; background: white; cursor: pointer; }
-        .sidebar-btn.active { background: var(--brand-primary); color: white; transform: scale(1.1); }
-        .brand-pill { background: white; padding: 5px 20px; border-radius: 50px; cursor: pointer; opacity: 0.7; filter: grayscale(100%); min-width: 120px; height: 60px; display: flex; justify-content: center; align-items: center; }
-        .brand-pill.active { opacity: 1; transform: scale(1.05); filter: grayscale(0%); border: 2px solid var(--brand-accent); }
+        /* Product Card */
+        .card { 
+            background: white; border-radius: 16px; overflow: hidden; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
+            transition: 0.2s; border: 1px solid #f1f5f9; cursor: pointer;
+            height: 300px; display: flex; flex-direction: column;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--brand-accent); }
+        .card-img { height: 60%; padding: 20px; display: flex; align-items: center; justify-content: center; background: #fff; }
+        .card-img img { max-height: 100%; max-width: 100%; object-fit: contain; mix-blend-multiply; }
+        .card-info { padding: 15px; border-top: 1px solid #f1f5f9; background: white; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+
+        /* --- Video Modal (Popup) --- */
+        .video-modal { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200; 
+            display: none; align-items: center; justify-content: center; 
+            backdrop-filter: blur(5px);
+        }
+        .video-modal.open { display: flex; animation: fadeIn 0.3s ease; }
+        .video-wrapper { 
+            width: 80%; max-width: 900px; aspect-ratio: 16/9; 
+            background: black; border-radius: 20px; overflow: hidden; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); position: relative;
+        }
+        .close-vid-btn {
+            position: absolute; top: -50px; right: 0; 
+            color: white; font-size: 14px; cursor: pointer; 
+            display: flex; items-center; gap: 8px;
+            background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 50px;
+        }
+        .close-vid-btn:hover { background: rgba(255,255,255,0.2); }
+
+        /* --- Product Details Modal --- */
+        .prod-modal { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; 
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);
+        }
+        .prod-modal.open { display: flex; animation: zoomIn 0.3s ease; }
+        .pm-content { 
+            width: 900px; height: 600px; background: white; border-radius: 30px; 
+            display: flex; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.2); relative;
+        }
+
+        /* --- Sika AI Robot --- */
+        #sikaAiWrapper { 
+            position: fixed; bottom: 30px; right: 30px; z-index: 300; 
+            pointer-events: none; /* כדי לא לחסום לחיצות מסביב */
+        }
+        .robot-btn { 
+            width: 120px; height: 120px; cursor: pointer; pointer-events: auto; 
+            transition: 0.3s; animation: floaty 4s infinite ease-in-out; 
+        }
+        .robot-btn:hover { transform: scale(1.1); }
+        .robot-btn img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); }
+
+        .chat-window { 
+            position: absolute; bottom: 140px; right: 0; width: 350px; height: 500px; 
+            background: white; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); 
+            display: none; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; pointer-events: auto;
+            transform-origin: bottom right; animation: popUp 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+        .chat-window.open { display: flex; }
+
+        @keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes popUp { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+
+        /* Utilities */
+        .hidden-view { display: none !important; }
+        .btn-action { background: var(--brand-accent); color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; border: none; }
+        .btn-action:hover { background: #1d4ed8; }
         
-        /* Robot UI */
-        #sikaAiWrapper { position: fixed; z-index: 9999; pointer-events: none; transition: 0.8s; }
-        .state-corner { bottom: -20px; right: -20px; width: 260px; height: 260px; pointer-events: auto; }
-        .state-active { bottom: 50%; right: 50%; width: 0; height: 0; }
-        .robot-character { width: 100%; height: 100%; object-fit: contain; animation: floaty 4s infinite; cursor: pointer; transition: 0.6s; }
-        .state-active .robot-character { position: absolute; bottom: -250px; right: 350px; width: 250px; transform: scale(1.1); }
-        @keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        #aiWindow { position: absolute; background: rgba(255,255,255,0.98); border-radius: 30px; border: 4px solid var(--brand-accent); overflow: hidden; display: flex; flex-direction: column; width: 600px; height: 750px; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); opacity: 0; pointer-events: auto; transition: 0.5s; }
-        .state-active #aiWindow { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
-<body class="flex h-screen w-screen" onload="init()">
+<body onload="init()">
 
-    <nav class="w-32 bg-white h-full flex flex-col items-center py-8 shadow-2xl z-40 relative border-l border-gray-100">
-        <div class="mb-10 w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-2 shadow-inner"><img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" class="w-full h-full object-contain"></div>
-        <div onclick="switchTab('catalog')" id="btn-catalog" class="sidebar-btn active"><i data-lucide="layout-grid" size="32"></i><span class="text-[10px] font-bold mt-2">קטלוג</span></div>
-        <div onclick="switchTab('calculator')" id="btn-calculator" class="sidebar-btn"><i data-lucide="calculator" size="32"></i><span class="text-[10px] font-bold mt-2">מחשבון</span></div>
-        <div onclick="switchTab('tutorials')" id="btn-tutorials" class="sidebar-btn"><i data-lucide="play-circle" size="32"></i><span class="text-[10px] font-bold mt-2">הדרכות</span></div>
-        <div onclick="triggerInteraction()" class="sidebar-btn mt-auto text-yellow-500 border-yellow-400"><i data-lucide="bot" size="32"></i><span class="text-[10px] font-bold mt-2">Ai</span></div>
+    <nav>
+        <div class="mb-6 w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black italic shadow-lg">S</div>
+        
+        <div onclick="switchView('catalog')" id="nav-catalog" class="sidebar-btn active">
+            <i data-lucide="layout-grid"></i><span>קטלוג</span>
+        </div>
+        <div onclick="switchView('tutorials')" id="nav-tutorials" class="sidebar-btn">
+            <i data-lucide="play-circle"></i><span>הדרכות</span>
+        </div>
+        <div onclick="switchView('calculator')" id="nav-calculator" class="sidebar-btn">
+            <i data-lucide="calculator"></i><span>מחשבון</span>
+        </div>
+        
+        <div onclick="toggleChat()" class="sidebar-btn mt-auto text-blue-600 bg-blue-50">
+            <i data-lucide="bot"></i><span>AI</span>
+        </div>
     </nav>
 
-    <main class="flex-1 flex flex-col h-full overflow-hidden p-8 z-10 bg-slate-50 relative">
-        <header class="flex flex-col gap-6 mb-6">
-            <div class="flex gap-4 overflow-x-auto pb-4 pt-2 no-scrollbar items-center px-2" id="brandListContainer"></div>
-            <div class="flex justify-between items-center bg-white/60 p-5 rounded-3xl shadow-sm border border-white">
-                <h1 class="text-5xl font-black text-[var(--brand-primary)]" id="heroTitle">המרכז המקצועי</h1>
-                <input id="searchInput" oninput="filterProducts()" class="w-[450px] bg-white p-4 pr-12 rounded-2xl shadow-sm outline-none font-bold text-lg" placeholder="חיפוש מוצר...">
-            </div>
-        </header>
-
-        <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 pb-32 overflow-y-auto"></div>
+    <main>
         
-        <div id="view-calculator" class="hidden h-full flex items-center justify-center"><h2 class="text-4xl font-bold">מחשבון</h2></div>
-        <div id="view-tutorials" class="hidden h-full"><h2 class="text-4xl font-bold">הדרכות</h2></div>
+        <div class="top-bar">
+            <div>
+                <h1 class="text-3xl font-black text-gray-900" id="pageTitle">המרכז המקצועי</h1>
+                <p class="text-sm text-gray-500 font-bold">ברוכים הבאים לעמדת המידע של Sika</p>
+            </div>
+            <div class="search-box">
+                <i data-lucide="search"></i>
+                <input id="searchInput" onkeyup="filterItems()" type="text" placeholder="מה מחפשים היום?">
+            </div>
+        </div>
+
+        <div id="brandsBar" class="brands-row">
+            </div>
+
+        <div id="view-catalog" class="grid-container">
+            </div>
+
+        <div id="view-tutorials" class="grid-container hidden-view">
+            </div>
+
+        <div id="view-calculator" class="hidden-view h-full flex flex-col items-center justify-center">
+            <div class="bg-white p-10 rounded-3xl shadow-xl w-[500px] text-center border border-gray-100">
+                <h2 class="text-3xl font-black mb-6 text-gray-800">מחשבון כמויות</h2>
+                <div class="space-y-4 mb-8">
+                    <input id="calcArea" type="number" placeholder="שטח ליישום (מ''ר)" class="w-full p-4 bg-gray-50 rounded-xl border text-center text-lg font-bold">
+                    <input id="calcCons" type="number" placeholder="צריכה (ק''ג למ''ר)" class="w-full p-4 bg-gray-50 rounded-xl border text-center text-lg font-bold">
+                </div>
+                <div class="text-5xl font-black text-blue-600 mb-6" id="calcRes">0 <span class="text-xl text-gray-400">ק"ג</span></div>
+                <button onclick="doCalc()" class="btn-action w-full text-lg">בצע חישוב</button>
+            </div>
+        </div>
+
     </main>
 
-    <div id="productModal" class="modal-overlay">
-        <div class="bg-white rounded-[40px] shadow-2xl w-[90vw] h-[85vh] flex overflow-hidden relative animate-fade-in">
-            <button onclick="closeModal()" class="absolute top-6 left-6 z-20 bg-white/80 p-3 rounded-full hover:bg-white shadow-lg"><i data-lucide="x" size="28"></i></button>
-            
-            <div class="w-[45%] bg-gray-50 p-8 flex flex-col items-center justify-center border-l border-gray-100 relative">
-                <div class="flex-1 w-full flex items-center justify-center relative">
-                    <img id="mImage" src="" class="max-h-full max-w-full object-contain mix-blend-multiply z-10 transition-all duration-300">
-                    
-                    <button id="btnPlayVideo" onclick="playVideo()" class="absolute z-20 bg-red-600 text-white p-4 rounded-full shadow-xl hover:scale-110 transition hidden">
-                        <i data-lucide="play" size="32" fill="white"></i>
+    <div id="prodModal" class="prod-modal" onclick="if(event.target===this) closeProd()">
+        <div class="pm-content">
+            <div class="w-1/2 bg-gray-50 p-8 flex flex-col items-center justify-center relative border-l">
+                <button onclick="closeProd()" class="absolute top-4 left-4 bg-white p-2 rounded-full shadow hover:text-red-500"><i data-lucide="x"></i></button>
+                <img id="pmImg" src="" class="max-h-[60%] object-contain mix-blend-multiply mb-6">
+                
+                <div class="flex gap-2">
+                    <button id="btnPlayVideo" onclick="playCurrentVideo()" class="btn-action bg-red-600 hover:bg-red-700 flex items-center gap-2 hidden">
+                        <i data-lucide="play"></i> נגן סרטון יישום
                     </button>
                 </div>
-                
-                <div id="mGallery" class="h-20 mt-6 flex gap-3 overflow-x-auto w-full justify-center px-4"></div>
             </div>
-
-            <div class="w-[55%] p-14 overflow-y-auto bg-white flex flex-col">
-                <h2 class="text-5xl font-black mb-4 leading-tight text-gray-900" id="mName"></h2>
-                <div class="bg-[var(--brand-bg)] p-6 rounded-2xl border-r-4 border-[var(--brand-accent)] mb-8">
-                    <p id="mDesc" class="text-xl text-gray-800 font-medium leading-relaxed"></p>
+            
+            <div class="w-1/2 p-10 flex flex-col overflow-y-auto">
+                <div class="mb-auto">
+                    <span id="pmBrand" class="text-xs font-bold text-gray-400 uppercase tracking-widest">SIKA</span>
+                    <h2 id="pmName" class="text-4xl font-black text-gray-900 leading-tight mb-4">שם המוצר</h2>
+                    <p id="pmDesc" class="text-gray-600 text-lg leading-relaxed mb-6">תיאור...</p>
+                    
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                        <h4 class="text-xs font-bold text-blue-900 uppercase mb-2">מפרט טכני</h4>
+                        <div class="flex justify-between text-center">
+                            <div><span class="block text-xs text-blue-400">כיסוי</span><span id="pmCov" class="font-bold">-</span></div>
+                            <div><span class="block text-xs text-blue-400">ייבוש</span><span id="pmDry" class="font-bold">-</span></div>
+                            <div><span class="block text-xs text-blue-400">עובי</span><span id="pmThick" class="font-bold">-</span></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="grid grid-cols-3 gap-4 mb-10 text-center">
-                    <div class="bg-gray-50 p-4 rounded-xl"><span class="text-sm text-gray-500 font-bold block mb-1">כיסוי</span><span class="text-lg font-black" id="mCov">-</span></div>
-                    <div class="bg-gray-50 p-4 rounded-xl"><span class="text-sm text-gray-500 font-bold block mb-1">ייבוש</span><span class="text-lg font-black" id="mDry">-</span></div>
-                    <div class="bg-gray-50 p-4 rounded-xl"><span class="text-sm text-gray-500 font-bold block mb-1">עובי</span><span class="text-lg font-black" id="mThick">-</span></div>
-                </div>
-                <button onclick="triggerInteraction(true)" class="mt-auto bg-[var(--brand-primary)] text-white py-5 rounded-2xl font-black text-2xl shadow-xl hover:scale-[1.02] transition flex items-center justify-center gap-3">
-                    <i data-lucide="message-circle"></i> שאל את המומחה
+                <button onclick="askRobotAboutCurrent()" class="mt-6 w-full py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition flex items-center justify-center gap-2">
+                    <i data-lucide="message-circle"></i> שאל את הרובוט על מוצר זה
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="videoModal" onclick="this.classList.remove('open'); document.getElementById('vidFrame').src=''">
-        <div class="w-[80vw] aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl">
+    <div id="vidModal" class="video-modal" onclick="if(event.target===this) closeVideo()">
+        <div class="video-wrapper">
+            <div onclick="closeVideo()" class="close-vid-btn"><i data-lucide="x"></i> סגור נגן</div>
             <iframe id="vidFrame" class="w-full h-full" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         </div>
     </div>
 
-    <div id="sikaAiWrapper" class="state-corner">
-        <div class="robot-character" onclick="triggerInteraction()"><img src="https://saban-kiosk-core.pages.dev/admin/sika-ai.png" class="w-full h-full object-contain"></div>
-        <div id="aiWindow">
-            <div class="bg-black p-4 text-white flex justify-between"><span class="font-bold">Sika Expert</span><button onclick="event.stopPropagation(); closeInteraction()"><i data-lucide="x"></i></button></div>
-            <div class="flex-1 bg-gray-100 p-4" id="chatArea"></div>
+    <div id="sikaAiWrapper">
+        <div id="chatWindow" class="chat-window">
+            <div class="bg-gray-900 text-white p-4 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center font-bold">AI</div>
+                    <span class="font-bold text-sm">Sika Expert</span>
+                </div>
+                <button onclick="toggleChat()"><i data-lucide="x" size="18"></i></button>
+            </div>
+            <div id="chatHistory" class="flex-1 bg-gray-50 p-4 overflow-y-auto space-y-3 text-sm">
+                <div class="bg-white p-3 rounded-xl rounded-tl-none border shadow-sm max-w-[90%]">
+                    שלום! אני הרובוט של סיקה. <br>אני מחובר למאגר המוצרים והסרטונים. מה תרצה לדעת?
+                </div>
+            </div>
+            <div class="p-3 border-t bg-white flex gap-2">
+                <input id="chatInput" onkeydown="if(event.key==='Enter') sendChat()" class="flex-1 bg-gray-100 rounded-lg px-3 py-2 text-sm outline-none" placeholder="שאל אותי...">
+                <button onclick="sendChat()" class="bg-blue-600 text-white p-2 rounded-lg"><i data-lucide="send" size="16"></i></button>
+            </div>
+        </div>
+        
+        <div class="robot-btn" onclick="toggleChat()">
+            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Robot">
         </div>
     </div>
 
     <script type="module">
         import { db } from './js/firebase-config.js';
-        import { collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         
         lucide.createIcons();
-        let allProducts = [], currentProduct = null;
+        
+        // State
+        const state = {
+            products: [],
+            tutorials: [],
+            brands: [],
+            currentProduct: null,
+            view: 'catalog'
+        };
 
-        window.init = async () => {
+        window.init = () => {
+            // Load Brands
             onSnapshot(collection(db, "brands"), s => {
-                const c = document.getElementById('brandListContainer'); c.innerHTML = "";
-                s.forEach(d => c.innerHTML += `<div onclick="filterBrand('${d.data().name}')" class="brand-pill"><img src="${d.data().logo}"></div>`);
+                const con = document.getElementById('brandsBar');
+                con.innerHTML = `<div onclick="filterBrand('all')" class="brand-pill active" id="pill-all"><span class="font-bold text-xs">כל המותגים</span></div>`;
+                state.brands = [];
+                s.forEach(d => {
+                    const b = {id:d.id, ...d.data()}; state.brands.push(b);
+                    con.innerHTML += `<div onclick="filterBrand('${b.name}')" class="brand-pill" id="pill-${b.name.replace(/\s/g,'')}"><img src="${b.logo}"></div>`;
+                });
             });
+
+            // Load Products
             onSnapshot(collection(db, "products"), s => {
-                allProducts = []; s.forEach(d => allProducts.push({id: d.id, ...d.data()}));
-                renderGrid(allProducts);
+                state.products = [];
+                s.forEach(d => state.products.push({id:d.id, ...d.data()}));
+                renderCatalog(state.products);
+            });
+
+            // Load Tutorials
+            onSnapshot(collection(db, "tutorials"), s => {
+                state.tutorials = [];
+                s.forEach(d => state.tutorials.push({id:d.id, ...d.data()}));
+                renderTutorials(state.tutorials);
             });
         };
 
-        function renderGrid(list) {
-            document.getElementById('productGrid').innerHTML = list.map(p => `
-                <div onclick="openProduct('${p.id}')" class="product-card group">
-                    <div class="h-[60%] flex items-center justify-center p-6 bg-white group-hover:bg-gray-50 transition">
-                        <img src="${p.image || 'https://placehold.co/200'}" class="max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition duration-500">
-                    </div>
-                    <div class="p-5 flex-1 bg-white border-t border-gray-100">
-                        <div class="text-xs font-bold text-gray-400 uppercase mb-1">${p.brand}</div>
-                        <h3 class="text-xl font-black text-gray-900 leading-tight">${p.name}</h3>
+        // --- Render Functions ---
+        function renderCatalog(list) {
+            const grid = document.getElementById('view-catalog');
+            grid.innerHTML = list.map(p => `
+                <div onclick="openProd('${p.id}')" class="card">
+                    <div class="card-img"><img src="${p.image || 'https://placehold.co/200'}" loading="lazy"></div>
+                    <div class="card-info">
+                        <div>
+                            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${p.brand || 'Sika'}</div>
+                            <div class="font-black text-gray-900 leading-tight">${p.name}</div>
+                        </div>
+                        <div class="mt-2 text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded w-fit">${p.category || 'כללי'}</div>
                     </div>
                 </div>`).join('');
         }
 
-        window.openProduct = (id) => {
-            const p = allProducts.find(x => x.id === id);
-            currentProduct = p;
-            document.getElementById('mName').innerText = p.name;
-            document.getElementById('mDesc').innerText = p.marketingDesc || "";
-            document.getElementById('mImage').src = p.image || '';
-            document.getElementById('mCov').innerText = p.tech?.coverage || '-';
-            document.getElementById('mDry').innerText = p.tech?.drying || '-';
-            document.getElementById('mThick').innerText = p.tech?.thickness || '-';
+        function renderTutorials(list) {
+            const grid = document.getElementById('view-tutorials');
+            grid.innerHTML = list.map(t => {
+                const vidId = t.url.includes('v=') ? t.url.split('v=')[1].split('&')[0] : '';
+                const thumb = vidId ? `https://img.youtube.com/vi/${vidId}/mqdefault.jpg` : 'https://placehold.co/300x200';
+                return `
+                <div onclick="openVideo('${t.url}')" class="card h-auto">
+                    <div class="relative aspect-video bg-black group">
+                        <img src="${thumb}" class="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition">
+                        <div class="absolute inset-0 flex items-center justify-center"><i data-lucide="play-circle" class="text-white w-12 h-12 drop-shadow-lg"></i></div>
+                    </div>
+                    <div class="p-4 font-bold text-sm text-gray-800">${t.title}</div>
+                </div>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        // --- Navigation ---
+        window.switchView = (v) => {
+            state.view = v;
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('nav-'+v).classList.add('active');
             
-            // Video Logic
-            const btnVid = document.getElementById('btnPlayVideo');
-            if(p.video && p.video.includes('youtube')) {
-                btnVid.classList.remove('hidden');
-                btnVid.dataset.url = p.video;
+            ['catalog','tutorials','calculator'].forEach(id => document.getElementById('view-'+id).classList.add('hidden-view'));
+            document.getElementById('view-'+v).classList.remove('hidden-view');
+            
+            // Show/Hide Brands bar
+            document.getElementById('brandsBar').style.display = v === 'catalog' ? 'flex' : 'none';
+        };
+
+        // --- Features ---
+        window.filterBrand = (name) => {
+            document.querySelectorAll('.brand-pill').forEach(b => b.classList.remove('active'));
+            if(name === 'all') {
+                document.getElementById('pill-all').classList.add('active');
+                renderCatalog(state.products);
             } else {
-                btnVid.classList.add('hidden');
+                const pill = document.getElementById(`pill-${name.replace(/\s/g,'')}`);
+                if(pill) pill.classList.add('active');
+                renderCatalog(state.products.filter(p => p.brand === name));
             }
+        };
 
-            // Gallery Logic
-            const galDiv = document.getElementById('mGallery');
-            galDiv.innerHTML = "";
+        window.filterItems = () => {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            if(state.view === 'catalog') {
+                renderCatalog(state.products.filter(p => p.name.toLowerCase().includes(term) || (p.brand||'').toLowerCase().includes(term)));
+            } else if(state.view === 'tutorials') {
+                renderTutorials(state.tutorials.filter(t => t.title.toLowerCase().includes(term)));
+            }
+        };
+
+        window.doCalc = () => {
+            const a = document.getElementById('calcArea').value;
+            const c = document.getElementById('calcCons').value;
+            if(a && c) document.getElementById('calcRes').innerHTML = (a*c).toFixed(1) + ' <span class="text-xl text-gray-400">ק"ג</span>';
+        };
+
+        // --- Product Modal ---
+        window.openProd = (id) => {
+            const p = state.products.find(x => x.id === id);
+            state.currentProduct = p;
             
-            // Add main image as first thumbnail
-            const images = [p.image, ...(p.gallery || [])].filter(Boolean);
+            document.getElementById('pmName').innerText = p.name;
+            document.getElementById('pmBrand').innerText = p.brand || 'Sika';
+            document.getElementById('pmDesc').innerText = p.marketingDesc || 'אין תיאור זמין.';
+            document.getElementById('pmImg').src = p.image || '';
             
-            if(images.length > 1) {
-                images.forEach((url, i) => {
-                    galDiv.innerHTML += `<img src="${url}" onclick="changeImg('${url}', this)" class="thumb ${i===0?'active':''}">`;
-                });
+            document.getElementById('pmCov').innerText = p.tech?.coverage || '-';
+            document.getElementById('pmDry').innerText = p.tech?.drying || '-';
+            document.getElementById('pmThick').innerText = p.tech?.thickness || '-';
+            
+            // Video Button Logic
+            const btnV = document.getElementById('btnPlayVideo');
+            if(p.video && p.video.includes('youtube')) {
+                btnV.classList.remove('hidden');
+                btnV.onclick = () => openVideo(p.video);
+            } else {
+                btnV.classList.add('hidden');
             }
 
-            document.getElementById('productModal').classList.add('open');
+            document.getElementById('prodModal').classList.add('open');
+        };
+        window.closeProd = () => document.getElementById('prodModal').classList.remove('open');
+
+        // --- Video Modal ---
+        window.openVideo = (url) => {
+            const vidId = url.split('v=')[1].split('&')[0];
+            document.getElementById('vidFrame').src = `https://www.youtube.com/embed/${vidId}?autoplay=1`;
+            document.getElementById('vidModal').classList.add('open');
+        };
+        window.closeVideo = () => {
+            document.getElementById('vidModal').classList.remove('open');
+            document.getElementById('vidFrame').src = "";
         };
 
-        window.changeImg = (url, el) => {
-            document.getElementById('mImage').src = url;
-            document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
+        // --- AI Robot Logic ---
+        window.toggleChat = () => {
+            const win = document.getElementById('chatWindow');
+            win.classList.toggle('open');
+            if(win.classList.contains('open')) document.getElementById('chatInput').focus();
         };
 
-        window.playVideo = () => {
-            const url = currentProduct.video;
-            let vidId = "";
-            try { vidId = url.split('v=')[1].split('&')[0]; } catch(e){}
-            if(vidId) {
-                document.getElementById('vidFrame').src = `https://www.youtube.com/embed/${vidId}?autoplay=1`;
-                document.getElementById('videoModal').classList.add('open');
-            }
+        window.askRobotAboutCurrent = () => {
+            closeProd();
+            const win = document.getElementById('chatWindow');
+            win.classList.add('open');
+            addMsg(`אני רואה שאתה מתעניין ב-${state.currentProduct.name}. מה תרצה לדעת עליו?`, 'bot');
         };
 
-        window.closeModal = () => document.getElementById('productModal').classList.remove('open');
-        window.triggerInteraction = (auto) => {
-             document.getElementById('sikaAiWrapper').classList.add('state-active');
-             document.getElementById('sikaAiWrapper').classList.remove('state-corner');
-             if(auto) document.getElementById('chatArea').innerHTML = `🤖 שלום! אני רואה שאתה מתעניין ב-${currentProduct.name}. איך לעזור?`;
+        window.sendChat = () => {
+            const input = document.getElementById('chatInput');
+            const txt = input.value.trim();
+            if(!txt) return;
+            
+            addMsg(txt, 'user');
+            input.value = "";
+            
+            // Smart Robot Logic
+            setTimeout(() => {
+                const lower = txt.toLowerCase();
+                
+                // 1. Search for Product
+                const foundProd = state.products.find(p => p.name.toLowerCase().includes(lower));
+                if(foundProd) {
+                    addMsg(`מצאתי מידע על <b>${foundProd.name}</b>:<br> ${foundProd.marketingDesc.substring(0,80)}...`, 'bot');
+                    // Suggest opening product
+                    setTimeout(()=> openProd(foundProd.id), 1500);
+                    return;
+                }
+
+                // 2. Search for Tutorial
+                const foundVid = state.tutorials.find(t => t.title.toLowerCase().includes(lower) || lower.includes('יישום') || lower.includes('סרטון'));
+                if(foundVid) {
+                    addMsg(`יש לי סרטון הדרכה בנושא: "${foundVid.title}". מנגן אותו עכשיו...`, 'bot');
+                    setTimeout(()=> openVideo(foundVid.url), 1500);
+                    return;
+                }
+
+                // 3. Fallback
+                addMsg("אני עדיין לומד. נסה לשאול על שם מוצר ספציפי או לבקש סרטון יישום.", 'bot');
+            }, 800);
         };
-        window.closeInteraction = () => {
-             document.getElementById('sikaAiWrapper').classList.remove('state-active');
-             document.getElementById('sikaAiWrapper').classList.add('state-corner');
-        };
-        window.switchTab = (t) => {
-            document.getElementById('productGrid').style.display = t==='catalog'?'grid':'none';
-            document.getElementById('view-calculator').style.display = t==='calculator'?'flex':'none';
-        };
-        window.filterProducts = () => {
-            const t = document.getElementById('searchInput').value.toLowerCase();
-            renderGrid(allProducts.filter(p => p.name.toLowerCase().includes(t)));
-        };
+
+        function addMsg(html, type) {
+            const div = document.createElement('div');
+            div.className = type === 'user' 
+                ? "bg-blue-600 text-white p-3 rounded-xl rounded-br-none ml-auto max-w-[80%] text-sm"
+                : "bg-white border text-gray-800 p-3 rounded-xl rounded-tl-none mr-auto max-w-[80%] text-sm shadow-sm";
+            div.innerHTML = html;
+            document.getElementById('chatHistory').appendChild(div);
+            document.getElementById('chatHistory').scrollTop = 9999;
+        }
+
         window.init = init;
     </script>
 </body>
