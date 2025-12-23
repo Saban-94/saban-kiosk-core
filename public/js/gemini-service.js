@@ -1,7 +1,7 @@
 // public/js/gemini-service.js
 
 // Updated API Key
-const GEMINI_API_KEY = "AIzaSyDn2bU0mnmNpj26UeBZYAirLnXf-FtPgCg";
+const GEMINI_API_KEY = "AIzaSyBL76DNiLPe5fgvNpryrr6_7YNnrFkdMug";
 
 export async function askGeminiAdmin(productName) {
     // Switching to 'gemini-pro' which is more stable for general use
