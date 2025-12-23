@@ -3,294 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sika Kiosk - AI Powered</title>
+    <title>Sika Kiosk - AI Alive</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --brand-primary: #111; --brand-accent: #E3000F; --brand-bg: #f8fafc; }
+        /* משתני צבע דינאמיים */
+        :root { 
+            --brand-primary: #111; 
+            --brand-accent: #E3000F; 
+            --brand-bg: #f8fafc; 
+            --glass-bg: rgba(255, 255, 255, 0.95);
+        }
         
-        body { font-family: 'Heebo', sans-serif; background-color: var(--brand-bg); height: 100vh; overflow: hidden; display: flex; user-select: none; }
+        body { font-family: 'Heebo', sans-serif; background-color: var(--brand-bg); height: 100vh; overflow: hidden; display: flex; user-select: none; transition: background-color 0.5s ease; }
 
         /* Navigation */
         nav { width: 110px; background: white; display: flex; flex-direction: column; align-items: center; padding: 25px 0; box-shadow: 4px 0 20px rgba(0,0,0,0.05); z-index: 50; }
         .nav-btn { width: 70px; height: 70px; border-radius: 18px; margin-bottom: 20px; display: flex; flex-direction: column; items-center; justify-content: center; color: #94a3b8; cursor: pointer; transition: 0.3s; border: 2px solid transparent; }
         .nav-btn:hover { background: #fff0f0; color: var(--brand-accent); }
-        .nav-btn.active { background: var(--brand-accent); color: white; box-shadow: 0 10px 25px -5px rgba(227, 0, 15, 0.4); transform: scale(1.05); }
+        .nav-btn.active { background: var(--brand-accent); color: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); transform: scale(1.05); }
         .nav-btn span { font-size: 10px; font-weight: bold; margin-top: 5px; }
 
         /* Main Area */
         main { flex: 1; padding: 40px; overflow: hidden; display: flex; flex-direction: column; position: relative; z-index: 10; }
         
-        /* Header */
         .header { display: flex; justify-content: space-between; items-center; margin-bottom: 20px; }
-        .search-bar { position: relative; width: 450px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border-radius: 20px; background: white; }
+        .search-bar { position: relative; width: 450px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border-radius: 20px; background: white; transition: 0.3s; }
+        .search-bar:focus-within { box-shadow: 0 8px 30px rgba(0,0,0,0.1); transform: translateY(-2px); }
         .search-bar input { width: 100%; padding: 15px 25px; padding-left: 50px; border-radius: 20px; border: 2px solid transparent; outline: none; font-weight: bold; font-size: 16px; transition: 0.3s; }
         .search-bar input:focus { border-color: var(--brand-accent); }
         .search-bar i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
 
-        /* Grid */
+        /* Grid & Cards */
         .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; padding-bottom: 120px; overflow-y: auto; padding-right: 10px; }
         
-        /* Cards */
-        .card { background: white; border-radius: 24px; overflow: hidden; height: 340px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: 0.3s; border: 1px solid #f1f5f9; cursor: pointer; display: flex; flex-direction: column; position: relative; }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); border-color: var(--brand-accent); }
-        .card img { width: 100%; height: 60%; object-fit: contain; padding: 20px; mix-blend-multiply; }
+        .card { background: white; border-radius: 24px; overflow: hidden; height: 340px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); border: 1px solid #f1f5f9; cursor: pointer; display: flex; flex-direction: column; position: relative; }
+        .card:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); border-color: var(--brand-accent); }
+        .card img { width: 100%; height: 60%; object-fit: contain; padding: 20px; mix-blend-multiply; transition: 0.5s; }
+        .card:hover img { transform: scale(1.1); }
         .card-content { padding: 20px; border-top: 1px solid #f1f5f9; background: white; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
         /* Modals */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); opacity: 0; transition: 0.3s; }
         .modal-overlay.open { display: flex; opacity: 1; }
-        
         .prod-modal { width: 90vw; height: 85vh; max-width: 1400px; background: white; border-radius: 40px; overflow: hidden; display: flex; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5); transform: scale(0.95); transition: 0.3s; }
         .modal-overlay.open .prod-modal { transform: scale(1); }
 
-        /* Gallery */
-        .gallery-strip { display: flex; gap: 10px; margin-top: 20px; overflow-x: auto; padding: 4px; }
-        .gal-thumb { width: 70px; height: 70px; border-radius: 12px; border: 2px solid transparent; cursor: pointer; object-fit: cover; opacity: 0.6; transition: 0.2s; background: white; }
-        .gal-thumb.active { border-color: var(--brand-accent); opacity: 1; transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-
-        /* Video Popup */
-        .video-container { width: 80%; max-width: 1000px; aspect-ratio: 16/9; background: black; border-radius: 24px; overflow: hidden; position: relative; box-shadow: 0 0 60px rgba(255,255,255,0.1); }
-        .close-video { position: absolute; top: -50px; right: 0; color: white; cursor: pointer; display: flex; items-center; gap: 8px; background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 30px; backdrop-filter: blur(5px); }
-
-        /* AI Robot */
+        /* AI Robot & Smart Window */
         #aiWrapper { position: fixed; bottom: 40px; right: 40px; z-index: 200; pointer-events: none; }
-        .robot-avatar { width: 140px; height: 140px; cursor: pointer; pointer-events: auto; transition: 0.3s; animation: float 5s infinite ease-in-out; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3)); }
-        .robot-avatar:hover { transform: scale(1.1) rotate(-5deg); }
-        .chat-box { position: absolute; bottom: 160px; right: 0; width: 400px; height: 550px; background: white; border-radius: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); display: none; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; pointer-events: auto; transform-origin: bottom right; animation: popUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        
+        /* האנימציה החדשה - מעוף חי */
+        @keyframes flyLive {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+        
+        .robot-avatar { 
+            width: 160px; height: 160px; cursor: pointer; pointer-events: auto; 
+            animation: flyLive 4s ease-in-out infinite; 
+            filter: drop-shadow(0 30px 40px rgba(0,0,0,0.25));
+            transition: transform 0.3s;
+        }
+        .robot-avatar:hover { transform: scale(1.1) translateY(-10px); }
+        .robot-avatar img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+
+        .chat-box { 
+            position: absolute; bottom: 180px; right: 20px; width: 420px; height: 600px; 
+            background: var(--glass-bg); border-radius: 30px; 
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3); 
+            display: none; flex-direction: column; overflow: hidden; 
+            border: 1px solid rgba(255,255,255,0.5); backdrop-filter: blur(20px);
+            pointer-events: auto; transform-origin: bottom right; 
+            animation: popUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
         .chat-box.open { display: flex; }
 
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
         @keyframes popUp { from { opacity: 0; transform: scale(0.8) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
+        /* Smart Nav Buttons in Chat */
+        .smart-nav { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 12px; background: rgba(0,0,0,0.03); }
+        .sn-btn { 
+            background: white; border: 1px solid #e2e8f0; border-radius: 12px; 
+            padding: 10px; text-align: center; font-size: 11px; font-weight: bold; color: #64748b;
+            cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; items-center; gap: 4px;
+        }
+        .sn-btn:hover { background: var(--brand-accent); color: white; border-color: var(--brand-accent); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
         .hidden-view { display: none !important; }
-        
-        /* Remote Control Indicator */
         #remoteIndicator { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #22c55e; color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold; font-size: 12px; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4); display: none; animation: slideDown 0.5s; z-index: 900; }
-        @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
     </style>
 </head>
 <body onload="init()">
 
-    <div id="remoteIndicator"><i data-lucide="wifi"></i> נשלט מרחוק ע"י מומחה</div>
+    <div id="remoteIndicator"><i data-lucide="wifi"></i> נשלט מרחוק</div>
 
     <nav>
-        <div class="mb-8 w-14 h-14 bg-[#E3000F] rounded-2xl flex items-center justify-center text-white font-black italic text-2xl shadow-lg shadow-red-200">S</div>
+        <div class="mb-8 w-14 h-14 bg-[var(--brand-accent)] rounded-2xl flex items-center justify-center text-white font-black italic text-2xl shadow-lg transition-colors duration-500">S</div>
         
-        <div onclick="switchView('catalog')" id="nav-catalog" class="nav-btn active">
-            <i data-lucide="layout-grid" size="28"></i><span>קטלוג</span>
-        </div>
-        <div onclick="switchView('tutorials')" id="nav-tutorials" class="nav-btn">
-            <i data-lucide="play-circle" size="28"></i><span>הדרכות</span>
-        </div>
+        <div onclick="switchView('catalog')" id="nav-catalog" class="nav-btn active"><i data-lucide="layout-grid" size="28"></i><span>קטלוג</span></div>
+        <div onclick="switchView('tutorials')" id="nav-tutorials" class="nav-btn"><i data-lucide="play-circle" size="28"></i><span>הדרכות</span></div>
         
-        <div onclick="toggleChat()" class="nav-btn mt-auto text-blue-600 bg-blue-50 border-blue-100">
-            <i data-lucide="bot" size="28"></i><span>AI</span>
-        </div>
+        <div onclick="toggleChat()" class="nav-btn mt-auto text-blue-600 bg-blue-50 border-blue-100"><i data-lucide="bot" size="28"></i><span>AI</span></div>
     </nav>
 
     <main>
         <div class="header">
             <div>
-                <h1 class="text-4xl font-black text-gray-900 tracking-tight">המרכז המקצועי</h1>
+                <h1 class="text-4xl font-black text-gray-900 tracking-tight" id="mainTitle">המרכז המקצועי</h1>
                 <p class="text-gray-500 font-medium mt-1">Sika Knowledge Hub</p>
             </div>
             <div class="search-bar">
                 <i data-lucide="search"></i>
-                <input id="searchInput" onkeyup="filterItems()" type="text" placeholder="חיפוש מוצר, יישום או פתרון...">
+                <input id="searchInput" onkeyup="filterItems()" type="text" placeholder="חיפוש חכם...">
             </div>
         </div>
 
         <div class="flex gap-3 mb-6 overflow-x-auto pb-2 items-center" id="filtersArea">
-            <button onclick="filterCat('all')" class="px-6 py-2 rounded-full bg-black text-white font-bold text-sm shadow-lg transform scale-105" id="cat-all">הכל</button>
-            <button onclick="filterCat('sealing')" class="px-6 py-2 rounded-full bg-white text-gray-600 border font-bold text-sm hover:border-red-500" id="cat-sealing">איטום</button>
-            <button onclick="filterCat('glues')" class="px-6 py-2 rounded-full bg-white text-gray-600 border font-bold text-sm hover:border-red-500" id="cat-glues">דבקים</button>
-            <button onclick="filterCat('concrete')" class="px-6 py-2 rounded-full bg-white text-gray-600 border font-bold text-sm hover:border-red-500" id="cat-concrete">בטון</button>
+            <button onclick="filterCat('all')" class="px-6 py-2 rounded-full bg-black text-white font-bold text-sm shadow-lg transform scale-105 transition" id="cat-all">הכל</button>
+            <button onclick="filterCat('sealing')" class="px-6 py-2 rounded-full bg-white text-gray-600 border font-bold text-sm hover:border-[var(--brand-accent)] transition" id="cat-sealing">איטום</button>
+            <button onclick="filterCat('glues')" class="px-6 py-2 rounded-full bg-white text-gray-600 border font-bold text-sm hover:border-[var(--brand-accent)] transition" id="cat-glues">דבקים</button>
+            <button onclick="filterCat('concrete')" class="px-6 py-2 rounded-full bg-white text-gray-600 border font-bold text-sm hover:border-[var(--brand-accent)] transition" id="cat-concrete">בטון</button>
             <div class="w-[1px] h-8 bg-gray-200 mx-2"></div>
             <div id="brandsList" class="flex gap-2"></div>
         </div>
 
         <div id="view-catalog" class="grid-layout"></div>
-        
         <div id="view-tutorials" class="grid-layout hidden-view"></div>
-
     </main>
 
     <div id="prodModal" class="modal-overlay" onclick="if(event.target===this) closeProd()">
         <div class="prod-modal">
             <div class="w-[45%] bg-gray-50 p-10 flex flex-col items-center justify-center relative border-l border-gray-100">
                 <button onclick="closeProd()" class="absolute top-6 left-6 bg-white p-3 rounded-full shadow-lg hover:text-red-600 transition"><i data-lucide="x" size="24"></i></button>
-                
                 <img id="pmImg" src="" class="max-h-[65%] w-auto object-contain transition-all duration-300">
-                
-                <button id="btnPlayVideo" onclick="playCurrentVideo()" class="mt-6 bg-[#E3000F] text-white px-8 py-3 rounded-full font-bold shadow-xl shadow-red-200 hover:bg-red-700 flex items-center gap-3 transition transform hover:scale-105 hidden">
-                    <i data-lucide="play-circle" size="20"></i> נגן סרטון יישום
-                </button>
-
-                <div id="pmGallery" class="gallery-strip mt-auto w-full justify-center"></div>
+                <button id="btnPlayVideo" onclick="playCurrentVideo()" class="mt-6 bg-[var(--brand-accent)] text-white px-8 py-3 rounded-full font-bold shadow-xl hover:brightness-110 flex items-center gap-3 transition transform hover:scale-105 hidden"><i data-lucide="play-circle" size="20"></i> נגן סרטון יישום</button>
+                <div id="pmGallery" class="flex gap-3 mt-auto pt-4 overflow-x-auto w-full justify-center"></div>
             </div>
-            
             <div class="w-[55%] p-14 flex flex-col overflow-y-auto bg-white">
                 <div class="flex items-center gap-3 mb-2">
                     <span id="pmBrand" class="px-3 py-1 bg-gray-100 rounded text-xs font-bold text-gray-500 uppercase tracking-widest">SIKA</span>
                     <span id="pmCat" class="px-3 py-1 bg-blue-50 text-blue-600 rounded text-xs font-bold">קטגוריה</span>
                 </div>
-                
                 <h2 id="pmName" class="text-5xl font-black text-gray-900 leading-tight mb-6">שם המוצר</h2>
-                
-                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-[#E3000F]"></div>
-                    <p id="pmDesc" class="text-gray-700 text-lg leading-relaxed">תיאור...</p>
-                </div>
-                
+                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8 relative overflow-hidden"><div class="absolute top-0 left-0 w-1 h-full bg-[var(--brand-accent)]"></div><p id="pmDesc" class="text-gray-700 text-lg leading-relaxed">תיאור...</p></div>
                 <div class="grid grid-cols-3 gap-4 mb-8">
-                    <div class="bg-white border p-4 rounded-xl text-center shadow-sm">
-                        <i data-lucide="maximize" class="mx-auto text-gray-300 mb-2"></i>
-                        <span class="block text-xs text-gray-400 font-bold uppercase">כיסוי</span>
-                        <span id="pmCov" class="font-bold text-gray-900 text-lg">-</span>
-                    </div>
-                    <div class="bg-white border p-4 rounded-xl text-center shadow-sm">
-                        <i data-lucide="clock" class="mx-auto text-gray-300 mb-2"></i>
-                        <span class="block text-xs text-gray-400 font-bold uppercase">ייבוש</span>
-                        <span id="pmDry" class="font-bold text-gray-900 text-lg">-</span>
-                    </div>
-                    <div class="bg-white border p-4 rounded-xl text-center shadow-sm">
-                        <i data-lucide="layers" class="mx-auto text-gray-300 mb-2"></i>
-                        <span class="block text-xs text-gray-400 font-bold uppercase">עובי</span>
-                        <span id="pmThick" class="font-bold text-gray-900 text-lg">-</span>
-                    </div>
+                    <div class="bg-white border p-4 rounded-xl text-center shadow-sm"><i data-lucide="maximize" class="mx-auto text-gray-300 mb-2"></i><span class="block text-xs text-gray-400 font-bold uppercase">כיסוי</span><span id="pmCov" class="font-bold text-gray-900 text-lg">-</span></div>
+                    <div class="bg-white border p-4 rounded-xl text-center shadow-sm"><i data-lucide="clock" class="mx-auto text-gray-300 mb-2"></i><span class="block text-xs text-gray-400 font-bold uppercase">ייבוש</span><span id="pmDry" class="font-bold text-gray-900 text-lg">-</span></div>
+                    <div class="bg-white border p-4 rounded-xl text-center shadow-sm"><i data-lucide="layers" class="mx-auto text-gray-300 mb-2"></i><span class="block text-xs text-gray-400 font-bold uppercase">עובי</span><span id="pmThick" class="font-bold text-gray-900 text-lg">-</span></div>
                 </div>
-
-                <button onclick="askRobotAboutCurrent()" class="mt-auto w-full py-5 bg-black text-white rounded-2xl font-bold hover:bg-gray-800 transition flex items-center justify-center gap-3 text-lg shadow-xl">
-                    <i data-lucide="sparkles"></i> שאל את ה-AI על מוצר זה
-                </button>
+                <button onclick="askRobotAboutCurrent()" class="mt-auto w-full py-5 bg-black text-white rounded-2xl font-bold hover:bg-gray-800 transition flex items-center justify-center gap-3 text-lg shadow-xl"><i data-lucide="sparkles"></i> שאל את ה-AI על מוצר זה</button>
             </div>
         </div>
     </div>
 
     <div id="vidModal" class="modal-overlay" onclick="if(event.target===this) closeVideo()">
-        <div class="video-container">
-            <div onclick="closeVideo()" class="close-video"><i data-lucide="x"></i> סגור נגן</div>
+        <div class="w-[80%] max-w-[1000px] aspect-video bg-black rounded-2xl overflow-hidden relative shadow-2xl">
+            <div onclick="closeVideo()" class="absolute top-4 right-4 text-white cursor-pointer bg-white/20 p-2 rounded-full backdrop-blur-md hover:bg-white/40 z-50"><i data-lucide="x"></i></div>
             <iframe id="vidFrame" class="w-full h-full" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         </div>
     </div>
 
     <div id="aiWrapper">
         <div id="chatWindow" class="chat-box">
-            <div class="bg-[#E3000F] text-white p-5 flex justify-between items-center relative overflow-hidden">
+            <div class="bg-[var(--brand-accent)] text-white p-5 flex justify-between items-center relative overflow-hidden transition-colors duration-500">
                 <div class="absolute inset-0 bg-gradient-to-r from-transparent to-black opacity-20"></div>
                 <div class="flex items-center gap-3 z-10">
-                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center font-black text-[#E3000F] shadow">AI</div>
-                    <div>
-                        <div class="font-bold">Sika Expert</div>
-                        <div class="text-xs opacity-80">מחובר למאגר</div>
-                    </div>
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center font-black text-[var(--brand-accent)] shadow">AI</div>
+                    <div><div class="font-bold">Sika Expert</div><div class="text-xs opacity-80">מחובר למאגר</div></div>
                 </div>
                 <button onclick="toggleChat()" class="z-10 hover:bg-white/20 p-2 rounded-full"><i data-lucide="x"></i></button>
             </div>
             
             <div id="chatHistory" class="flex-1 bg-gray-50 p-5 overflow-y-auto space-y-4 text-sm"></div>
             
+            <div class="smart-nav">
+                <div class="sn-btn" onclick="switchView('catalog')"><i data-lucide="layout-grid" size="16"></i> קטלוג</div>
+                <div class="sn-btn" onclick="switchView('tutorials')"><i data-lucide="play-circle" size="16"></i> הדרכות</div>
+                <div class="sn-btn" onclick="sendChat('נציג')"><i data-lucide="phone" size="16"></i> נציג</div>
+            </div>
+
             <div class="p-4 border-t bg-white flex gap-3">
-                <input id="chatInput" onkeydown="if(event.key==='Enter') sendChat()" class="flex-1 bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none border border-transparent focus:bg-white focus:border-gray-200 transition" placeholder="שאל אותי כל דבר...">
-                <button onclick="sendChat()" class="bg-[#E3000F] text-white p-3 rounded-xl shadow-lg hover:bg-red-700 transition"><i data-lucide="send" size="18"></i></button>
+                <input id="chatInput" onkeydown="if(event.key==='Enter') sendChat()" class="flex-1 bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none border border-transparent focus:bg-white focus:border-gray-200 transition" placeholder="שאל אותי...">
+                <button onclick="sendChat()" class="bg-[var(--brand-accent)] text-white p-3 rounded-xl shadow-lg hover:brightness-110 transition"><i data-lucide="send" size="18"></i></button>
             </div>
         </div>
         
         <div class="robot-avatar" onclick="toggleChat()">
-            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" class="w-full h-full object-contain">
+            <img src="https://saban-94.github.io/saban-kiosk-core/public/1000187746.jpg" class="w-full h-full object-cover rounded-full border-4 border-white shadow-2xl">
         </div>
     </div>
 
     <script type="module">
         import { db } from './js/firebase-config.js';
-        import { collection, onSnapshot, query, where, orderBy, limit, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { collection, onSnapshot, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         
         lucide.createIcons();
-        
-        const state = { 
-            products: [], tutorials: [], brands: [], chatRules: [],
-            currentProduct: null, view: 'catalog', cat: 'all' 
-        };
-        const KIOSK_ID = "kiosk_main_01"; // זיהוי הקיוסק
+        const state = { products: [], tutorials: [], brands: [], chatRules: [], currentProduct: null, view: 'catalog' };
+        const KIOSK_ID = "kiosk_main_01";
 
         window.init = () => {
-            // 1. טעינת נתונים
             onSnapshot(collection(db, "brands"), s => {
                 const con = document.getElementById('brandsList'); con.innerHTML = "";
+                state.brands = [];
                 s.forEach(d => {
                     const b = {id:d.id, ...d.data()}; state.brands.push(b);
-                    con.innerHTML += `<button onclick="filterBrand('${b.name}')" class="px-4 py-1 rounded-lg bg-white border hover:border-red-500 flex items-center"><img src="${b.logo}" class="h-6 object-contain"></button>`;
+                    con.innerHTML += `<button onclick="filterBrand('${b.name}')" class="px-4 py-1 rounded-lg bg-white border hover:border-[var(--brand-accent)] flex items-center transition shadow-sm"><img src="${b.logo}" class="h-6 object-contain"></button>`;
                 });
             });
-            onSnapshot(collection(db, "products"), s => {
-                state.products = []; s.forEach(d => state.products.push({id:d.id, ...d.data()}));
-                renderCatalog(state.products);
-            });
-            onSnapshot(collection(db, "tutorials"), s => {
-                state.tutorials = []; s.forEach(d => state.tutorials.push({id:d.id, ...d.data()}));
-                renderTutorials(state.tutorials);
-            });
-            onSnapshot(collection(db, "chat_rules"), s => {
-                state.chatRules = []; s.forEach(d => state.chatRules.push(d.data()));
-            });
+            onSnapshot(collection(db, "products"), s => { state.products = []; s.forEach(d => state.products.push({id:d.id, ...d.data()})); renderCatalog(state.products); });
+            onSnapshot(collection(db, "tutorials"), s => { state.tutorials = []; s.forEach(d => state.tutorials.push({id:d.id, ...d.data()})); renderTutorials(state.tutorials); });
+            onSnapshot(collection(db, "chat_rules"), s => { state.chatRules = []; s.forEach(d => state.chatRules.push(d.data())); });
 
-            // 2. האזנה למומחה (Dynamic Expert Connection)
             listenToExpert();
-
-            addMsg("שלום! אני הרובוט של Sika. אני כאן לעזור לך למצוא מוצרים וסרטוני יישום.", 'bot');
+            addMsg("שלום! אני ה-AI החדש של Sika. אני כאן לכל שאלה, או שתשתמש בכפתורים למטה לניווט מהיר.", 'bot');
         };
 
-        // --- Expert Listener Logic ---
         function listenToExpert() {
-            // מאזין להודעות שמיועדות לקיוסק הזה
             const q = query(collection(db, "chats"), where("chatId", "==", KIOSK_ID), orderBy("timestamp", "desc"), limit(1));
-            
             onSnapshot(q, (snap) => {
                 snap.docChanges().forEach((change) => {
                     if (change.type === "added") {
                         const data = change.doc.data();
-                        
-                        // רק הודעות חדשות (מהדקה האחרונה)
-                        const now = new Date();
-                        const msgTime = data.timestamp?.toDate();
-                        if (msgTime && (now - msgTime) < 60000) { 
-                            
-                            // חיווי על המסך
-                            const ind = document.getElementById('remoteIndicator');
-                            ind.style.display = 'block';
-                            setTimeout(() => ind.style.display = 'none', 5000);
-
-                            if (data.type === 'product_push') {
-                                // המומחה שידר מוצר - פתח אותו מיד!
-                                openProd(data.productData.id);
-                                addMsg(`👨‍🏫 המומחה מציג לך כרגע את: <b>${data.productData.name}</b>`, 'bot');
-                                toggleChat(); // פתח צ'אט כדי שהלקוח יראה את ההודעה
-                            } 
-                            else if (data.type === 'text' && data.sender === 'expert') {
-                                // הודעת טקסט מהמומחה
-                                addMsg(`👨‍🏫 המומחה: ${data.text}`, 'bot');
-                                toggleChat();
-                            }
+                        if (data.timestamp?.toDate() && (new Date() - data.timestamp.toDate()) < 60000) { 
+                            document.getElementById('remoteIndicator').style.display = 'block';
+                            setTimeout(() => document.getElementById('remoteIndicator').style.display = 'none', 5000);
+                            if (data.type === 'product_push') { openProd(data.productData.id); addMsg(`👨‍🏫 המומחה מציג: <b>${data.productData.name}</b>`, 'bot'); toggleChat(); } 
+                            else if (data.type === 'text' && data.sender === 'expert') { addMsg(`👨‍🏫 מומחה: ${data.text}`, 'bot'); toggleChat(); }
                         }
                     }
                 });
             });
         }
 
-        // --- Rendering ---
+        // --- Color & Brand Logic ---
+        window.filterBrand = (name) => {
+            const brand = state.brands.find(b => b.name === name);
+            if(brand && brand.colors) {
+                document.documentElement.style.setProperty('--brand-primary', brand.colors.primary);
+                document.documentElement.style.setProperty('--brand-accent', brand.colors.accent);
+                document.documentElement.style.setProperty('--brand-bg', brand.colors.bg || '#f8fafc');
+            } else {
+                // Reset to Default Sika Colors
+                document.documentElement.style.setProperty('--brand-primary', '#111');
+                document.documentElement.style.setProperty('--brand-accent', '#E3000F');
+                document.documentElement.style.setProperty('--brand-bg', '#f8fafc');
+            }
+            renderCatalog(state.products.filter(p => p.brand === name));
+        };
+
         function renderCatalog(list) {
             document.getElementById('view-catalog').innerHTML = list.map(p => `
                 <div onclick="openProd('${p.id}')" class="card group">
-                    <img src="${p.image || 'https://placehold.co/200'}" loading="lazy" class="group-hover:scale-105 transition duration-500">
+                    <img src="${p.image || 'https://placehold.co/200'}" loading="lazy" class="group-hover:scale-105">
                     <div class="card-content">
-                        <div>
-                            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${p.brand || 'Sika'}</div>
-                            <h3 class="text-xl font-black text-gray-900 leading-tight">${p.name}</h3>
-                        </div>
+                        <div><div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${p.brand || 'Sika'}</div><h3 class="text-xl font-black text-gray-900 leading-tight">${p.name}</h3></div>
                         <div class="mt-2 text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded w-fit">${p.category || 'כללי'}</div>
                     </div>
                 </div>`).join('');
@@ -301,7 +270,7 @@
                 const vidId = t.url.includes('v=') ? t.url.split('v=')[1].split('&')[0] : '';
                 const thumb = vidId ? `https://img.youtube.com/vi/${vidId}/mqdefault.jpg` : 'https://placehold.co/300';
                 return `
-                <div onclick="openVideo('${t.url}')" class="card h-auto group cursor-pointer">
+                <div onclick="openVideo('${t.url}')" class="card h-auto group cursor-pointer border-0 shadow-lg">
                     <div class="relative aspect-video bg-black overflow-hidden rounded-t-2xl">
                         <img src="${thumb}" class="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition duration-500 group-hover:scale-110">
                         <div class="absolute inset-0 flex items-center justify-center"><div class="bg-white/20 p-3 rounded-full backdrop-blur-sm group-hover:scale-110 transition"><i data-lucide="play" class="text-white fill-white"></i></div></div>
@@ -312,21 +281,12 @@
             lucide.createIcons();
         }
 
-        // --- Logic ---
         window.filterCat = (cat) => {
-            document.querySelectorAll('#filtersArea button').forEach(b => {
-                b.className = "px-6 py-2 rounded-full bg-white text-gray-600 border font-bold text-sm hover:border-red-500";
-            });
-            document.getElementById('cat-'+cat).className = "px-6 py-2 rounded-full bg-black text-white font-bold text-sm shadow-lg transform scale-105";
-            let list = state.products;
-            if(cat !== 'all') list = list.filter(p => p.category === cat);
-            renderCatalog(list);
+            document.querySelectorAll('#filtersArea button').forEach(b => b.className="px-6 py-2 rounded-full bg-white text-gray-600 border font-bold text-sm hover:border-[var(--brand-accent)] transition");
+            document.getElementById('cat-'+cat).className="px-6 py-2 rounded-full bg-black text-white font-bold text-sm shadow-lg transform scale-105 transition";
+            renderCatalog(cat==='all' ? state.products : state.products.filter(p => p.category === cat));
         };
         
-        window.filterBrand = (name) => {
-             renderCatalog(state.products.filter(p => p.brand === name));
-        };
-
         window.filterItems = () => {
             const t = document.getElementById('searchInput').value.toLowerCase();
             if(state.view === 'catalog') renderCatalog(state.products.filter(p => p.name.toLowerCase().includes(t)));
@@ -340,21 +300,19 @@
             document.getElementById('pmName').innerText = p.name;
             document.getElementById('pmBrand').innerText = p.brand || 'Sika';
             document.getElementById('pmCat').innerText = p.category || 'כללי';
-            document.getElementById('pmDesc').innerText = p.marketingDesc || 'אין תיאור זמין.';
+            document.getElementById('pmDesc').innerText = p.marketingDesc || 'אין תיאור.';
             document.getElementById('pmImg').src = p.image || '';
             document.getElementById('pmCov').innerText = p.tech?.coverage || '-';
             document.getElementById('pmDry').innerText = p.tech?.drying || '-';
             document.getElementById('pmThick').innerText = p.tech?.thickness || '-';
 
-            // Video & Gallery
             const btn = document.getElementById('btnPlayVideo');
             if(p.video && p.video.includes('youtube')) btn.classList.remove('hidden'); else btn.classList.add('hidden');
             
             const gal = document.getElementById('pmGallery'); gal.innerHTML = "";
             const images = [p.image, ...(p.gallery||[])].filter(Boolean);
-            if(images.length > 1) {
-                images.forEach(url => gal.innerHTML += `<img src="${url}" onclick="document.getElementById('pmImg').src='${url}'" class="gal-thumb">`);
-            }
+            if(images.length > 1) images.forEach(url => gal.innerHTML += `<img src="${url}" onclick="document.getElementById('pmImg').src='${url}'" class="w-16 h-16 rounded-lg border-2 border-transparent hover:border-[var(--brand-accent)] cursor-pointer object-cover bg-white">`);
+            
             document.getElementById('prodModal').classList.add('open');
         };
         window.closeProd = () => document.getElementById('prodModal').classList.remove('open');
@@ -367,62 +325,40 @@
         };
         window.closeVideo = () => { document.getElementById('vidModal').classList.remove('open'); document.getElementById('vidFrame').src=""; };
 
-        // --- AI Brain Logic ---
         window.toggleChat = () => document.getElementById('chatWindow').classList.toggle('open');
         window.askRobotAboutCurrent = () => {
             closeProd(); 
             const win = document.getElementById('chatWindow');
             if(!win.classList.contains('open')) win.classList.add('open');
-            addMsg(`אני רואה שאתה מתעניין ב-${state.currentProduct.name}. מה תרצה לדעת? (מחיר, יישום, צריכה...)`, 'bot');
+            addMsg(`אני רואה שאתה מתעניין ב-${state.currentProduct.name}. מה תרצה לדעת?`, 'bot');
         };
         
-        window.sendChat = () => {
-            const txt = document.getElementById('chatInput').value.trim();
+        window.sendChat = (manualText) => {
+            const txt = manualText || document.getElementById('chatInput').value.trim();
             if(!txt) return;
             addMsg(txt, 'user');
             document.getElementById('chatInput').value = "";
             
             setTimeout(() => {
                 const lower = txt.toLowerCase();
-                
-                // 1. בדיקה בחוקי המוח (Admin Rules)
                 const rule = state.chatRules.find(r => lower.includes(r.trigger.toLowerCase()));
-                if(rule) {
-                    addMsg(rule.response, 'bot');
-                    return;
-                }
+                if(rule) { addMsg(rule.response, 'bot'); return; }
 
-                // 2. חיפוש מוצר
                 const foundProd = state.products.find(p => p.name.toLowerCase().includes(lower));
-                if(foundProd) {
-                    addMsg(`מצאתי את <b>${foundProd.name}</b> בקטלוג. פותח לך אותו...`, 'bot');
-                    setTimeout(()=>openProd(foundProd.id), 1500);
-                    return;
-                }
+                if(foundProd) { addMsg(`מצאתי את <b>${foundProd.name}</b>. פותח...`, 'bot'); setTimeout(()=>openProd(foundProd.id), 1500); return; }
 
-                // 3. חיפוש סרטון
-                const foundVid = state.tutorials.find(t => t.title.toLowerCase().includes(lower) || lower.includes('סרטון') && t.title.toLowerCase().includes(state.currentProduct?.name.toLowerCase()));
-                if(foundVid) {
-                    addMsg(`מצאתי סרטון הדרכה: "${foundVid.title}". מנגן עכשיו...`, 'bot');
-                    setTimeout(()=>openVideo(foundVid.url), 1500);
-                    return;
-                }
+                const foundVid = state.tutorials.find(t => t.title.toLowerCase().includes(lower) || (lower.includes('סרטון') && t.title.toLowerCase().includes((state.currentProduct?.name||'').toLowerCase())));
+                if(foundVid) { addMsg(`הנה סרטון הדרכה: "${foundVid.title}".`, 'bot'); setTimeout(()=>openVideo(foundVid.url), 1500); return; }
                 
-                // 4. ברירת מחדל
-                addMsg("אני לומד כל הזמן. נסה לשאול על שם של מוצר, או בקש 'סרטון'.", 'bot');
-                
+                addMsg("אני לומד כל הזמן. נסה לחפש שם מוצר או בקש 'סרטון'.", 'bot');
             }, 600);
         };
 
         function addMsg(h, t) {
             const d = document.createElement('div');
-            d.className = t==='user'
-                ? "bg-[#E3000F] text-white p-3 rounded-2xl rounded-br-none ml-auto max-w-[85%] shadow-md"
-                : "bg-white border text-gray-800 p-3 rounded-2xl rounded-tl-none mr-auto max-w-[85%] shadow-sm";
+            d.className = t==='user' ? "bg-[var(--brand-accent)] text-white p-3 rounded-2xl rounded-br-none ml-auto max-w-[85%] shadow-md" : "bg-white border text-gray-800 p-3 rounded-2xl rounded-tl-none mr-auto max-w-[85%] shadow-sm";
             d.innerHTML = h; 
-            const hist = document.getElementById('chatHistory');
-            hist.appendChild(d);
-            hist.scrollTop = hist.scrollHeight;
+            const hist = document.getElementById('chatHistory'); hist.appendChild(d); hist.scrollTop = hist.scrollHeight;
         }
 
         window.switchView = (v) => {
