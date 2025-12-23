@@ -3,27 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sika AI - מרכז העצבים</title>
+    <title>Sika Brain Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
-    <script type="module" src="./js/firebase-config.js"></script>
     <style>
         body { font-family: 'Heebo', sans-serif; background-color: #f3f4f6; }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* עיצוב סרגל גלילה */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
     <aside class="w-64 bg-slate-900 text-white flex flex-col shadow-xl z-20">
-        <div class="p-6 text-2xl font-black text-red-500 tracking-tighter">AI BRAIN <span class="text-white text-sm block font-normal">ממשק ניהול</span></div>
-        <nav class="flex-1 px-2 space-y-2">
-            <button onclick="switchTab('keywords')" class="w-full text-right p-3 rounded hover:bg-slate-800 transition flex items-center gap-3">🏷️ ניהול מילות מפתח</button>
-            <button onclick="switchTab('qa')" class="w-full text-right p-3 rounded hover:bg-slate-800 transition flex items-center gap-3">❓ ספריית שאלות/תשובות</button>
-            <button onclick="switchTab('logs')" class="w-full text-right p-3 rounded hover:bg-slate-800 transition flex items-center gap-3">📊 לוג שיחות</button>
+        <div class="p-6 text-2xl font-black text-red-500 tracking-tighter">
+            AI BRAIN <span class="text-white text-sm block font-normal opacity-70">ממשק ניהול</span>
+        </div>
+        <nav class="flex-1 px-2 space-y-2 mt-4">
+            <button onclick="switchTab('keywords')" class="w-full text-right p-3 rounded hover:bg-slate-800 transition flex items-center gap-3 font-medium">
+                🏷️ ניהול מילות מפתח
+            </button>
+            <button onclick="switchTab('qa')" class="w-full text-right p-3 rounded hover:bg-slate-800 transition flex items-center gap-3 font-medium">
+                ❓ ספריית תשובות
+            </button>
+            <button onclick="switchTab('logs')" class="w-full text-right p-3 rounded hover:bg-slate-800 transition flex items-center gap-3 font-medium">
+                📊 לוג שיחות חי
+            </button>
         </nav>
-        <div class="p-4 border-t border-slate-800 text-xs text-slate-500">מחובר כ-Admin</div>
+        <div class="p-4 border-t border-slate-800 text-xs text-green-400 flex items-center gap-2">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> מחובר לשרת
+        </div>
     </aside>
 
     <main class="flex-1 overflow-y-auto p-8 relative">
@@ -35,26 +47,36 @@
             
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-8">
                 <h3 class="font-bold mb-4 text-slate-600">הוספת ביטוי חדש</h3>
-                <div class="grid grid-cols-4 gap-4">
-                    <input id="kwPhrase" type="text" placeholder="ביטוי (למשל: סדק בקיר)" class="border p-2 rounded">
-                    <select id="kwCategory" class="border p-2 rounded">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input id="kwPhrase" type="text" placeholder="ביטוי (למשל: סדק בקיר)" class="border p-2 rounded focus:ring-2 ring-blue-500 outline-none">
+                    <select id="kwCategory" class="border p-2 rounded focus:ring-2 ring-blue-500 outline-none">
                         <option value="איטום">איטום</option>
                         <option value="בטון">בטון</option>
                         <option value="דבקים">דבקים</option>
                         <option value="ריצוף">ריצוף</option>
+                        <option value="כללי">כללי</option>
                     </select>
-                    <input id="kwWeight" type="number" placeholder="משקל (1-10)" class="border p-2 rounded" min="1" max="10">
-                    <input id="kwSynonyms" type="text" placeholder="מילים נרדפות (מופרד בפסיק)" class="border p-2 rounded">
+                    <input id="kwWeight" type="number" placeholder="משקל (1-10)" class="border p-2 rounded focus:ring-2 ring-blue-500 outline-none" min="1" max="10" value="1">
+                    <input id="kwSynonyms" type="text" placeholder="מילים נרדפות (מופרד בפסיק)" class="border p-2 rounded focus:ring-2 ring-blue-500 outline-none">
                 </div>
-                <button onclick="addKeyword()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700 transition">שמור מילת מפתח</button>
+                <button onclick="addKeyword()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">
+                    שמור מילת מפתח
+                </button>
             </div>
 
-            <div class="bg-white rounded-xl shadow overflow-hidden">
+            <div class="bg-white rounded-xl shadow overflow-hidden border border-slate-200">
                 <table class="w-full text-right">
-                    <thead class="bg-slate-100 text-slate-600">
-                        <tr><th class="p-4">ביטוי</th><th class="p-4">קטגוריה</th><th class="p-4">משקל</th><th class="p-4">נרדפות</th><th class="p-4">פעולה</th></tr>
+                    <thead class="bg-slate-50 text-slate-600 border-b">
+                        <tr>
+                            <th class="p-4 font-bold">ביטוי</th>
+                            <th class="p-4 font-bold">קטגוריה</th>
+                            <th class="p-4 font-bold">משקל</th>
+                            <th class="p-4 font-bold">נרדפות</th>
+                            <th class="p-4 font-bold">פעולה</th>
+                        </tr>
                     </thead>
-                    <tbody id="keywordsTable"></tbody>
+                    <tbody id="keywordsTable" class="divide-y divide-slate-100">
+                        </tbody>
                 </table>
             </div>
         </div>
@@ -64,106 +86,182 @@
             
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-8">
                 <div class="grid grid-cols-1 gap-4">
-                    <input id="qaPattern" type="text" placeholder="תבנית שאלה (למשל: איך מתקנים סדק?)" class="border p-3 rounded w-full">
-                    <textarea id="qaTemplate" rows="3" placeholder="תשובת המערכת (ניתן להשתמש ב HTML בסיסי)" class="border p-3 rounded w-full"></textarea>
+                    <div>
+                        <label class="text-sm font-bold text-slate-500 mb-1 block">תבנית שאלה</label>
+                        <input id="qaPattern" type="text" placeholder="למשל: איך מתקנים סדק בקיר?" class="border p-3 rounded w-full focus:ring-2 ring-green-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-sm font-bold text-slate-500 mb-1 block">תשובת המערכת</label>
+                        <textarea id="qaTemplate" rows="3" placeholder="התשובה שהרובוט יחזיר..." class="border p-3 rounded w-full focus:ring-2 ring-green-500 outline-none"></textarea>
+                    </div>
                     <div class="flex gap-4">
-                        <input id="qaProducts" type="text" placeholder="מק״ט מוצרים קשורים (מופרד פסיק)" class="border p-2 rounded flex-1">
-                        <input id="qaPriority" type="number" placeholder="עדיפות (0-5)" class="border p-2 rounded w-32">
+                        <div class="flex-1">
+                            <label class="text-sm font-bold text-slate-500 mb-1 block">מוצרים קשורים (מק״ט)</label>
+                            <input id="qaProducts" type="text" placeholder="SKU1, SKU2..." class="border p-2 rounded w-full focus:ring-2 ring-green-500 outline-none">
+                        </div>
+                        <div class="w-32">
+                            <label class="text-sm font-bold text-slate-500 mb-1 block">עדיפות</label>
+                            <input id="qaPriority" type="number" placeholder="0-5" class="border p-2 rounded w-full focus:ring-2 ring-green-500 outline-none" value="1">
+                        </div>
                     </div>
                 </div>
-                <button onclick="addQA()" class="mt-4 bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition">שמור שאלה</button>
+                <button onclick="addQA()" class="mt-4 bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition shadow-lg shadow-green-200">
+                    שמור שאלה
+                </button>
             </div>
 
-            <div id="qaList" class="grid gap-4"></div>
+            <div id="qaList" class="grid gap-4">
+                </div>
         </div>
 
         <div id="logs" class="tab-content">
-            <h2 class="text-3xl font-bold text-slate-800 mb-6">לוג שיחות (Live)</h2>
-            <div class="bg-white rounded-xl shadow overflow-hidden">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6">לוג שיחות בזמן אמת</h2>
+            <div class="bg-white rounded-xl shadow overflow-hidden border border-slate-200">
                 <table class="w-full text-right">
                     <thead class="bg-slate-800 text-white">
-                        <tr><th class="p-3">שאלה</th><th class="p-3">זוהה כ...</th><th class="p-3">ביטחון</th><th class="p-3">זמן</th></tr>
+                        <tr>
+                            <th class="p-3">שאלה</th>
+                            <th class="p-3">תשובה שניתנה</th>
+                            <th class="p-3">ציון ביטחון</th>
+                            <th class="p-3">זמן</th>
+                        </tr>
                     </thead>
-                    <tbody id="logsTable" class="text-sm text-slate-700"></tbody>
+                    <tbody id="logsTable" class="text-sm text-slate-700 divide-y divide-slate-100">
+                        </tbody>
                 </table>
             </div>
         </div>
 
     </main>
 
-    <script type="module">
-        import { db, auth } from "./firebase-config.js";
-        import { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    <script>
+        // פונקציות דמי (Placeholder) למניעת שגיאות עד שהמודול נטען
+        window.switchTab = () => {};
+        window.addKeyword = () => {};
+        window.addQA = () => {};
+        window.deleteDocById = () => {};
+    </script>
 
-        // ניווט טאבים
+    <script type="module">
+        // 1. חיבור ישיר ל-Firebase (פותר את בעיית ה-404)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, limit, Timestamp } 
+        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZuI7AaDZVteUhUT_eIVCR5SIdU0jhqUg",
+            authDomain: "saban-kiosk-core.firebaseapp.com",
+            projectId: "saban-kiosk-core",
+            storageBucket: "saban-kiosk-core.firebasestorage.app",
+            messagingSenderId: "866976260818",
+            appId: "1:866976260818:web:0e3ec12df72291c77f430b",
+            measurementId: "G-ZVV23FRJ6N"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        console.log("🔥 Firebase Connected Successfully");
+
+        // 2. פונקציות ממשק (חשופות ל-window כדי שה-HTML יכיר אותן)
+        
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
         };
 
-        // --- ניהול מילות מפתח ---
         window.addKeyword = async () => {
             const phrase = document.getElementById('kwPhrase').value;
             if(!phrase) return alert("חובה להזין ביטוי");
             
-            await addDoc(collection(db, "keywords"), {
-                phrase: phrase,
-                category: document.getElementById('kwCategory').value,
-                weight: parseInt(document.getElementById('kwWeight').value) || 1,
-                synonyms: document.getElementById('kwSynonyms').value.split(',').map(s => s.trim()).filter(s=>s)
-            });
-            alert("נשמר!");
-            document.getElementById('kwPhrase').value = "";
+            try {
+                await addDoc(collection(db, "keywords"), {
+                    phrase: phrase,
+                    category: document.getElementById('kwCategory').value,
+                    weight: parseInt(document.getElementById('kwWeight').value) || 1,
+                    synonyms: document.getElementById('kwSynonyms').value.split(',').map(s => s.trim()).filter(s=>s)
+                });
+                alert("✅ מילת מפתח נשמרה!");
+                document.getElementById('kwPhrase').value = "";
+                document.getElementById('kwSynonyms').value = "";
+            } catch (e) {
+                console.error(e);
+                alert("שגיאה בשמירה");
+            }
         };
 
+        window.addQA = async () => {
+            const pattern = document.getElementById('qaPattern').value;
+            if(!pattern) return alert("חסרה תבנית שאלה");
+
+            try {
+                await addDoc(collection(db, "qa_library"), {
+                    question_patterns: [pattern],
+                    answer_template: document.getElementById('qaTemplate').value,
+                    related_products: document.getElementById('qaProducts').value.split(',').map(s => s.trim()).filter(s=>s),
+                    priority: parseInt(document.getElementById('qaPriority').value) || 0
+                });
+                alert("✅ שאלה נשמרה!");
+                document.getElementById('qaPattern').value = "";
+                document.getElementById('qaTemplate').value = "";
+            } catch (e) {
+                console.error(e);
+                alert("שגיאה בשמירה");
+            }
+        };
+
+        window.deleteDocById = async (col, id) => {
+            if(confirm("האם אתה בטוח שברצונך למחוק?")) {
+                try {
+                    await deleteDoc(doc(db, col, id));
+                } catch (e) {
+                    console.error("Error deleting:", e);
+                    alert("שגיאה במחיקה");
+                }
+            }
+        };
+
+        // 3. האזנה לשינויים בזמן אמת (Realtime Listeners)
+
+        // טעינת מילות מפתח
         onSnapshot(collection(db, "keywords"), (snap) => {
             const tbody = document.getElementById('keywordsTable');
             tbody.innerHTML = "";
             snap.forEach(d => {
                 const k = d.data();
                 tbody.innerHTML += `
-                    <tr class="border-b hover:bg-slate-50">
-                        <td class="p-4 font-bold">${k.phrase}</td>
-                        <td class="p-4"><span class="bg-slate-200 px-2 py-1 rounded text-xs">${k.category}</span></td>
-                        <td class="p-4">${k.weight}</td>
-                        <td class="p-4 text-xs text-slate-500">${k.synonyms?.join(', ')}</td>
-                        <td class="p-4"><button onclick="deleteDocById('keywords','${d.id}')" class="text-red-500 hover:underline">מחק</button></td>
+                    <tr class="border-b hover:bg-slate-50 transition">
+                        <td class="p-4 font-bold text-slate-700">${k.phrase}</td>
+                        <td class="p-4"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">${k.category}</span></td>
+                        <td class="p-4 text-slate-600">${k.weight}</td>
+                        <td class="p-4 text-xs text-slate-500 italic">${k.synonyms?.join(', ')}</td>
+                        <td class="p-4"><button onclick="deleteDocById('keywords','${d.id}')" class="text-red-500 hover:text-red-700 font-bold hover:bg-red-50 p-2 rounded transition">מחק</button></td>
                     </tr>`;
             });
         });
 
-        // --- ניהול שאלות ---
-        window.addQA = async () => {
-            const pattern = document.getElementById('qaPattern').value;
-            if(!pattern) return alert("חסרה תבנית שאלה");
-
-            await addDoc(collection(db, "qa_library"), {
-                question_patterns: [pattern],
-                answer_template: document.getElementById('qaTemplate').value,
-                related_products: document.getElementById('qaProducts').value.split(',').map(s => s.trim()).filter(s=>s),
-                priority: parseInt(document.getElementById('qaPriority').value) || 0
-            });
-            alert("נשמר!");
-        };
-
+        // טעינת שאלות ותשובות
         onSnapshot(collection(db, "qa_library"), (snap) => {
             const container = document.getElementById('qaList');
             container.innerHTML = "";
             snap.forEach(d => {
                 const qa = d.data();
                 container.innerHTML += `
-                    <div class="bg-white p-4 rounded border-l-4 border-green-500 shadow-sm flex justify-between">
+                    <div class="bg-white p-5 rounded-lg border-r-4 border-green-500 shadow-sm flex justify-between items-start hover:shadow-md transition">
                         <div>
-                            <div class="font-bold text-lg">"${qa.question_patterns[0]}"</div>
-                            <div class="text-slate-600 mt-1">${qa.answer_template}</div>
-                            <div class="text-xs text-slate-400 mt-2">מוצרים: ${qa.related_products} | עדיפות: ${qa.priority}</div>
+                            <div class="font-bold text-lg text-slate-800">"${qa.question_patterns[0]}"</div>
+                            <div class="text-slate-600 mt-2 bg-slate-50 p-3 rounded">${qa.answer_template}</div>
+                            <div class="text-xs text-slate-400 mt-2 flex gap-2">
+                                <span>🛒 מוצרים: ${qa.related_products?.join(', ') || 'אין'}</span>
+                                <span>⚡ עדיפות: ${qa.priority}</span>
+                            </div>
                         </div>
-                        <button onclick="deleteDocById('qa_library','${d.id}')" class="text-red-500">🗑️</button>
+                        <button onclick="deleteDocById('qa_library','${d.id}')" class="text-gray-400 hover:text-red-500 p-2"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                     </div>`;
             });
         });
 
-        // --- לוגים ---
+        // טעינת לוגים
         const logsQuery = query(collection(db, "conversations_logs"), orderBy("timestamp", "desc"), limit(20));
         onSnapshot(logsQuery, (snap) => {
             const tbody = document.getElementById('logsTable');
@@ -172,23 +270,15 @@
                 const log = d.data();
                 const time = log.timestamp ? new Date(log.timestamp.seconds * 1000).toLocaleTimeString('he-IL') : '-';
                 tbody.innerHTML += `
-                    <tr class="border-b">
-                        <td class="p-3 font-medium">${log.user_query}</td>
-                        <td class="p-3 text-xs">${log.matched_keywords?.join(', ')}</td>
-                        <td class="p-3 text-xs">${(log.confidence * 100).toFixed(0)}%</td>
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 font-medium text-slate-800">${log.user_query || log.query}</td>
+                        <td class="p-3 text-sm text-slate-600 truncate max-w-xs">${log.response_preview || log.response}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${log.confidence > 0.7 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${((log.confidence || 0) * 100).toFixed(0)}%</span></td>
                         <td class="p-3 text-xs text-slate-400">${time}</td>
                     </tr>`;
             });
         });
 
-        // גלובלי למחיקה
-        window.deleteDocById = async (col, id) => {
-            if(confirm("למחוק רשומה זו?")) {
-                const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js");
-                const { db } = await import('./firebase-config.js');
-                await deleteDoc(doc(db, col, id));
-            }
-        };
     </script>
 </body>
 </html>
