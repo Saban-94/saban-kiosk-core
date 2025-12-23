@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sika AI - Chameleon Kiosk</title>
+    <title>Sika AI - Smart Interaction</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -11,388 +11,286 @@
     
     <style>
         :root {
-            /* משתנים דינאמיים - "אפקט הזיקית" */
-            --brand-color: #E3000F; /* ברירת מחדל: אדום סיקה */
+            --brand-color: #E3000F;
             --brand-dark: #111;
-            --brand-bg: #ffffff;
         }
 
         body { 
             font-family: 'Heebo', sans-serif; 
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
             height: 100vh; overflow: hidden; display: flex; 
-            transition: all 0.5s ease;
         }
 
-        /* --- 1. הרובוט המרחף (ללא רקע, גדול) --- */
+        /* --- Robot Avatar --- */
         #robot-container {
-            position: fixed;
-            bottom: -20px; /* קצת חתוך למטה למראה ריאליסטי */
-            left: 20px;
-            z-index: 50;
-            pointer-events: none;
-            transition: all 0.5s ease;
+            position: fixed; bottom: -20px; left: 20px; z-index: 50;
+            pointer-events: none; transition: 0.5s;
         }
-
         .robot-img {
-            width: 450px; /* גדול ומרשים */
-            height: auto;
-            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4)); /* צל ריאליסטי במקום עיגול */
-            animation: float 6s ease-in-out infinite;
-            transform-origin: bottom center;
+            width: 420px; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4));
+            animation: float 6s ease-in-out infinite; transform-origin: bottom center;
         }
-
-        /* אנימציות רובוט */
         .state-thinking .robot-img { animation: pulse 1s infinite alternate; filter: drop-shadow(0 0 30px var(--brand-color)); }
-        .state-speaking .robot-img { animation: talk 0.2s infinite alternate; }
-
-        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-15px) rotate(1deg); } }
+        
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.02); } }
-        @keyframes talk { from { transform: translateY(0); } to { transform: translateY(-5px); } }
 
-        /* --- 2. אזור ראשי (חיפוש ותשובה) --- */
+        /* --- Main Layout --- */
         .main-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            transition: 0.5s;
-            z-index: 10;
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 40px;
+            transition: 0.5s; z-index: 10;
         }
-        
-        .main-area.sidebar-open {
-            margin-right: 400px; /* פינוי מקום לפאנל הימני */
-            align-items: flex-start; /* הזזה שמאלה */
-            padding-right: 60px;
-        }
+        .main-area.sidebar-open { margin-right: 450px; align-items: flex-start; padding-right: 60px; }
 
-        /* Search Hero */
-        .search-container {
-            width: 100%; max-width: 800px;
-            text-align: center;
-            transition: 0.5s;
-        }
-        
-        .logo-text {
-            font-size: 4rem; font-weight: 900; color: var(--brand-dark);
-            margin-bottom: 20px; letter-spacing: -2px;
-            transition: 0.3s;
-        }
+        /* Search */
+        .search-container { width: 100%; max-width: 800px; text-align: center; transition: 0.5s; }
+        .logo-text { font-size: 4rem; font-weight: 900; color: var(--brand-dark); margin-bottom: 20px; }
         .logo-text span { color: var(--brand-color); }
 
         .search-box {
-            position: relative;
-            background: white;
-            border-radius: 50px;
+            background: white; border-radius: 50px;
             box-shadow: 0 15px 40px -10px rgba(0,0,0,0.15);
-            display: flex; align-items: center;
-            padding: 10px; border: 2px solid transparent;
-            transition: 0.3s;
+            display: flex; align-items: center; padding: 10px;
+            border: 2px solid transparent; transition: 0.3s;
         }
-        .search-box:focus-within { 
-            border-color: var(--brand-color); 
-            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.2);
-            transform: scale(1.02);
-        }
-        
-        .search-input {
-            flex: 1; padding: 15px 25px; font-size: 20px; border: none; outline: none; background: transparent; font-weight: 500;
-        }
-        
+        .search-box:focus-within { border-color: var(--brand-color); transform: scale(1.02); }
+        .search-input { flex: 1; padding: 15px 25px; font-size: 20px; outline: none; font-weight: 500; }
         .search-btn {
             width: 60px; height: 60px; border-radius: 50%;
             background: var(--brand-color); color: white;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            cursor: pointer; transition: 0.2s;
         }
-        .search-btn:hover { transform: scale(1.1) rotate(-10deg); }
 
-        /* AI Answer Bubble */
+        /* Chat Bubble */
         .ai-bubble {
-            margin-top: 40px;
-            background: white;
-            padding: 30px;
-            border-radius: 0 30px 30px 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            max-width: 800px;
-            width: 100%;
-            font-size: 20px;
-            line-height: 1.6;
-            color: #334155;
+            margin-top: 40px; background: white; padding: 30px;
+            border-radius: 0 30px 30px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            width: 100%; font-size: 20px; line-height: 1.6; color: #334155;
             border-right: 6px solid var(--brand-color);
-            opacity: 0; transform: translateY(20px);
-            transition: 0.5s;
-            position: relative;
+            opacity: 0; transform: translateY(20px); transition: 0.5s;
         }
         .ai-bubble.visible { opacity: 1; transform: translateY(0); }
-        .ai-bubble::before {
-            content: "AI Analysis";
-            position: absolute; top: -15px; right: 0;
-            background: var(--brand-color); color: white;
-            font-size: 12px; font-weight: bold; padding: 4px 12px; border-radius: 12px;
-        }
 
-        /* --- 3. פאנל צד ימין (תוצאות ויזואליות) --- */
+        /* --- Right Panel (Product Card) --- */
         #right-panel {
-            position: fixed;
-            top: 0; right: 0; bottom: 0;
-            width: 400px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-left: 1px solid rgba(0,0,0,0.05);
-            box-shadow: -10px 0 40px rgba(0,0,0,0.05);
-            padding: 30px;
-            transform: translateX(110%); /* מוסתר בהתחלה */
-            transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-            z-index: 40;
-            overflow-y: auto;
-            display: flex; flex-direction: column; gap: 20px;
+            position: fixed; top: 0; right: 0; bottom: 0; width: 450px;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.05); padding: 30px;
+            transform: translateX(110%); transition: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 40; overflow-y: auto;
         }
         #right-panel.open { transform: translateX(0); }
 
-        .panel-header { font-size: 14px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
-
-        /* כרטיסי מוצר בפאנל */
-        .side-card {
-            background: white; border-radius: 20px; overflow: hidden;
-            border: 1px solid #f1f5f9; box-shadow: 0 10px 20px -5px rgba(0,0,0,0.08);
-            transition: 0.2s; cursor: pointer;
+        /* --- Product Card Design --- */
+        .product-full-card {
+            background: white; border-radius: 24px; overflow: hidden;
+            border: 1px solid #f1f5f9; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+            animation: slideIn 0.5s ease-out;
         }
-        .side-card:hover { transform: translateY(-5px); border-color: var(--brand-color); }
+        .p-image { height: 250px; background: #f8fafc; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; }
+        .p-image img { max-height: 100%; max-width: 100%; object-fit: contain; mix-blend-multiply; }
+        .p-brand-badge { position: absolute; top: 15px; right: 15px; background: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-transform: uppercase; color: #64748b; }
         
-        .side-img { height: 180px; display: flex; align-items: center; justify-content: center; background: #f8fafc; padding: 20px; }
-        .side-img img { max-height: 100%; max-width: 100%; object-fit: contain; mix-blend-multiply; }
-        
-        .side-content { padding: 15px; }
-        .side-brand { font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
-        .side-title { font-size: 18px; font-weight: 900; color: #1e293b; line-height: 1.2; margin-bottom: 5px; }
-        
-        .action-chip {
-            display: inline-flex; align-items: center; gap: 4px;
-            font-size: 11px; font-weight: bold; color: white;
-            background: var(--brand-color); padding: 4px 10px; border-radius: 20px;
-            margin-top: 10px;
+        .p-content { padding: 25px; }
+        .p-title { font-size: 28px; font-weight: 900; color: #1e293b; line-height: 1.1; margin-bottom: 10px; }
+        .p-desc { font-size: 15px; color: #64748b; line-height: 1.5; margin-bottom: 20px; }
+
+        /* Specs Grid */
+        .specs-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .spec-item { background: #f8fafc; padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; }
+        .spec-label { font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 4px; }
+        .spec-val { font-size: 14px; font-weight: 800; color: #334155; }
+
+        /* Smart Questions (Chips) */
+        .questions-area { margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 20px; }
+        .q-title { font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 10px; display: block; }
+        .chips-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip { 
+            background: white; border: 1px solid #e2e8f0; padding: 8px 16px; 
+            border-radius: 20px; font-size: 13px; font-weight: 600; color: #475569; 
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
+        .chip:hover { background: var(--brand-color); color: white; border-color: var(--brand-color); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(227,0,15,0.2); }
+        .chip i { width: 14px; height: 14px; }
 
-        /* Video Embed */
-        .video-embed { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 16px; overflow: hidden; margin-bottom: 10px; }
-
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body id="app-body">
+<body>
 
     <div id="robot-container">
-        <img src="https://saban-94.github.io/saban-kiosk-core/public/1000187746.jpg" class="robot-img" alt="Sika AI">
+        <img src="https://saban-94.github.io/saban-kiosk-core/public/1000187746.jpg" class="robot-img">
     </div>
 
     <div class="main-area" id="mainArea">
-        
         <div class="search-container">
             <div class="logo-text">Sika<span>.Ai</span></div>
-            
             <div class="search-box">
-                <input type="text" id="mainInput" class="search-input" placeholder="מה מחפשים היום? (למשל: סרנפיל 520, איטום גג...)" autocomplete="off">
-                <div class="search-btn" onclick="handleSearch()"><i data-lucide="search" size="24"></i></div>
+                <input type="text" id="mainInput" class="search-input" placeholder="שאל אותי על מוצר, יישום או פתרון..." onkeypress="if(event.key==='Enter') handleSearch()">
+                <div class="search-btn" onclick="handleSearch()"><i data-lucide="search"></i></div>
             </div>
-
+            
             <div id="aiBubble" class="ai-bubble">
-                <span id="aiText"></span>
-                <span class="animate-pulse">|</span>
+                <span id="aiText"></span><span class="animate-pulse">|</span>
             </div>
         </div>
-
     </div>
 
-    <div id="right-panel">
-        </div>
+    <div id="right-panel"></div>
 
     <script type="module">
         import { db } from './js/firebase-config.js';
         import { collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        import { askBrain } from './js/ai-brain.js';
-
+        
         lucide.createIcons();
-
-        // Local Cache
         let productsDB = [];
-        let videosDB = [];
 
-        // Init
-        async function init() {
-            const pSnap = await getDocs(collection(db, "products"));
-            productsDB = pSnap.docs.map(d => ({id:d.id, ...d.data()}));
-            
-            const vSnap = await getDocs(collection(db, "tutorials"));
-            videosDB = vSnap.docs.map(d => ({id:d.id, ...d.data()}));
-            
-            console.log("DB Loaded:", productsDB.length, "products");
-        }
-        init();
-
-        // --- Core Functions ---
+        // Load Data
+        (async function init() {
+            const snap = await getDocs(collection(db, "products"));
+            productsDB = snap.docs.map(d => ({id:d.id, ...d.data()}));
+            console.log("Products Loaded:", productsDB.length);
+        })();
 
         window.handleSearch = async () => {
             const input = document.getElementById('mainInput');
             const query = input.value.trim();
             if(!query) return;
 
-            // 1. UI States
             setRobotState('thinking');
-            document.getElementById('aiBubble').classList.remove('visible');
-            document.getElementById('right-panel').classList.remove('open');
-            document.getElementById('mainArea').classList.remove('sidebar-open');
-            document.getElementById('aiText').innerHTML = "";
-
-            try {
-                // 2. Ask Brain
-                const response = await askBrain(query);
-                
-                // 3. Update UI
-                setRobotState('speaking');
-                document.getElementById('aiBubble').classList.add('visible');
-                
-                // Typewriter Effect
-                typeWriter(response.answer, 'aiText', () => {
-                    setRobotState('idle');
-                });
-
-                // 4. Populate Right Panel (Smart Sidebar)
-                populateSidebar(query, response);
-
-            } catch(e) {
-                console.error(e);
-                setRobotState('idle');
-            }
             
-            input.value = "";
+            // Simulate AI Delay
+            setTimeout(() => {
+                const product = findProduct(query);
+                
+                if(product) {
+                    showProductCard(product);
+                    typeAnswer(`מצאתי את <b>${product.name}</b> בקטלוג. הנה המפרט המלא שלו.`);
+                } else {
+                    typeAnswer("לא מצאתי מוצר מדויק, נסה לחפש שם אחר (למשל: סיקה טופ).");
+                    closeSidebar();
+                }
+                
+                setRobotState('idle');
+                input.value = "";
+            }, 1000);
         };
 
-        // --- Sidebar & Chameleon Logic ---
+        function findProduct(query) {
+            const q = query.toLowerCase();
+            return productsDB.find(p => p.name.toLowerCase().includes(q) || (p.brand && p.brand.toLowerCase().includes(q)));
+        }
 
-        function populateSidebar(query, brainResponse) {
+        // --- בונה את כרטיס המוצר החכם ---
+        function showProductCard(p) {
             const panel = document.getElementById('right-panel');
-            panel.innerHTML = ""; // Clear
             
-            // 1. Find relevant products (from Brain OR keyword match)
-            let hits = [];
-            
-            // Priority: Brain products first
-            if(brainResponse.products && brainResponse.products.length > 0) {
-                hits = brainResponse.products;
-            } else {
-                // Fallback: Simple keyword match from cache
-                const lowerQ = query.toLowerCase();
-                hits = productsDB.filter(p => 
-                    p.name.toLowerCase().includes(lowerQ) || 
-                    (p.brand && p.brand.toLowerCase().includes(lowerQ))
-                );
-            }
+            // שליפת נתונים (עם ברירת מחדל אם חסר)
+            const cov = p.tech?.coverage || '-';
+            const dry = p.tech?.drying || '-';
+            const vid = p.video || '';
 
-            // 2. Chameleon Effect (Change colors based on first hit)
-            if(hits.length > 0) {
-                applyChameleonTheme(hits[0].brand);
-            } else {
-                applyChameleonTheme('Sika'); // Default
-            }
-
-            // 3. Render Cards
-            if(hits.length > 0) {
-                panel.innerHTML += `<div class="panel-header">מוצרים שנמצאו (${hits.length})</div>`;
-                
-                hits.forEach(p => {
-                    // Check for video
-                    const vid = videosDB.find(v => v.title.toLowerCase().includes(p.name.toLowerCase()));
+            panel.innerHTML = `
+                <div class="product-full-card">
+                    <div class="p-image">
+                        <span class="p-brand-badge">${p.brand || 'Sika'}</span>
+                        <img src="${p.image || 'https://placehold.co/300'}" alt="${p.name}">
+                    </div>
                     
-                    let html = `
-                    <div class="side-card" onclick="alert('פותח דף מוצר: ${p.name}')">
-                        <div class="side-img">
-                            <img src="${p.image || 'https://placehold.co/200'}" alt="${p.name}">
-                        </div>
-                        <div class="side-content">
-                            <div class="side-brand">${p.brand || 'General'}</div>
-                            <div class="side-title">${p.name}</div>
-                            
-                            <div class="flex gap-2 mt-2">
-                                <div class="action-chip"><i data-lucide="shopping-cart" size="10"></i> הזמן</div>
-                                ${vid ? `<div class="action-chip" style="background:#2563eb"><i data-lucide="play" size="10"></i> וידאו</div>` : ''}
+                    <div class="p-content">
+                        <h2 class="p-title">${p.name}</h2>
+                        <p class="p-desc">${p.marketingDesc || 'מוצר מקצועי ליישום בבנייה.'}</p>
+                        
+                        <div class="specs-grid">
+                            <div class="spec-item">
+                                <span class="spec-label"><i data-lucide="maximize" class="inline w-3"></i> כיסוי</span>
+                                <span class="spec-val">${cov}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label"><i data-lucide="clock" class="inline w-3"></i> ייבוש</span>
+                                <span class="spec-val">${dry}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label"><i data-lucide="package" class="inline w-3"></i> אריזה</span>
+                                <span class="spec-val">שק/דלי</span>
                             </div>
                         </div>
-                    </div>`;
-                    
-                    // If video exists, append player below card
-                    if(vid) {
-                        const vidId = vid.url.split('v=')[1]?.split('&')[0];
-                        if(vidId) {
-                            html += `
-                            <div class="video-embed mt-2">
-                                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${vidId}" frameborder="0" allowfullscreen></iframe>
-                            </div>`;
-                        }
-                    }
 
-                    panel.innerHTML += html;
-                });
+                        <div class="questions-area">
+                            <span class="q-title">מה תרצה לדעת על המוצר?</span>
+                            <div class="chips-container">
+                                <div class="chip" onclick="askDetail('${p.name}', 'coverage', '${cov}')">
+                                    <i data-lucide="ruler"></i> מה הצריכה למ"ר?
+                                </div>
+                                <div class="chip" onclick="askDetail('${p.name}', 'drying', '${dry}')">
+                                    <i data-lucide="clock"></i> כמה זמן לייבוש?
+                                </div>
+                                ${vid ? `<div class="chip" style="background:#eff6ff; color:#2563eb; border-color:#bfdbfe" onclick="playVideo('${vid}')"><i data-lucide="play-circle"></i> נגן סרטון יישום</div>` : ''}
+                                <div class="chip" onclick="askDetail('${p.name}', 'price', 'צור קשר עם נציג')">
+                                    <i data-lucide="tag"></i> מחיר וזמינות
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-                // Open Sidebar
-                panel.classList.add('open');
-                document.getElementById('mainArea').classList.add('sidebar-open');
-                lucide.createIcons();
-            }
+            // Open & Animate
+            panel.classList.add('open');
+            document.getElementById('mainArea').classList.add('sidebar-open');
+            lucide.createIcons();
+            applyBrandTheme(p.brand);
         }
 
-        function applyChameleonTheme(brandName) {
+        // --- דינמיקה: תשובה אוטומטית לשאלות מהצ'יפים ---
+        window.askDetail = (pName, type, value) => {
+            setRobotState('speaking');
+            
+            let text = "";
+            if(type === 'coverage') text = `הצריכה המומלצת ל-<b>${pName}</b> היא ${value}. כדאי לחשב לפי שטח היישום.`;
+            if(type === 'drying') text = `זמן הייבוש של <b>${pName}</b> הוא ${value}. יש להמתין לייבוש מלא לפני שכבה נוספת.`;
+            if(type === 'price') text = `לגבי מחיר ל-<b>${pName}</b>, אני ממליץ לפנות לנציג המכירות בדלפק.`;
+
+            typeAnswer(text);
+        };
+
+        window.playVideo = (url) => {
+            const vidId = url.split('v=')[1]?.split('&')[0];
+            if(vidId) {
+                const panel = document.getElementById('right-panel');
+                // הוספת נגן וידאו בראש הפאנל
+                const frame = document.createElement('div');
+                frame.innerHTML = `<iframe width="100%" height="220" src="https://www.youtube.com/embed/${vidId}?autoplay=1" frameborder="0" allowfullscreen style="border-radius:16px; margin-bottom:20px; box-shadow:0 10px 30px rgba(0,0,0,0.2)"></iframe>`;
+                panel.prepend(frame);
+                typeAnswer("מנגן סרטון יישום... צפייה מהנה!");
+            }
+        };
+
+        // --- Visuals ---
+        function typeAnswer(html) {
+            const el = document.getElementById('aiText');
+            document.getElementById('aiBubble').classList.add('visible');
+            el.innerHTML = html; // תומך ב-HTML (הדגשות)
+        }
+
+        function applyBrandTheme(brand) {
             const root = document.documentElement;
-            brandName = (brandName || '').toLowerCase();
-
-            if(brandName.includes('sika')) {
-                root.style.setProperty('--brand-color', '#E3000F'); // Red
-                root.style.setProperty('--brand-dark', '#111');
-            } else if(brandName.includes('nir') || brandName.includes('נירלט')) {
-                root.style.setProperty('--brand-color', '#8bc34a'); // Greenish
-            } else if(brandName.includes('tambour') || brandName.includes('טמבור')) {
-                root.style.setProperty('--brand-color', '#ff5722'); // Orange
-            } else {
-                root.style.setProperty('--brand-color', '#2563eb'); // Generic Blue
-            }
+            brand = (brand||'').toLowerCase();
+            if(brand.includes('sika')) root.style.setProperty('--brand-color', '#E3000F');
+            else if(brand.includes('nir')) root.style.setProperty('--brand-color', '#8bc34a');
+            else root.style.setProperty('--brand-color', '#2563eb');
         }
 
-        // --- Animation Helpers ---
-
-        function setRobotState(state) {
-            const el = document.getElementById('robot-container');
-            // Reset classes
-            el.className = ""; 
-            el.classList.add(`state-${state}`);
+        function setRobotState(s) {
+            document.getElementById('robot-container').className = s === 'thinking' ? 'state-thinking' : '';
         }
-
-        function typeWriter(text, elementId, callback) {
-            const el = document.getElementById(elementId);
-            el.innerHTML = "";
-            
-            // Clean AI codes for display
-            const cleanText = text.replace(/{{.*?}}/g, '').replace(/\[\[.*?\]\]/g, '');
-            
-            let i = 0;
-            const speed = 25; 
-
-            function type() {
-                if (i < cleanText.length) {
-                    el.innerHTML += cleanText.charAt(i);
-                    i++;
-                    setTimeout(type, speed);
-                } else {
-                    if (callback) callback();
-                }
-            }
-            type();
+        function closeSidebar() {
+            document.getElementById('right-panel').classList.remove('open');
+            document.getElementById('mainArea').classList.remove('sidebar-open');
         }
-
-        // Handle Enter Key
-        document.getElementById('mainInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') handleSearch();
-        });
 
     </script>
 </body>
