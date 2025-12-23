@@ -1,29 +1,35 @@
 import { db } from './firebase-config.js';
 import { collection, getDocs, writeBatch, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-const realProducts = [
-    { name: "SikaTop Seal 107", brand: "SIKA", category: "sealing", marketingDesc: "איטום צמנטי גמיש (דו רכיבי) - הסטנדרט העולמי לאיטום מקלחות.", image: "https://gilar.co.il/wp-content/uploads/2023/12/SikaTop-Seal-107-25-Kg.png", status: "recommended", tech: {coverage: "3-4 ק\"ג/מ\"ר", drying: "6 שעות", thickness: "2 מ\"מ"} },
-    { name: "Sikaflex 11FC+", brand: "SIKA", category: "glues", marketingDesc: "דבק ואיטום פוליאוריטני רב תכליתי. מדביק הכל להכל, גמיש וחזק.", image: "https://gilar.co.il/wp-content/uploads/2020/12/Sikaflex-11-FC.jpg", status: "sale", tech: {coverage: "משתנה", drying: "24 שעות", thickness: "-"} },
-    { name: "Thermokir 603", brand: "THERMOKIR", category: "concrete", marketingDesc: "טיח תרמי לבידוד מעולה וחיסכון באנרגיה. מונע עיבוי.", image: "https://www.thermokir.co.il/wp-content/uploads/2019/06/603.png", status: "standard", tech: {coverage: "14 ק\"ג/מ\"ר", drying: "48 שעות", thickness: "30 מ\"מ"} },
-    { name: "Mister Fix 109", brand: "MISTER FIX", category: "glues", marketingDesc: "דבק אקרילי C1TE להדבקת אריחי קרמיקה ופורצלן.", image: "https://karmit-mrfix.com/wp-content/uploads/2020/07/109.png", status: "standard", tech: {coverage: "5 ק\"ג/מ\"ר", drying: "24 שעות", thickness: "5 מ\"מ"} },
-    { name: "BG Bond 10", brand: "BG BOND", category: "sealing", marketingDesc: "מסטיק ביטומני לאיטום ושיקום סדקים.", image: "https://bgbond.co.il/wp-content/uploads/2020/05/BG-10-new.png", status: "new", tech: {coverage: "משתנה", drying: "12 שעות", thickness: "מריחה"} },
-    { name: "Super Paint", brand: "TAMBOUR", category: "flooring", marketingDesc: "צבע אקרילי איכותי ועמיד במיוחד לקירות חוץ ופנים.", image: "https://tambour.co.il/wp-content/uploads/2020/05/Supercryl_Matt_White_Bucket_5L_Front.jpg", status: "standard", tech: {coverage: "1 ליטר/9 מ\"ר", drying: "שעתיים", thickness: "-"} }
+// נתוני מותגים יציבים
+const brandsData = [
+    { name: "Sika", logo: "https://placehold.co/200x100/FFC500/000?text=Sika", slogan: "בונים אמון", themeColor: "sika" },
+    { name: "Thermokir", logo: "https://placehold.co/200x100/0057B8/fff?text=Thermokir", slogan: "פתרונות מתקדמים", themeColor: "thermokir" },
+    { name: "Mister Fix", logo: "https://placehold.co/200x100/E3000F/fff?text=Fix", slogan: "מקצוענות בבניה", themeColor: "misterfix" },
+    { name: "Nirlat", logo: "https://placehold.co/200x100/8BC53F/fff?text=Nirlat", slogan: "הצבע של ישראל", themeColor: "nirlat" },
+    { name: "Tambour", logo: "https://placehold.co/200x100/E31E24/fff?text=Tambour", slogan: "תראו מה שצבע יכול לעשות", themeColor: "tambour" },
+    { name: "BG Bond", logo: "https://placehold.co/200x100/F37021/fff?text=BG", slogan: "טכנולוגיה בבניה", themeColor: "bg" }
+];
+
+const productsData = [
+    { name: "Sika TopSeal 107", brand: "Sika", category: "sealing", marketingDesc: "איטום צמנטי גמיש", image: "https://placehold.co/400?text=107", tech: {coverage:"3kg", drying:"6h", thickness:"2mm"} },
+    { name: "Thermokir 603", brand: "Thermokir", category: "concrete", marketingDesc: "טיח תרמי", image: "https://placehold.co/400?text=603", tech: {coverage:"14kg", drying:"48h", thickness:"30mm"} }
 ];
 
 export async function seedRealData() {
-    console.log("Starting Seed Process...");
+    console.log("Seeding...");
     const batch = writeBatch(db);
-    
-    // 1. ניקוי נתונים קיימים
-    const snapshot = await getDocs(collection(db, "products"));
-    snapshot.forEach((doc) => batch.delete(doc.ref));
-    
-    // 2. הוספת מוצרים חדשים
-    realProducts.forEach((p) => {
-        const newRef = doc(collection(db, "products"));
-        batch.set(newRef, { ...p, createdAt: Date.now() });
-    });
-    
+
+    // ניקוי וטעינת מותגים
+    const bSnap = await getDocs(collection(db, "brands"));
+    bSnap.forEach(d => batch.delete(d.ref));
+    brandsData.forEach(b => batch.set(doc(collection(db, "brands")), { ...b, createdAt: Date.now() }));
+
+    // ניקוי וטעינת מוצרים
+    const pSnap = await getDocs(collection(db, "products"));
+    pSnap.forEach(d => batch.delete(d.ref));
+    productsData.forEach(p => batch.set(doc(collection(db, "products")), { ...p, createdAt: Date.now() }));
+
     await batch.commit();
-    console.log("Seed Completed!");
+    console.log("Done!");
 }
