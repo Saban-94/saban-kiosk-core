@@ -200,11 +200,14 @@
         let currentProducts = [];
         let currentProduct = null;
 
-        // Stable Mock Data with Working Images
+        // Stable Mock Data with Working Images (Fixes 404s)
         const mockProducts = [
             { id: "1", name: "Sika TopSeal 107", brand: "SIKA", category: "sealing", marketingDesc: "איטום צמנטי גמיש (דו רכיבי).", image: "https://placehold.co/400x400?text=Sika+107", tech: {coverage: "3-4", drying: "6h", thickness: "2mm"} },
             { id: "2", name: "Thermokir 603", brand: "THERMOKIR", category: "concrete", marketingDesc: "טיח תרמי לבידוד.", image: "https://placehold.co/400x400?text=Thermokir+603", tech: {coverage: "14", drying: "48h", thickness: "30mm"} },
-            { id: "3", name: "Mister Fix 109", brand: "MISTER FIX", category: "glues", marketingDesc: "דבק אקרילי.", image: "https://placehold.co/400x400?text=Fix+109", tech: {coverage: "5", drying: "24h", thickness: "5mm"} }
+            { id: "3", name: "Mister Fix 109", brand: "MISTER FIX", category: "glues", marketingDesc: "דבק אקרילי.", image: "https://placehold.co/400x400?text=Fix+109", tech: {coverage: "5", drying: "24h", thickness: "5mm"} },
+            { id: "4", name: "Nirlat Super", brand: "NIRLAT", category: "flooring", marketingDesc: "צבע אקרילי.", image: "https://placehold.co/400x400?text=Nirlat", tech: {coverage: "9", drying: "2h", thickness: "-"} },
+            { id: "5", name: "Tambour Supercryl", brand: "TAMBOUR", category: "flooring", marketingDesc: "סופרקריל מט פלוס.", image: "https://placehold.co/400x400?text=Tambour", tech: {coverage: "10", drying: "2h", thickness: "-"} },
+            { id: "6", name: "BG Bond 10", brand: "BG BOND", category: "sealing", marketingDesc: "מסטיק איטום.", image: "https://placehold.co/400x400?text=BG+Bond", tech: {coverage: "-", drying: "12h", thickness: "-"} }
         ];
 
         window.init = async () => {
