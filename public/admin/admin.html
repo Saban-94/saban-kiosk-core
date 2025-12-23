@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sika Admin Suite - Ultimate</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -16,24 +15,35 @@
         .view-panel { display: none; height: 100%; flex-direction: column; }
         .view-panel.active { display: flex; }
         .nav-item { display: flex; items-center; gap: 12px; padding: 16px 24px; color: #64748b; font-weight: 500; cursor: pointer; transition: all 0.2s; border-right: 4px solid transparent; }
-        .nav-item:hover { background: #f1f5f9; color: #0f172a; }
-        .nav-item.active { background: #eff6ff; color: #2563eb; border-right-color: #2563eb; font-weight: 700; }
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-weight: 600; transition: 0.2s; cursor: pointer; font-size: 14px; }
+        .nav-item:hover, .nav-item.active { background: #eff6ff; color: #2563eb; border-right-color: #2563eb; font-weight: 700; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .btn-primary { background: #2563eb; color: white; }
         .btn-danger { background: white; border: 1px solid #fee2e2; color: #dc2626; }
         .btn-ai { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; }
-        .input-std { width: 100%; border: 1px solid #cbd5e1; padding: 12px; border-radius: 10px; outline: none; background: #fff; font-size: 14px; transition: 0.2s; }
+        .input-std { width: 100%; border: 1px solid #cbd5e1; padding: 12px; border-radius: 10px; outline: none; background: #fff; font-size: 14px; }
         .input-std:focus { border-color: #2563eb; ring: 2px solid #bfdbfe; }
         .tab-link { padding: 12px 24px; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 2px solid transparent; }
         .tab-link.active { color: #2563eb; border-bottom-color: #2563eb; }
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
+        
+        /* Media & Gallery */
         .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .gallery-item { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9; border: 1px solid #e2e8f0; }
         .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
         .remove-btn { position: absolute; top: 4px; left: 4px; background: rgba(220, 38, 38, 0.9); color: white; padding: 4px; border-radius: 4px; opacity: 0; transition: 0.2s; cursor: pointer; }
         .gallery-item:hover .remove-btn { opacity: 1; }
-        .chat-rule-item { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* Academy Cards */
+        .academy-card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; position: relative; }
+        .academy-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .vid-thumb { aspect-ratio: 16/9; background: #000; position: relative; }
+        .vid-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; opacity: 0.8; }
+        .card-content { padding: 20px; }
+        .delete-vid { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 6px; border-radius: 6px; opacity: 0; transition: 0.2s; cursor: pointer; z-index: 10; }
+        .academy-card:hover .delete-vid { opacity: 1; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.4s; z-index: 100; display: flex; gap: 10px; }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -44,13 +54,13 @@
     <div class="sidebar">
         <div class="p-8 border-b border-gray-100 flex items-center gap-4">
             <div class="w-12 h-12 bg-[#E3000F] rounded-xl flex items-center justify-center text-white font-black italic text-2xl shadow-xl shadow-red-100">S</div>
-            <div><h1 class="text-2xl font-black text-gray-900 tracking-tight">SIKA</h1><p class="text-xs text-gray-400 font-bold tracking-widest uppercase">Admin Ultimate</p></div>
+            <div><h1 class="text-2xl font-black text-gray-900 tracking-tight">SIKA</h1><p class="text-xs text-gray-400 font-bold tracking-widest uppercase">Admin</p></div>
         </div>
         <nav class="flex-1 py-8 space-y-2">
             <div class="nav-item active" onclick="app.switchView('products')"><i data-lucide="package"></i> קטלוג מוצרים</div>
-            <div class="nav-item" onclick="app.switchView('brands')"><i data-lucide="tag"></i> ניהול מותגים</div>
+            <div class="nav-item" onclick="app.switchView('brands')"><i data-lucide="tag"></i> מותגים</div>
             <div class="nav-item" onclick="app.switchView('tutorials')"><i data-lucide="graduation-cap"></i> אקדמיה</div>
-            <div class="nav-item" onclick="app.switchView('ai-logic')"><i data-lucide="bot"></i> המוח של סיקה</div>
+            <div class="nav-item" onclick="app.switchView('ai-brain')"><i data-lucide="bot"></i> המוח של סיקה</div>
         </nav>
         <div class="p-6 border-t border-gray-100 bg-gray-50/50">
             <button onclick="app.runSeed()" class="w-full py-3 rounded-xl border border-gray-200 text-gray-500 font-bold hover:bg-white hover:text-red-500 hover:border-red-200 transition text-xs flex items-center justify-center gap-2">
@@ -145,27 +155,9 @@
             <div id="tutorialsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 overflow-y-auto pb-10"></div>
         </div>
 
-        <div id="view-ai-logic" class="view-panel">
+        <div id="view-ai-brain" class="view-panel">
             <h2 class="text-3xl font-black text-gray-900 mb-6">המוח של סיקה-Ai</h2>
-            <div class="flex gap-6 h-full">
-                <div class="w-1/3 bg-white p-6 rounded-3xl border border-gray-200 shadow-sm h-fit">
-                    <h3 class="font-bold text-lg mb-4">הוספת חוק שיחה</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 block mb-1">מילת מפתח (טריגר)</label>
-                            <input id="aiTrigger" class="input-std" placeholder="למשל: מחיר, סדק, תודה...">
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 block mb-1">תשובת הרובוט</label>
-                            <textarea id="aiResponse" class="input-std h-32" placeholder="מה הרובוט יענה..."></textarea>
-                        </div>
-                        <button onclick="app.addChatRule()" class="btn btn-primary w-full">שמור חוק</button>
-                    </div>
-                </div>
-                <div class="flex-1 overflow-y-auto pr-2" id="chatRulesList">
-                    <div class="text-center text-gray-400 mt-10">טוען חוקים...</div>
-                </div>
-            </div>
+            <div class="text-gray-500">מערכת חוקים לניהול תשובות אוטומטיות (Coming Soon)</div>
         </div>
 
     </div>
@@ -200,7 +192,6 @@
                 app.loadProducts();
                 app.loadBrands();
                 app.loadTutorials();
-                app.loadChatRules();
             },
 
             // Navigation
@@ -209,8 +200,7 @@
                 document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
                 document.getElementById('view-'+v).classList.add('active');
                 
-                // Active link highlight logic
-                const map = {'products':0, 'brands':1, 'tutorials':2, 'ai-logic':3};
+                const map = {'products':0, 'brands':1, 'tutorials':2, 'ai-brain':3};
                 if(map[v] !== undefined) document.querySelectorAll('.nav-item')[map[v]].classList.add('active');
             },
             switchTab: (t, btn) => {
@@ -220,37 +210,7 @@
                 btn.classList.add('active');
             },
 
-            // --- CHAT RULES LOGIC ---
-            loadChatRules: () => {
-                onSnapshot(collection(db, "chat_rules"), (snap) => {
-                    const list = document.getElementById('chatRulesList');
-                    list.innerHTML = "";
-                    snap.forEach(d => {
-                        const r = {id: d.id, ...d.data()};
-                        list.innerHTML += `
-                            <div class="chat-rule-item">
-                                <div>
-                                    <div class="font-bold text-gray-800 text-sm mb-1">מילת מפתח: <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">${r.trigger}</span></div>
-                                    <div class="text-gray-600 text-sm">${r.response}</div>
-                                </div>
-                                <button onclick="app.deleteChatRule('${r.id}')" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" size="16"></i></button>
-                            </div>`;
-                    });
-                    lucide.createIcons();
-                });
-            },
-            addChatRule: async () => {
-                const trigger = document.getElementById('aiTrigger').value;
-                const response = document.getElementById('aiResponse').value;
-                if(!trigger || !response) return alert("מלא את שני השדות");
-                await addDoc(collection(db, "chat_rules"), { trigger, response, createdAt: Date.now() });
-                document.getElementById('aiTrigger').value = "";
-                document.getElementById('aiResponse').value = "";
-                app.showToast("חוק שיחה נשמר");
-            },
-            deleteChatRule: async (id) => { if(confirm("למחוק חוק?")) await deleteDoc(doc(db, "chat_rules", id)); },
-
-            // --- PRODUCTS & OTHERS ---
+            // Products
             loadProducts: () => { 
                 const list = document.getElementById('productsList');
                 onSnapshot(collection(db, "products"), (snap) => {
