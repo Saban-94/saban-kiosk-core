@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>SikaOS - מרכז טעינת נתונים</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body{background:#f0f2f5; font-family:sans-serif;}</style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-10">
+
+    <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-2xl text-center">
+        <h1 class="text-3xl font-black text-gray-800 mb-2">💾 מרכז טעינת נתונים</h1>
+        <p class="text-gray-500 mb-8">טעינת קבצי ה-Seed מהתיקייה local/js לתוך Firestore</p>
+
+        <div id="status" class="bg-gray-900 text-green-400 font-mono text-left text-sm p-4 rounded-lg h-48 overflow-y-auto mb-8 dir-ltr">
+            > ממתין לפקודה...<br>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+                <h3 class="font-bold text-gray-700">מוצרים (Products)</h3>
+                <button onclick="upload('products', window.sikaProductsFull, 'Sika')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition">
+                    טען מוצרי Sika 📦
+                </button>
+                <button onclick="upload('products', window.thermokirProducts, 'Thermokir')" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded transition">
+                    טען מוצרי תרמוקיר 📦
+                </button>
+                <button onclick="upload('products', window.mrfixProducts, 'Mr. Fix')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition">
+                    טען מוצרי כרמית 📦
+                </button>
+            </div>
+
+            <div class="space-y-2">
+                <h3 class="font-bold text-gray-700">המוח (Chat Rules)</h3>
+                <button onclick="upload('chat_rules', window.sikaSoul, 'Sika Brain')" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded transition border border-gray-600">
+                    טען מוח Sika 🧠
+                </button>
+                <button onclick="upload('chat_rules', window.thermokirSoul, 'Thermokir Brain')" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded transition border border-gray-600">
+                    טען מוח תרמוקיר 🧠
+                </button>
+                <button onclick="upload('chat_rules', window.mrfixSoul, 'Mr. Fix Brain')" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded transition border border-gray-600">
+                    טען מוח כרמית 🧠
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/products-seed.js"></script> 
+    <script src="js/thermokir-seed.js"></script>
+    <script src="js/mrfix-seed.js"></script>
+    
+    <script src="js/sika-soul-50.js"></script> 
+    <script src="js/thermokir-soul.js"></script> 
+    <script src="js/mrfix-soul.js"></script> 
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        
+        // יבוא ההגדרות מהקובץ שלך (או הגדרה מחדש אם הייבוא נכשל)
+        import { firebaseConfig } from './js/firebase-config.js'; 
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const logEl = document.getElementById('status');
+
+        function log(msg) {
+            logEl.innerHTML += `> ${msg}<br>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // פונקציה גלובלית לטעינה
+        window.upload = async (collectionName, dataArray, sourceName) => {
+            if (!dataArray || dataArray.length === 0) {
+                log(`❌ שגיאה: לא נמצאו נתונים עבור ${sourceName}. בדוק את קובץ ה-JS.`);
+                return;
+            }
+
+            log(`🚀 מתחיל טעינה של ${dataArray.length} פריטים מ-${sourceName} ל-${collectionName}...`);
+            
+            let count = 0;
+            for (const item of dataArray) {
+                try {
+                    // הוספת Timestamp כדי לדעת מתי נטען
+                    await addDoc(collection(db, collectionName), {
+                        ...item,
+                        createdAt: new Date(),
+                        source: sourceName
+                    });
+                    count++;
+                    if(count % 5 === 0) log(`... נטענו ${count} פריטים`); // עדכון כל 5 פריטים כדי לא להעמיס
+                } catch (e) {
+                    log(`❌ שגיאה בפריט: ${e.message}`);
+                }
+            }
+            log(`✅ סיום! ${count} פריטים של ${sourceName} נטענו בהצלחה.`);
+            alert(`הטעינה של ${sourceName} הסתיימה!`);
+        };
+    </script>
+</body>
+</html>
