@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Sika Data Loader</title>
+    <style>body{font-family:sans-serif;padding:20px;background:#f4f4f9;text-align:center}.btn{background:#E3000F;color:white;padding:15px 30px;font-size:20px;border:none;cursor:pointer;border-radius:8px;margin:10px;}.btn:hover{background:#c4000d}#log{background:#222;color:#0f0;text-align:left;padding:20px;height:300px;overflow-y:auto;margin-top:20px;direction:ltr;border-radius:8px;}</style>
+</head>
+<body>
+    <h1>🚀 טעינת נתונים - Sika</h1>
+    <p>קובץ זה יטען 50 מוצרים ו-50 שיחות של Sika למאגר.</p>
+    <button class="btn" onclick="startUpload()">התחל טעינה (Sika)</button>
+    <div id="log">ממתין...</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        // 1. הגדרות Firebase (הדבק את שלך כאן אם זה שונה)
+        const firebaseConfig = {
+          apiKey: "AIzaSyDZuI7AaDZVteUhUT_eIVCR5SIdU0jhqUg",
+          authDomain: "saban-kiosk-core.firebaseapp.com",
+          projectId: "saban-kiosk-core"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const logEl = document.getElementById('log');
+
+        // 2. הנתונים (מוטמעים בפנים למניעת שגיאות)
+        const products = [
+            // העתק לכאן את 50 המוצרים של Sika מהשיחה הקודמת (sikaProductsFull)
+            // לדוגמה:
+            { name: "Sikalastic 560", brand: "Sika", category: "איטום", tech: { coverage: "1.5", drying: "24h" } },
+            { name: "SikaTop 107 Seal", brand: "Sika", category: "איטום", tech: { coverage: "4", drying: "6h" } },
+            // ... (המשך להעתיק את כל הרשימה שיצרנו)
+        ];
+
+        const chats = [
+            // העתק לכאן את 50 השיחות של Sika (sikaSoul)
+            { trigger: "איטום גג", response: "אני ממליץ על Sikalastic 560..." },
+            // ...
+        ];
+
+        // 3. לוגיקת טעינה
+        window.startUpload = async () => {
+            logEl.innerHTML = "מתחיל תהליך...<br>";
+            
+            // טעינת מוצרים
+            for (const p of products) {
+                try {
+                    await addDoc(collection(db, "products"), p);
+                    logEl.innerHTML += `✅ מוצר נטען: ${p.name}<br>`;
+                } catch (e) { logEl.innerHTML += `❌ שגיאה: ${e.message}<br>`; }
+            }
+
+            // טעינת שיחות
+            for (const c of chats) {
+                try {
+                    await addDoc(collection(db, "chat_rules"), c);
+                    logEl.innerHTML += `✅ שיחה נטענה: ${c.trigger}<br>`;
+                } catch (e) { logEl.innerHTML += `❌ שגיאה: ${e.message}<br>`; }
+            }
+            
+            logEl.innerHTML += "🏁 <b>התהליך הסתיים בהצלחה!</b><br>";
+            logEl.scrollTop = logEl.scrollHeight;
+        };
+    </script>
+</body>
+</html>
