@@ -1,5 +1,4 @@
-const sikaProductsFull = [
-    // --- איטום (Waterproofing) ---
+window.mrfixProducts    // --- איטום (Waterproofing) ---
     {
         name: "Sikalastic 560",
         brand: "Sika",
