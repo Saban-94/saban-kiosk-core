@@ -251,9 +251,7 @@ const mrfixProducts = [
         tech: { coverage: "נקודתי", drying: "מהיר", thickness: "-" },
         features: ["חזק מאוד", "דו רכיבי", "עיגון"]
     },
-    
-    // השלמה ל-50 מוצרים עם מוצרים משלימים
-    { name: "טיט 182", brand: "Carmit Mr. Fix", category: "בנייה", marketingDesc: "טיט לקירות", image: "https://placehold.co/300x300?text=Tit182", tech: {}, features: [] },
+        { name: "טיט 182", brand: "Carmit Mr. Fix", category: "בנייה", marketingDesc: "טיט לקירות", image: "https://placehold.co/300x300?text=Tit182", tech: {}, features: [] },
     { name: "טיח חוץ 710", brand: "Carmit Mr. Fix", category: "טיח", marketingDesc: "טיח חוץ", image: "https://placehold.co/300x300?text=Plaster710", tech: {}, features: [] },
     { name: "דבק אקרילי 120", brand: "Carmit Mr. Fix", category: "דבקים", marketingDesc: "דבק אקרילי", image: "https://placehold.co/300x300?text=Glue120", tech: {}, features: [] },
     { name: "שליכט צבעוני", brand: "Carmit Mr. Fix", category: "צבע", marketingDesc: "שליכט דקורטיבי", image: "https://placehold.co/300x300?text=Schlicht", tech: {}, features: [] },
