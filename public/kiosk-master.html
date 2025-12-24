@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SikaOS - Master CRM</title>
+    <link rel="icon" href="sikabot.png" type="image/png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --sidebar-bg: #0f172a; --accent: #E3000F; --bg-light: #f1f5f9; }
+        body { font-family: 'Heebo', sans-serif; background: var(--sidebar-bg); height: 100vh; display: flex; overflow: hidden; color: #334155; }
+        
+        /* Layout */
+        .sidebar { width: 260px; background: var(--sidebar-bg); border-left: 1px solid #1e293b; display: flex; flex-direction: column; z-index: 50; flex-shrink: 0; }
+        .workspace { flex: 1; background: var(--bg-light); border-radius: 30px 0 0 30px; margin-right: -20px; z-index: 10; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: -10px 0 30px rgba(0,0,0,0.3); }
+        .sim-pane { width: 400px; background: #0f172a; border-right: 1px solid #1e293b; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; align-items: center; justify-content: center; }
+
+        /* Components */
+        .nav-item { padding: 14px 24px; cursor: pointer; color: #94a3b8; font-weight: 500; display: flex; items-center; gap: 12px; transition: 0.2s; border-right: 4px solid transparent; }
+        .nav-item:hover { background: #1e293b; color: white; }
+        .nav-item.active { background: #1e293b; color: var(--accent); border-right-color: var(--accent); }
+        
+        .view-section { display: none; height: 100%; flex-direction: column; }
+        .view-section.active { display: flex; }
+        
+        .input-field { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; font-size: 14px; outline: none; }
+        .input-field:focus { border-color: var(--accent); ring: 2px solid rgba(227,0,15,0.1); }
+        
+        .btn { padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; transition: 0.2s; border:none; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: #c4000d; }
+        .btn-ghost { background: white; border: 1px solid #cbd5e1; color: #475569; }
+        
+        .list-item { padding: 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: white; transition: 0.2s; }
+        .list-item:hover { background: #f8fafc; border-right: 4px solid var(--accent); }
+        .list-item.selected { background: #eff6ff; border-right: 4px solid #2563eb; }
+
+        /* Simulator */
+        .device-mockup { width: 340px; height: 680px; background: white; border-radius: 40px; border: 12px solid #1e293b; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .sim-screen { flex: 1; background: #f8fafc; overflow-y: auto; padding: 10px; }
+        .chat-bubble { padding: 10px 14px; border-radius: 16px; font-size: 13px; max-width: 90%; margin-bottom: 8px; animation: pop 0.3s; }
+        .cb-bot { background: white; border: 1px solid #e2e8f0; color: #334155; border-top-right-radius: 2px; }
+        .cb-user { background: var(--accent); color: white; align-self: flex-end; border-top-left-radius: 2px; }
+        @keyframes pop { from{transform:translateY(10px);opacity:0} to{transform:translateY(0);opacity:1} }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="p-8 flex items-center gap-4 border-b border-slate-700">
+            <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-white font-black">S</div>
+            <div><h1 class="text-white font-bold">SikaOS</h1><p class="text-xs text-gray-500">ADMIN</p></div>
+        </div>
+        <nav class="flex-1 py-4 space-y-1">
+            <div class="nav-item active" onclick="safeApp.nav('products')"><i data-lucide="package"></i> ניהול מוצרים</div>
+            <div class="nav-item" onclick="safeApp.nav('brain')"><i data-lucide="brain-circuit"></i> מוח (AI)</div>
+            <div class="nav-item" onclick="safeApp.nav('brands')"><i data-lucide="award"></i> מותגים</div>
+        </nav>
+        <div id="status" class="p-4 text-center text-xs text-green-500 font-bold border-t border-slate-700">● מחובר</div>
+    </div>
+
+    <div class="workspace">
+        
+        <div id="view-products" class="view-section active">
+            <div class="p-6 bg-white border-b flex justify-between items-center">
+                <h2 class="text-2xl font-black text-slate-800">מוצרים</h2>
+                <div class="flex gap-2">
+                    <button onclick="safeApp.reset('prod')" class="btn btn-ghost">✨ חדש</button>
+                    <button onclick="safeApp.saveProd()" class="btn btn-primary">💾 שמור מוצר</button>
+                </div>
+            </div>
+            <div class="flex h-full overflow-hidden">
+                <div class="w-80 bg-white border-l flex flex-col">
+                    <div class="p-3 bg-slate-50 border-b"><input onkeyup="safeApp.filter('prodList', this.value)" class="input-field mb-0" placeholder="חפש מוצר..."></div>
+                    <div id="prodList" class="flex-1 overflow-y-auto"></div>
+                </div>
+                <div class="flex-1 p-8 overflow-y-auto">
+                    <div id="prodMode" class="text-xs font-bold text-gray-400 uppercase mb-2">מצב: יצירת חדש</div>
+                    <input type="hidden" id="pId">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="pName" class="input-field" placeholder="שם המוצר" oninput="safeApp.simProd()">
+                        <input id="pBrand" class="input-field" placeholder="מותג (Sika, Thermokir...)" oninput="safeApp.simProd()">
+                    </div>
+                    <input id="pImg" class="input-field" placeholder="תמונה URL" oninput="safeApp.simProd()">
+                    <textarea id="pDesc" class="input-field h-32" placeholder="תיאור שיווקי..." oninput="safeApp.simProd()"></textarea>
+                    
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mt-4">
+                        <h3 class="text-xs font-bold text-blue-800 mb-2">נתונים טכניים</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input id="pCov" class="input-field text-center" placeholder="כיסוי" oninput="safeApp.simProd()">
+                            <input id="pDry" class="input-field text-center" placeholder="ייבוש" oninput="safeApp.simProd()">
+                            <input id="pThick" class="input-field text-center" placeholder="עובי" oninput="safeApp.simProd()">
+                        </div>
+                    </div>
+                    
+                    <button onclick="safeApp.delItem('products', document.getElementById('pId').value)" class="text-red-500 text-xs mt-4 hover:underline">מחק מוצר זה</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-brain" class="view-section">
+            <div class="p-6 bg-white border-b flex justify-between items-center">
+                <h2 class="text-2xl font-black text-slate-800">המוח (AI Brain)</h2>
+                <div class="flex gap-2">
+                    <button onclick="safeApp.reset('brain')" class="btn btn-ghost">✨ חדש</button>
+                    <button onclick="safeApp.saveQA()" class="btn btn-primary">💾 שמור חוק</button>
+                </div>
+            </div>
+            <div class="flex h-full overflow-hidden">
+                <div class="w-80 bg-white border-l flex flex-col">
+                    <div class="p-3 bg-slate-50 border-b font-bold text-xs text-gray-500">רשימת חוקים</div>
+                    <div id="qaList" class="flex-1 overflow-y-auto"></div>
+                </div>
+                <div class="flex-1 p-8 overflow-y-auto">
+                    <div id="brainMode" class="text-xs font-bold text-gray-400 uppercase mb-2">מצב: יצירת חוק חדש</div>
+                    <input type="hidden" id="qaId">
+                    
+                    <label class="text-xs font-bold text-blue-600 block mb-1">הטריגר (מה המשתמש שואל?)</label>
+                    <input id="qaTrig" class="input-field font-bold text-lg" placeholder='למשל: "איטום גג", "מחיר"...' oninput="safeApp.simChat()">
+                    
+                    <label class="text-xs font-bold text-green-600 block mb-1 mt-4">התשובה (מה הרובוט עונה?)</label>
+                    <textarea id="qaResp" class="input-field h-40" placeholder="התשובה שלך כאן..." oninput="safeApp.simChat()"></textarea>
+                    
+                    <div class="flex gap-2 text-xs text-gray-500 mt-2">
+                        <span>כלים:</span>
+                        <span class="cursor-pointer hover:text-blue-600" onclick="safeApp.addTag('{{typing}}')">⏳ השהייה</span>
+                        <span class="cursor-pointer hover:text-blue-600" onclick="safeApp.addTag('{{product:שם}}')">📦 מוצר</span>
+                        <span class="cursor-pointer hover:text-blue-600" onclick="safeApp.addTag('{{video:שם}}')">🎬 וידאו</span>
+                    </div>
+
+                    <button onclick="safeApp.delItem('chat_rules', document.getElementById('qaId').value)" class="text-red-500 text-xs mt-6 hover:underline">מחק חוק זה</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-brands" class="view-section">
+            <div class="p-6 border-b"><h2 class="text-2xl font-black">מותגים</h2></div>
+            <div class="flex p-6 gap-6">
+                <div id="brandList" class="w-64 border rounded bg-white h-96 overflow-y-auto"></div>
+                <div class="flex-1">
+                    <input type="hidden" id="bId">
+                    <input id="bName" class="input-field" placeholder="שם המותג">
+                    <input id="bLogo" class="input-field" placeholder="לוגו URL">
+                    <button onclick="safeApp.saveBrand()" class="btn btn-primary mt-2">שמור מותג</button>
+                    <button onclick="safeApp.delItem('brands', document.getElementById('bId').value)" class="btn btn-ghost text-red-500 mt-2">מחק</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="sim-pane">
+        <div class="device-mockup">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-xl z-20"></div>
+            <div class="sim-screen" id="simScreen">
+                
+                <div id="s-prod" class="hidden h-full flex flex-col">
+                    <div class="h-1/2 bg-gray-100 flex items-center justify-center p-4">
+                        <img id="s-img" src="https://placehold.co/200" class="max-h-full max-w-full mix-blend-multiply">
+                    </div>
+                    <div class="p-4 bg-white flex-1">
+                        <div id="s-brand" class="text-xs font-bold text-gray-400">BRAND</div>
+                        <h2 id="s-name" class="text-xl font-black text-slate-800 leading-tight">שם המוצר</h2>
+                        <div class="flex gap-2 mt-4 text-center">
+                            <div class="flex-1 bg-slate-50 p-2 rounded border"><div class="text-[10px]">כיסוי</div><div id="s-cov" class="font-bold text-xs">-</div></div>
+                            <div class="flex-1 bg-slate-50 p-2 rounded border"><div class="text-[10px]">ייבוש</div><div id="s-dry" class="font-bold text-xs">-</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="s-chat" class="hidden h-full flex flex-col justify-end pb-10">
+                    <div class="chat-bubble cb-bot">שלום, אני Sika AI.</div>
+                    <div class="chat-bubble cb-user" id="s-user">...</div>
+                    <div class="chat-bubble cb-bot" id="s-bot">...</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } 
+        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        // ייבוא קונפיגורציה (אם קיים) או הגדרה ידנית
+        import { firebaseConfig } from './js/firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        lucide.createIcons();
+
+        const Logic = {
+            data: { prods: [], rules: [], brands: [] },
+
+            init: () => {
+                Logic.listeners();
+                Logic.nav('products');
+            },
+
+            nav: (v) => {
+                document.querySelectorAll('.view-section').forEach(e => e.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+                document.getElementById('view-'+v).classList.add('active');
+                
+                // Sim Toggle
+                document.getElementById('s-prod').classList.add('hidden');
+                document.getElementById('s-chat').classList.add('hidden');
+                if(v==='brain') document.getElementById('s-chat').classList.remove('hidden');
+                else document.getElementById('s-prod').classList.remove('hidden');
+            },
+
+            // --- LISTENERS (REAL TIME) ---
+            listeners: () => {
+                // Products
+                onSnapshot(collection(db, "products"), s => {
+                    const l = document.getElementById('prodList'); l.innerHTML = "";
+                    Logic.data.prods = [];
+                    s.forEach(d => {
+                        const p = {id:d.id, ...d.data()};
+                        Logic.data.prods.push(p);
+                        l.innerHTML += `<div onclick="safeApp.loadProd('${p.id}', this)" class="list-item text-sm">
+                            <span class="font-bold">${p.name}</span>
+                            <span class="text-xs text-gray-400">${p.brand || ''}</span>
+                        </div>`;
+                    });
+                });
+
+                // Chat Rules
+                onSnapshot(collection(db, "chat_rules"), s => {
+                    const l = document.getElementById('qaList'); l.innerHTML = "";
+                    Logic.data.rules = [];
+                    s.forEach(d => {
+                        const r = {id:d.id, ...d.data()};
+                        Logic.data.rules.push(r);
+                        l.innerHTML += `<div onclick="safeApp.loadRule('${r.id}', this)" class="list-item flex-col items-start gap-1">
+                            <span class="font-bold text-xs text-blue-600">${r.trigger}</span>
+                            <span class="text-xs text-gray-400 truncate w-full">${r.response}</span>
+                        </div>`;
+                    });
+                });
+
+                // Brands
+                onSnapshot(collection(db, "brands"), s => {
+                    const l = document.getElementById('brandList'); l.innerHTML = "";
+                    s.forEach(d => {
+                        const b = {id:d.id, ...d.data()};
+                        l.innerHTML += `<div onclick="safeApp.loadBrand('${b.id}')" class="list-item">${b.name}</div>`;
+                    });
+                });
+            },
+
+            // --- CRUD ACTIONS ---
+            
+            // 1. Products
+            loadProd: (id, el) => {
+                highlight(el);
+                const p = Logic.data.prods.find(x => x.id === id);
+                document.getElementById('pId').value = p.id;
+                document.getElementById('pName').value = p.name;
+                document.getElementById('pBrand').value = p.brand;
+                document.getElementById('pImg').value = p.image || '';
+                document.getElementById('pDesc').value = p.marketingDesc || '';
+                document.getElementById('pCov').value = p.tech?.coverage || '';
+                document.getElementById('pDry').value = p.tech?.drying || '';
+                document.getElementById('pThick').value = p.tech?.thickness || '';
+                
+                document.getElementById('prodMode').innerText = "מצב: עריכה";
+                document.getElementById('prodMode').className = "text-xs font-bold text-blue-600 uppercase mb-2";
+                Logic.simProd();
+            },
+            saveProd: async () => {
+                const id = document.getElementById('pId').value;
+                const d = {
+                    name: document.getElementById('pName').value,
+                    brand: document.getElementById('pBrand').value,
+                    image: document.getElementById('pImg').value,
+                    marketingDesc: document.getElementById('pDesc').value,
+                    tech: {
+                        coverage: document.getElementById('pCov').value,
+                        drying: document.getElementById('pDry').value,
+                        thickness: document.getElementById('pThick').value
+                    }
+                };
+                if(id) await updateDoc(doc(db, "products", id), d);
+                else await addDoc(collection(db, "products"), d);
+                alert("מוצר נשמר בהצלחה!");
+                Logic.reset('prod');
+            },
+
+            // 2. Brain (Rules)
+            loadRule: (id, el) => {
+                highlight(el);
+                const r = Logic.data.rules.find(x => x.id === id);
+                document.getElementById('qaId').value = r.id;
+                document.getElementById('qaTrig').value = r.trigger;
+                document.getElementById('qaResp').value = r.response;
+                
+                document.getElementById('brainMode').innerText = "מצב: עריכת חוק קיים";
+                document.getElementById('brainMode').className = "text-xs font-bold text-blue-600 uppercase mb-2";
+                Logic.simChat();
+            },
+            saveQA: async () => {
+                const id = document.getElementById('qaId').value;
+                const d = {
+                    trigger: document.getElementById('qaTrig').value,
+                    response: document.getElementById('qaResp').value
+                };
+                
+                if(!d.trigger || !d.response) return alert("חובה למלא טריגר ותשובה");
+
+                if(id) await updateDoc(doc(db, "chat_rules", id), d);
+                else await addDoc(collection(db, "chat_rules"), d);
+                
+                alert("חוק נשמר!");
+                Logic.reset('brain');
+            },
+
+            // 3. Brands (Simple)
+            loadBrand: (id) => {
+                document.getElementById('bId').value = id;
+                // Implementation simplified for brands
+            },
+            saveBrand: async () => {
+                const id = document.getElementById('bId').value;
+                const d = { name: document.getElementById('bName').value, logo: document.getElementById('bLogo').value };
+                if(id) await updateDoc(doc(db, "brands", id), d);
+                else await addDoc(collection(db, "brands"), d);
+                alert("מותג נשמר");
+            },
+
+            // --- UTILS ---
+            delItem: async (col, id) => {
+                if(!id) return alert("בחר פריט למחיקה");
+                if(confirm("למחוק לצמיתות?")) {
+                    await deleteDoc(doc(db, col, id));
+                    alert("נמחק.");
+                    Logic.reset(col === 'products' ? 'prod' : 'brain');
+                }
+            },
+            reset: (type) => {
+                if(type === 'prod') {
+                    document.getElementById('pId').value = "";
+                    document.getElementById('pName').value = "";
+                    document.getElementById('pBrand').value = "";
+                    document.getElementById('pImg').value = "";
+                    document.getElementById('pDesc').value = "";
+                    document.getElementById('prodMode').innerText = "מצב: יצירת חדש";
+                    document.getElementById('prodMode').className = "text-xs font-bold text-gray-400 uppercase mb-2";
+                    Logic.simProd();
+                }
+                if(type === 'brain') {
+                    document.getElementById('qaId').value = "";
+                    document.getElementById('qaTrig').value = "";
+                    document.getElementById('qaResp').value = "";
+                    document.getElementById('brainMode').innerText = "מצב: יצירת חוק חדש";
+                    document.getElementById('brainMode').className = "text-xs font-bold text-gray-400 uppercase mb-2";
+                    Logic.simChat();
+                }
+                // Clear selection highlight
+                document.querySelectorAll('.list-item').forEach(e => e.classList.remove('selected'));
+            },
+            
+            // Simulators
+            simProd: () => {
+                document.getElementById('s-name').innerText = document.getElementById('pName').value || 'שם המוצר';
+                document.getElementById('s-brand').innerText = document.getElementById('pBrand').value || 'BRAND';
+                document.getElementById('s-img').src = document.getElementById('pImg').value || 'https://placehold.co/200';
+                document.getElementById('s-cov').innerText = document.getElementById('pCov').value || '-';
+                document.getElementById('s-dry').innerText = document.getElementById('pDry').value || '-';
+            },
+            simChat: () => {
+                document.getElementById('s-user').innerText = document.getElementById('qaTrig').value || '...';
+                document.getElementById('s-bot').innerText = document.getElementById('qaResp').value || '...';
+            },
+            addTag: (t) => {
+                document.getElementById('qaResp').value += ` ${t}`;
+                Logic.simChat();
+            },
+            filter: (id, txt) => {
+                const list = document.getElementById(id);
+                Array.from(list.children).forEach(el => {
+                    el.style.display = el.innerText.toLowerCase().includes(txt.toLowerCase()) ? 'flex' : 'none';
+                });
+            }
+        };
+
+        function highlight(el) {
+            document.querySelectorAll('.list-item').forEach(e => e.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        window.safeApp = Logic;
+        Logic.init();
+    </script>
+</body>
+</html>
