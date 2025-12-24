@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Mr. Fix Data Loader</title>
+    <style>body{font-family:sans-serif;padding:20px;background:#e3f2fd;text-align:center}.btn{background:#1e88e5;color:white;padding:15px 30px;font-size:20px;border:none;cursor:pointer;border-radius:8px;margin:10px;}.btn:hover{background:#1565c0}#log{background:#222;color:#42a5f5;text-align:left;padding:20px;height:300px;overflow-y:auto;margin-top:20px;direction:ltr;border-radius:8px;}</style>
+</head>
+<body>
+    <h1>🚀 טעינת נתונים - כרמית מיסטר פיקס</h1>
+    <p>טעינת הקטלוג והמוח של כרמית.</p>
+    <button class="btn" onclick="startUpload()">התחל טעינה (Mr. Fix)</button>
+    <div id="log">ממתין...</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyDZuI7AaDZVteUhUT_eIVCR5SIdU0jhqUg",
+          authDomain: "saban-kiosk-core.firebaseapp.com",
+          projectId: "saban-kiosk-core"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const logEl = document.getElementById('log');
+
+        // נתונים
+        const products = [
+            { name: "איטומט 501", brand: "Carmit Mr. Fix", category: "איטום" },
+            { name: "דבק 132", brand: "Carmit Mr. Fix", category: "דבקים" },
+            // ... הדבק כאן את mrfixProducts המלא ...
+        ];
+
+        const chats = [
+            { trigger: "איטום מרפסת", response: "איטומט 501 הוא הפתרון..." },
+            // ... הדבק כאן את mrfixSoul המלא ...
+        ];
+
+        window.startUpload = async () => {
+            logEl.innerHTML = "מתחיל...<br>";
+            for (const p of products) {
+                await addDoc(collection(db, "products"), p);
+                logEl.innerHTML += `✅ מוצר: ${p.name}<br>`;
+            }
+            for (const c of chats) {
+                await addDoc(collection(db, "chat_rules"), c);
+                logEl.innerHTML += `✅ שיחה: ${c.trigger}<br>`;
+            }
+            logEl.innerHTML += "🏁 סיום!";
+        };
+    </script>
+</body>
+</html>
